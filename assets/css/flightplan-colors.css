@@ -1,0 +1,55 @@
+.fp-good {
+    color: #6ef300 !important;
+}
+.fp-alert {
+    color: #fcce00 !important;
+}
+
+.fp-cmd{
+    color:#2CD551 !important;
+}
+
+.fp-label {
+    color: #fd9dfd
+}
+
+.fp-info {
+    color: #79baca
+}
+
+
+.fp-progress {
+    
+    border:0
+}
+
+.fp-scratch{
+    color: #bf48f0 !important; 
+}
+button.fp-scratch{
+    border-color: #bf48f0 !important;
+}
+.fp-page-btn {
+    color: #25d7e9 !important
+}
+
+.fp-progress > .progress-bar {
+    background-color: white
+}
+
+
+.fp-advisable:hover {
+    background-color: #16335f !important;
+}
+.table {
+    color: inherit
+}
+
+code,textarea{color: #70acbb !important}
+body{
+    background-color: #070709;
+    color: #d0dfe7;
+}
+
+
+
