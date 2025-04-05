@@ -3,6 +3,8 @@ import FpRadar from "../components/Radar/Radar.js"
 import FpRadarBackgroundLayer from "../components/Radar/Layers/RadarBackgroundLayer.js"
 import FpRadarRangerLayer from "../components/Radar/Layers/RadarRangerLayer.js"
 import FpRadarSymbolLayer from "../components/Radar/Layers/RadarSymbolLayer.js"
+import FpCard from "../components/Card.js"
+import FpCardList from "../components/CardList.js"
 
 
 let app = createApp({
@@ -96,4 +98,6 @@ app.component("fpradar",FpRadar);
 app.component("fpradarbackgroundlayer",FpRadarBackgroundLayer);
 app.component("fpradarrangerlayer",FpRadarRangerLayer);
 app.component("fpradarsymbollayer",FpRadarSymbolLayer);
+app.component("fpcard",FpCard);
+app.component("fpcardlist",FpCardList);
 app = app.mount("#app");

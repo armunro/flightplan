@@ -2,22 +2,10 @@
     font-family: JetBrainsMonoRegularNerdFontComplete;
     src: url(../../assets/fonts/JetBrainsMonoRegularNerdFontComplete.ttf);
     font-weight: bold;
+    
 }
 html,body{margin:0px; padding:0px}
 *{font-family:  JetBrainsMonoRegularNerdFontComplete,sans-serif}
-
-/* Glass Display */
-.fp-display {background-color:#000; color: #EFEFEF; border: 1px solid #444}
-
-/* Info Panel */
-.fp-info-panel { color: lawngreen; padding: .7rem; font-family: JetBrainsMonoRegularNerdFontComplete, sans-serif}
-.fp-task-card {font-size: 1.2rem}
-
-/* Softkeys */
-.fp-softkey-panel div .btn { background: #0d1111; border-radius: 0}
-.fp-key-panel .btn { background: #0d1111; border-radius: 0}
-.fp-key-panel.fp-vertical > button.btn{margin-bottom: .5rem !important}
-
 
 /*Radar*/
 .fp-radar-container {position: relative; }   
@@ -55,6 +43,7 @@ html,body{margin:0px; padding:0px}
 body, html {
     font-family: 'JetBrains Mono Regular NerdFont Complete', serif;
     font-size: 11px;
+    color: #adc9d7
 
 }
 
@@ -65,110 +54,15 @@ body, html {
 .fp-page-btn{
     font-size:13px;
 }
-.contextLineText {
-    line-height: 2rem;
-    font-size: 1.5rem;
-}
-
-.btn-fp-large {
-    font-size: 1.25rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    border-radius: 0
-}
-
-.fp-action-btn.btn {
-    background-color: #1e2438 !important;
-    font-size: 1.24rem;
-    font-weight: bold;
-    border-color: #333;
-    border-radius: 0;
-
-}
-
-@media print {
-    #fp-plan {
-        background-color: white;
-        height: 100%;
-        width: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        margin: 0;
-        padding: 15px;
-        font-size: 14px;
-        line-height: 18px;
-    }
-
-    .btn {
-        display: none
-    }
-}
-
-table.fp-data {
-    font-size: 11px
-}
-
-.fp-large {
-    font-size: 1.2rem !important;
-}
-
-.fp-box {
-    --bs-gutter-x: 0;
-}
 
 
-.fp-advisable:hover {
-    cursor: pointer;
-
-}
-
-.fp-navable:hover {
-    cursor: pointer;
-    background: #1f4807;
-    box-sizing: border-box;
-}
-
-.fp-editable:hover {
-    cursor: pointer;
-    background-color: #823d00;
-}
 
 
-.mfd-button {
-    font-size: x-large;
-    border-width: 1px;
-    width: 100%;
-    font-weight: bold;
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem
-}
-
-#mfd-page .mfd-button {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    font-size: 30px
-}
-
-.mfd-button-group {
-    width: 100%;
-}
-
-.fp-date{
-    font-size:13px;
-    font-weight:bold
-}
-
-.bg-mfd-readable {
-    background-color: #18181f !important;
-    color: #e8f7ff
-}
 
 
-.mfd-card .card-header {
-    border: none;
-    font-size: .9rem
-}
+
+
+
 
 .card, .card-header {
     border-radius: 0px;
@@ -184,3 +78,30 @@ button {
 }
 
 #fp-page-nav div button {width:6rem !important}
+
+/* Additional styling for the clock and task cards */
+.clock {
+    font-size: 1.5rem;
+}
+.task-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #adc9d7;
+
+}
+.radar-view {
+    height: 100%;
+}
+.unused-bar {
+    height: 100%;
+}
+.info-slot {
+    font-size: 1rem;
+}
+.full-page {
+    min-height: 100vh; /* Ensure the full height of the viewport */
+}
+.main-container {
+    height: calc(100vh - 56px); /* Subtract the top bar height */
+    overflow: auto;
+}
