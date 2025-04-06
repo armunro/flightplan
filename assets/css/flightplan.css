@@ -65,11 +65,14 @@ body, html {
 Layout
 *************************************/
 .unused-bar {
-    /*height: 100%;*/
+    
+    
 }
 
 .radar-view {
     height: 100%;
+    border-right: 1px solid #adc9d7;
+    
 }
 
 .full-page {
@@ -77,7 +80,7 @@ Layout
 }
 
 .main-container {
-    height: calc(100vh - 56px); /* Subtract the top bar height */
+    height: calc(100vh - 57px); /* Subtract the top bar height */
     overflow: auto;
 }
 
