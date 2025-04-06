@@ -49,7 +49,8 @@
 body, html {
     font-family: 'JetBrains Mono Regular NerdFont Complete', serif;
     font-size: 13px;
-    color: #adc9d7
+    color: #adc9d7;
+    background-color: #0d1123;
 }
 
 .fp-card-list {;
@@ -71,7 +72,7 @@ Layout
 
 .radar-view {
     height: 100%;
-    border-right: 1px solid #adc9d7;
+    border-right: 1px solid #134970;
     
 }
 
@@ -101,8 +102,8 @@ Layout
 .info-slot {
 
     font-size: 1rem;
-    border-right: 1px solid #adc9d7;
-    border-bottom: 1px solid #adc9d7;
+    border-right: 1px solid #134970FF;
+    border-bottom: 1px solid #134970FF;
     min-height: 40px;
     width: 150px;
     padding: 0 2px 2px;

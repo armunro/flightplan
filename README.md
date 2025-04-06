@@ -1,5 +1,6 @@
 # FlightPlan
 Productivity and wellbeing for nerds.
+![img.png](img.png)
 
 ```mermaid
 classDiagram
