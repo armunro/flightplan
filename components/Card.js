@@ -8,8 +8,9 @@
     template: `
 
     <div class="task-card">
-          {{ data.Key }} FROM {{ data.Source }}<br>
-                    S {{ data.TargetStart }} -> E {{ data.TargetEnd }}  
+          <span class="fp-ref">{{ data.Key }}</span> FROM <span class="fp-source">{{data.Source }}</span><br>
+                    <span class="fp-label">START: </span> {{ data.TargetStart }}<br>
+                    <span class="fp-label">END:</span> {{ data.TargetEnd }}  
     </div>
   `
 }

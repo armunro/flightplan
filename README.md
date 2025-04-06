@@ -3,14 +3,25 @@ Productivity and wellbeing for nerds.
 
 ```mermaid
 classDiagram
+
+    class TimeSpan {
+        start: DateTime
+        end: DateTime
+    }
+    
     class Task {
         id: Uuid
         source: String
         key: String
         link: String
         priority: String
-        start: DateTime
-        end: DateTime
+        spans: TimeSpan
+        cycles: List:Cycle
+    }
+
+    class Source {
+        id: Uuid
+        name: String
     }
 
     class Cycle {
@@ -39,8 +50,9 @@ classDiagram
         content: String
     }
 
-    Task "1" --> "0..*" Cycle
-    
+    Task "1" --> "1..*" Cycle
+
+    Task "1" --> "1..0" TimeSpan
     Event "1" --> "0..*" Transit
     
 ```

@@ -1,55 +1,30 @@
-.fp-good {
-    color: #6ef300 !important;
-}
-.fp-alert {
-    color: #fcce00 !important;
-}
+/*
+- Sentiments
+    - Good
+    - Bad
+    - Unknown
+- Results
+    - Pass
+    - Fail
+    - Unknown
+- InfoTypes
+    - Label
+    - Ref
+    - Prompt
+    - Warning
+    - Caution
 
-.fp-cmd{
-    color:#2CD551 !important;
-}
+*/
 
-.fp-label {
-    color: #fd9dfd
-}
-
-.fp-info {
-    color: #79baca
-}
-
-
-.fp-progress {
-    
-    border:0
-}
-
-.fp-scratch{
-    color: #bf48f0 !important; 
-}
-button.fp-scratch{
-    border-color: #bf48f0 !important;
-}
-.fp-page-btn {
-    color: #25d7e9 !important
-}
-
-.fp-progress > .progress-bar {
-    background-color: white
-}
+.fp-good, .fp-pass {color: #6ef300;}
+.fp-bad, .fp-fail {color:#ff0000;}
+.fp-unknown { color: #40bcc0; }
 
 
-.fp-advisable:hover {
-    background-color: #16335f !important;
-}
-.table {
-    color: inherit
-}
-
-code,textarea{color: #70acbb !important}
-body{
-    background-color: #070709;
-    color: #d0dfe7;
-}
-
-
-
+.fp-label {color: #fd9dfd}
+.fp-ref{color:deepskyblue}
+.fp-source{color:mediumpurple}
+.fp-prompt {color: coral}
+.fp-warning{color: #b77800}
+.fp-caution{color:red}
+.fp-info {color: #79baca}
