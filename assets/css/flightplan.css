@@ -10,6 +10,7 @@
 * {
     font-family: JetBrainsMonoRegularNerdFontComplete, sans-serif
 }
+
 @font-face {
     font-family: 'JetBrains Mono Regular NerdFont Complete';
     font-style: normal;
@@ -51,9 +52,9 @@ body, html {
     color: #adc9d7
 }
 
-.fp-card-list{
-;
+.fp-card-list {;
 }
+
 .card, .card-header {
     border-radius: 0px;
     border-width: 2px;
@@ -66,9 +67,11 @@ Layout
 .unused-bar {
     /*height: 100%;*/
 }
+
 .radar-view {
     height: 100%;
 }
+
 .full-page {
     min-height: 100vh; /* Ensure the full height of the viewport */
 }
@@ -83,29 +86,38 @@ Layout
 *************************************/
 .clock {
     font-size: 30px;
-    flex-grow:0;
+    flex-grow: 0;
     text-align: center;
-    padding-top:4px !important;
+    padding-top: 4px !important;
 }
 
-.clock span {font-size:30px;}
+.clock span {
+    font-size: 30px;
+}
+
 .info-slot {
-    
+
     font-size: 1rem;
-    border-right:1px solid #adc9d7;
-    border-bottom:1px solid #adc9d7;
+    border-right: 1px solid #adc9d7;
+    border-bottom: 1px solid #adc9d7;
     min-height: 40px;
-    width:150px;
+    width: 150px;
     padding: 0 2px 2px;
     flex-grow: 1;
 }
-nav { padding:0px !important}
-.navbar-brand {font-size:1.5rem}
+
+nav {
+    padding: 0px !important
+}
+
+.navbar-brand {
+    font-size: 1.5rem
+}
 
 
 .task-card {
-    padding:5px;
-    
+    padding: 5px;
+
     border-bottom: 1px solid #3c4349;
 }
 
@@ -118,10 +130,12 @@ nav { padding:0px !important}
 .fp-radar-container {
     position: relative;
 }
+
 .fp-radar-container canvas {
     position: absolute;
     background: transparent
 }
+
 .fp-radar-container #fp-radar-background-layer {
     background: #000
 }

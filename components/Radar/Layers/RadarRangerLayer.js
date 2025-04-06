@@ -3,10 +3,23 @@
         width: Number,
         height: Number
     },
+    
     data() {
         return {}
     },
+    watch: {
+        width() {
+            this.handlePropChange();
+        },
+        height() {
+            this.handlePropChange();
+        }
+    },
     methods: {
+        handlePropChange() {
+            this.init();
+            this.drawRangeRings();
+        },
         drawRangeRing(x, y, radius, dashed) {
             if (dashed)
                 this.canvas.setLineDash([10, 5]);

@@ -3,6 +3,14 @@
         width: Number,
         height: Number
     },
+    watch: {
+        width() {
+            this.handlePropChange();
+        },
+        height() {
+            this.handlePropChange();
+        }
+    },
     data (){
         return {
             canvas: null,
@@ -10,6 +18,9 @@
         }
     },
     methods: {
+        handlePropChange(newVal, oldVal, propName) {
+         this.init();
+        },
         init() {
             const ratio = window.devicePixelRatio;
             let canvas = document.getElementById("fp-radar-background-layer");

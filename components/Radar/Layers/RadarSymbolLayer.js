@@ -4,6 +4,14 @@
         height: Number,
         objects: Array
     },
+    watch: {
+        width() {
+            this.handlePropChange();
+        },
+        height() {
+            this.handlePropChange();
+        }
+    },
     data() {
         return {
             symbolYOffset: -30,
@@ -20,7 +28,10 @@
     methods: {
         trueHeight() {return this.height * window.devicePixelRatio},
         trueWidth() {return this.width * window.devicePixelRatio},
-        
+        handlePropChange() {
+            this.init();
+            this.drawPlannedSymbols(this.objects, true);
+        },
         init() {
             const ratio = window.devicePixelRatio;
             let canvas = document.getElementById("fp-radar-symbol-layer");
