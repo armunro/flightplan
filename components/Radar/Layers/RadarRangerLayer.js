@@ -63,7 +63,8 @@
         },
         init() {
 
-            const ratio = window.devicePixelRatio;
+            // const ratio = window.devicePixelRatio;
+            const ratio = 1;
             let canvas = document.getElementById("fp-radar-ranger-layer");
             canvas.width = this.width * ratio;
             canvas.height = this.height * ratio;

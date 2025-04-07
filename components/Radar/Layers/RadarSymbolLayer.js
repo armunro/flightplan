@@ -71,26 +71,13 @@
             objects.forEach((task, index) => {
                 let drift = 0;
                 if(index >0)
-                    drift = this.randomDrift(-150, 150)
+                    drift = this.randomDrift(-250, 150)
                 let x = ((this.width) / 2) + drift;
                 let y = this.translateY(task);
                 this.drawSymbol(task.Key, x, y, "#CC6CE7", 13, task.Source);
 
                 if (lastX > 0 && lastY > 0 && drawPlanLine)
-                    this.drawWaypointLines(x +10, y - 8, lastX +10, lastY - 8);
-                lastX = x;
-                lastY = y;
-            });
-        },
-        drawUnplannedSymbols(objects) {
-            let lastX = 0;
-            let lastY = 0;
-            let maxDrift = this.width / 2;
-            objects.forEach((task, index) => {
-                let drift = this.randomDrift(-1 * maxDrift, maxDrift)
-                let x = ((this.width) / 2) + drift;
-                let y = this.translateY(task) + drift;
-                this.drawSymbol(task.Key, x, y, "White", 13, task.Source);
+                    this.drawWaypointLines(x +5, y - 8, lastX +5, lastY - 8);
                 lastX = x;
                 lastY = y;
             });
