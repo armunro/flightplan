@@ -1,10 +1,10 @@
 ﻿import {createApp} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-import FpRadar from "../components/Radar/Radar.js"
-import FpRadarBackgroundLayer from "../components/Radar/Layers/RadarBackgroundLayer.js"
-import FpRadarRangerLayer from "../components/Radar/Layers/RadarRangerLayer.js"
-import FpRadarSymbolLayer from "../components/Radar/Layers/RadarSymbolLayer.js"
-import FpCard from "../components/Card.js"
-import FpCardList from "../components/CardList.js"
+import FpRadar from "./components/Radar/Radar.js"
+import FpRadarBackgroundLayer from "./components/Radar/Layers/RadarBackgroundLayer.js"
+import FpRadarRangerLayer from "./components/Radar/Layers/RadarRangerLayer.js"
+import FpRadarSymbolLayer from "./components/Radar/Layers/RadarSymbolLayer.js"
+import FpCard from "./components/Card.js"
+import FpCardList from "./components/CardList.js"
 
 
 let app = createApp({
