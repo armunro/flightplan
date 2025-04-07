@@ -32,7 +32,7 @@
         },
         drawRangeCaption(text, x, y, radius, ) {
             this.canvas.fillStyle = "Cyan";
-            this.canvas.font = `${16}px JetBrainsMonoRegularNerdFontComplete`;
+            this.canvas.font = `${13}px JetBrainsMonoRegularNerdFontComplete`;
             let coords = this.calcTextCoordinates(x, y, radius, 45);
             this.canvas.fillText(text, coords[0], coords[1]);
             coords = this.calcTextCoordinates(x, y, radius, -45);

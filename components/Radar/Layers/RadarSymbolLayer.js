@@ -56,7 +56,7 @@
             return y
         },
         drawSymbol(text, x, y, color, size, symbolType) {
-            this.canvas.font = ` 16px fa-sharp-regular`
+            this.canvas.font = ` 13px fa-sharp-regular`
             this.canvas.fillStyle = color;
             let glyph = this.typeGlyphs["Default"];
             if (this.typeGlyphs[symbolType])
@@ -74,7 +74,7 @@
                     drift = this.randomDrift(-150, 150)
                 let x = ((this.width) / 2) + drift;
                 let y = this.translateY(task);
-                this.drawSymbol(task.Key, x, y, "#CC6CE7", 16, task.Source);
+                this.drawSymbol(task.Key, x, y, "#CC6CE7", 13, task.Source);
 
                 if (lastX > 0 && lastY > 0 && drawPlanLine)
                     this.drawWaypointLines(x +10, y - 8, lastX +10, lastY - 8);
@@ -90,7 +90,7 @@
                 let drift = this.randomDrift(-1 * maxDrift, maxDrift)
                 let x = ((this.width) / 2) + drift;
                 let y = this.translateY(task) + drift;
-                this.drawSymbol(task.Key, x, y, "White", 16, task.Source);
+                this.drawSymbol(task.Key, x, y, "White", 13, task.Source);
                 lastX = x;
                 lastY = y;
             });
