@@ -143,3 +143,13 @@ nav {
 .fp-radar-container #fp-radar-background-layer {
     background: #000
 }
+
+.fp-radar-symbol, .fp-radar-symbol{
+    position: absolute;
+}
+
+.fp-radar-spanline{
+    height: 1px; border-top:1px solid #cccc;
+    width:30px;
+    position:absolute;
+}

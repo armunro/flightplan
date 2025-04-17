@@ -10,94 +10,91 @@ import FpCardList from "./components/CardList.js"
 let app = createApp({
     data() {
         return {
-            objects: [
+            waypoints: [
                 {
-                    "Key": "J-1371",
-                    "Source": "Jira",
-                    "Title": "",
+                    "Type": "Task",
+                    "Key": "MH-123",
+                    "Source": "ClickUp",
+                    "Title": "Laundry - Adults",
                     "Link": "",
-                    "TargetStart": "2023-09-16T12:00:00.000Z"
+                    "TargetStart": "2023-09-16T17:00:00.000Z",
+                    "Spans": [
+                        {
+                            "Type": "Work",
+                            "Start": "2023-09-16T17:00:00.000Z",
+                            "End": "2023-09-16T17:20:00.000Z",
+
+                        }
+                    ],
+                    "Symbol": {
+                        "Class": "",
+                        "Unicode": "\uf219",
+                        "Color": "#FFFFFF",
+                    }
                 },
                 {
-                    "Key": "J-1371",
-                    "Source": "Jira",
-                    "Title": "",
+                    "Type": "Task",
+                    "Key": "MH-124",
+                    "Source": "ClickUp",
+                    "Title": "Laundry - Kids",
                     "Link": "",
-                    "TargetStart": "2023-09-16T13:00:00.000Z"
+                    "TargetStart": "2023-09-16T18:00:00.000Z",
+                    "Spans": [
+                        {
+                            "Type": "Work",
+                            "Start": "2023-09-16T18:00:00.000Z",
+                            "End": "2023-09-16T18:20:00.000Z",
+
+                        }
+                    ],
+                    "Symbol": {
+                        "Class": "",
+                        "Unicode": "\uf219",
+                        "Color": "#FFFFFF",
+                    }
 
                 },
                 {
-                    "Key": "J-1299",
-                    "Source": "Jira",
-                    "Title": "",
+                    "Type": "Event",
+                    "Key": "CAL: DESSAS ORTHO",
+                    "Source": "O365",
+                    "Title": "Dessa's Ortho",
                     "Link": "",
-                    "TargetStart": "2023-09-16T14:00:00.000Z"
-                },
-                {
-                    "Key": "J-1262",
-                    "Source": "Jira",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T15:00:00.000Z"
-                    
-                },
-                {
-                    "Key": "15698504",
-                    "Source": "Case",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T16:00:00.000Z"
-                    
-                },
-                {
-                    "Key": "14114681",
-                    "Source": "Case",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T17:00:00.000Z"
-                    
-                },
-                {
-                    "Key": "13388161",
-                    "Source": "Other",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T18:00:00.000Z"
-                    
-                },
-                {
-                    "Key": "13388161",
-                    "Source": "Other",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T19:00:00.000Z"
-
-                },
-                {
-                    "Key": "13388161",
-                    "Source": "Other",
-                    "Title": "",
-                    "Link": "",
-                    "TargetStart": "2023-09-16T20:00:00.000Z"
+                    "TargetStart": "2023-09-16T19:00:00.000Z",
+                    "Spans": [
+                        {
+                            "Type": "Attend",
+                            "Start": "2023-09-16T19:00:00.000Z",
+                            "End": "2023-09-16T19:00:00.000Z",
+                        },
+                        {
+                            "Type": "Transit",
+                            "Start": "2023-09-16T18:40:00.000Z",
+                            "End": "2023-09-16T18:55:00.000Z",
+                        }
+                    ],
+                    "Symbol": {
+                        "Class": "",
+                        "Unicode": "\uf219",
+                        "Color": "#FFFFFF",
+                    }
 
                 }
             ]
-            
+
         }
     },
-    methods: {
-        
-    },
+    methods: {},
     mounted() {
-        
+
     },
     watch: {}
 });
 
-app.component("fpradar",FpRadar);
-app.component("fpradarbackgroundlayer",FpRadarBackgroundLayer);
-app.component("fpradarrangerlayer",FpRadarRangerLayer);
-app.component("fpradarsymbollayer",FpRadarSymbolLayer);
-app.component("fpcard",FpCard);
-app.component("fpcardlist",FpCardList);
+app.component("fpradar", FpRadar);
+app.component("fpradarbackgroundlayer", FpRadarBackgroundLayer);
+app.component("fpradarrangerlayer", FpRadarRangerLayer);
+app.component("fpradarsymbollayer", FpRadarSymbolLayer);
+app.component("fpcard", FpCard);
+app.component("fpcardlist", FpCardList);
 app = app.mount("#app");

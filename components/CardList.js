@@ -1,13 +1,13 @@
 ﻿export default {
     props: {
-        objects: {
+        waypoints: {
             type: Array,
             required: true
         }
     },
     template: `
     <div class="fp-card-list" >
-       <fpcard v-for="(item, index) in objects" :key="index" :data="item"></fpcard>
+       <fpcard v-for="(wp, index) in waypoints" :key="index" :data="wp"></fpcard>
     </div>
   `
 }

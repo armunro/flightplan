@@ -2,7 +2,7 @@
     props: {
         width: Number,
         height: Number,
-        objects: Array
+        waypoints: Array
     },
     data (){
         return {
@@ -29,7 +29,7 @@
         <div class="fp-radar-container" :style="{ width: trueWidth + 'px', height: trueHeight + 'px', float: 'left' }" >
             <fpradarbackgroundlayer :width="trueWidth" :height="trueHeight"></fpradarbackgroundlayer>
             <fpradarrangerlayer :width="trueWidth" :height="trueHeight"></fpradarrangerlayer>
-            <fpradarsymbollayer :width="trueWidth" :height="trueHeight" :objects="objects"></fpradarsymbollayer>
+            <fpradarsymbollayer :width="trueWidth" :height="trueHeight" :waypoints="waypoints"></fpradarsymbollayer>
         </div>
       
   `

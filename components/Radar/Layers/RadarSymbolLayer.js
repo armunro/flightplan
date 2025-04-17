@@ -2,7 +2,7 @@
     props: {
         width: Number,
         height: Number,
-        objects: Array
+        waypoints: Array
     },
     watch: {
         width() {
@@ -30,20 +30,9 @@
         trueWidth() {return this.width * window.devicePixelRatio},
         handlePropChange() {
             this.init();
-            this.drawPlannedSymbols(this.objects, true);
         },
         init() {
-            const ratio = window.devicePixelRatio;
-            let canvas = document.getElementById("fp-radar-symbol-layer");
-            canvas.width = this.trueWidth()
-            canvas.height = this.trueHeight();
-            canvas.style.width = canvas.width + "px";
-            canvas.style.height = canvas.height + "px";
-            this.canvasElement = canvas;
-            this.canvas = canvas.getContext("2d");
-            this.canvas.strokeStyle = "#a2a2a2";
-            this.canvas.lineWidth = 1
-            this.canvas.scale(ratio, ratio);
+
         },
         translateY(task) {
             let date = new Date("2023-09-16T12:00:00.000Z")
@@ -51,60 +40,51 @@
             let diff = targetDate - date;
             let y = (diff / 1000 / 60 / 60) * this.height / this.hours;
             y =  (this.height - (y )) 
-            console.log(y + " " + task.Key);
 
             return y
         },
-        drawSymbol(text, x, y, color, size, symbolType) {
-            this.canvas.font = ` 13px fa-sharp-regular`
-            this.canvas.fillStyle = color;
-            let glyph = this.typeGlyphs["Default"];
-            if (this.typeGlyphs[symbolType])
-                glyph = this.typeGlyphs[symbolType];
-            this.canvas.fillText(glyph, x , y, 45);
-            this.canvas.font = `${size}px JetBrainsMonoRegularNerdFontComplete`;
-            this.canvas.fillText(text, x + 20, y);
-        },
-        drawPlannedSymbols(objects, drawPlanLine) {
-            let lastX = 0;
-            let lastY = 0;
-            objects.forEach((task, index) => {
-                let drift = 0;
-                if(index >0)
-                    drift = this.randomDrift(-250, 150)
-                let x = ((this.width) / 2) + drift;
-                let y = this.translateY(task);
-                this.drawSymbol(task.Key, x, y, "#CC6CE7", 13, task.Source);
+        translateSpanY(span) {
+            let date = new Date("2023-09-16T12:00:00.000Z")
+            let targetDate = new Date(span.Start);
+            let diff = targetDate - date;
+            let y = (diff / 1000 / 60 / 60) * this.height / this.hours;
+            y =  (this.height - (y ))
 
-                if (lastX > 0 && lastY > 0 && drawPlanLine)
-                    this.drawWaypointLines(x +5, y - 8, lastX +5, lastY - 8);
-                lastX = x;
-                lastY = y;
-            });
+            return y
         },
-        drawWaypointLines(xTo, yTo, xFrom, yFrom) {
-            this.canvas.strokeStyle = "#CC6CE7";
-            this.canvas.beginPath();
-            this.canvas.moveTo(xFrom, yFrom);
-            this.canvas.lineTo(xTo, yTo);
-            this.canvas.stroke();
-        }
-        ,
-        randomDrift(min, max) {
-            return Math.random() * (max - min) + min;
-        }
+        translateX(key) {
+            let drift = 0;
+          
+                drift = this.hashDrift(key, -250, 250);
+                 return (this.width / 2) + drift;
+        },
+        hashDrift(key, min, max) {
+            let hash = 0;
+            for (let i = 0; i < key.length; i++) {
+                hash = (hash << 5) - hash + key.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            // Normalize hash to 0..1 and scale to min..max
+            const range = max - min;
+            const normalized = (hash >>> 0) / 0xFFFFFFFF;
+            return min + normalized * range;
+        },
+
+       
     },
     mounted() {
-        const fa_sharp_regular = new FontFace('fa-sharp-regular',
-            'url(./assets/fonts/fa-pro-sharp-regular/webfonts/fa-sharp-regular-400.woff2)');
-        document.fonts.add(fa_sharp_regular);
-        fa_sharp_regular.load().then(() => {
             this.init()
-            this.drawPlannedSymbols(this.objects, true);
-            
-        }).catch(console.error);
     },
     template: `
-        <canvas id="fp-radar-symbol-layer" width="{{width}}" height="{{height}}" ></canvas>
+        <div id="fp-radar-symbol-layer" :style="{'width': width + 'px', 'height': height + 'px'}">
+        <template v-for="(wp, index) in waypoints" >
+            <div class="fp-radar-symbol" :style="{'top': this.translateY(wp) + 'px', 'left': this.translateX(wp.Key) +'px'}">
+                 <i class="fa-regular fa-square"></i> <span class="fp-label">{{ wp.Key}}</span>
+            </div>
+            <div v-for="(span, index) in wp.Spans" class="fp-radar-spanline" :style="{'top': this.translateSpanY(span) + 'px', 'left': this.translateX(wp.Key) +'px'}">
+                
+            </div>
+            </template>
+        </div>
   `
 }
