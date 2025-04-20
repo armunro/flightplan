@@ -1,0 +1,164 @@
+﻿/************************************
+ Fonts
+*************************************/
+@font-face {
+    font-family: JetBrainsMonoRegularNerdFontComplete;
+    src: url(../../assets/fonts/JetBrainsMonoRegularNerdFontComplete.ttf);
+    font-weight: bold;
+}
+
+* {
+    font-family: JetBrainsMonoRegularNerdFontComplete, sans-serif
+}
+
+@font-face {
+    font-family: 'JetBrains Mono Regular NerdFont Complete';
+    font-style: normal;
+    font-weight: 400;
+    src: url(../fonts/JetBrainsMonoRegularNerdFontComplete.ttf);
+}
+
+/************************************
+ Scrollbar Styling
+*************************************/
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #e0bb00 #000 !important;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #070709 !important;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #e0bb00;
+    border-radius: 0;
+    border: 0;
+}
+
+/************************************
+ Global Styling
+*************************************/
+body, html {
+    font-family: 'JetBrains Mono Regular NerdFont Complete', serif;
+    font-size: 13px;
+    color: #adc9d7;
+    background-color: #0d1123;
+}
+
+.fp-card-list {;
+}
+
+.card, .card-header {
+    border-radius: 0px;
+    border-width: 2px;
+}
+
+
+/************************************
+Layout
+*************************************/
+.unused-bar {
+    
+    
+}
+
+.radar-view {
+    height: 100%;
+    border-right: 1px solid #134970;
+    
+}
+
+.full-page {
+    min-height: 100vh; /* Ensure the full height of the viewport */
+}
+
+.main-container {
+    height: calc(100vh - 57px); /* Subtract the top bar height */
+    overflow: auto;
+}
+
+/************************************
+ Header/Navbar
+*************************************/
+.clock {
+    font-size: 30px;
+    flex-grow: 0;
+    text-align: center;
+    padding-top: 4px !important;
+}
+
+.clock span {
+    font-size: 30px;
+}
+
+.info-slot {
+
+    font-size: 1rem;
+    border-right: 1px solid #134970FF;
+    border-bottom: 1px solid #134970FF;
+    min-height: 40px;
+    width: 150px;
+    padding: 0 2px 2px;
+    flex-grow: 1;
+}
+
+nav {
+    padding: 0px !important
+}
+
+.navbar-brand {
+    font-size: 1.5rem
+}
+
+
+.task-card {
+    padding: 5px;
+
+    border-bottom: 1px solid #3c4349;
+}
+
+
+/************************************
+ Radar
+*************************************/
+
+
+.fp-radar-container {
+    position: relative;
+}
+
+.fp-radar-container canvas {
+    position: absolute;
+    background: transparent
+}
+
+.fp-radar-container #fp-radar-background-layer {
+    background: #000
+}
+
+.fp-radar-symbol, .fp-radar-symbol{
+    position: absolute;
+}
+
+.fp-radar-spanline{
+    height: 1px; border-top:1px solid #cccc;
+    width:30px;
+    position:absolute;
+}
+
+/************************************
+ Frames
+*************************************/
+
+.fp-frame {
+    border-right: 1px solid #134970FF
+}
+.fp-frame-header {}
