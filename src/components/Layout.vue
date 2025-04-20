@@ -2,6 +2,16 @@
 import { defineProps } from 'vue'
 import CardList from "./CardList.vue"
 import Radar from "./Radar/Radar.vue"
+import Tone from "./Tone.vue";
+import TabPages from "./TabPages.vue";
+import Test from "./Test.vue";
+
+
+
+const myPages = [
+  { title: 'Home', component: Tone },
+  { title: 'Settings', component: Test }
+]
 
 const props = defineProps({
   waypoints: {
@@ -41,11 +51,11 @@ const props = defineProps({
           <CardList :waypoints="waypoints" />
         </div>
       </div>
-      <div id="fp-radar-viewport" class="col-md-7 p-0 overflow-hidden" style="border-right: 1px solid #134970FF">
+      <div id="fp-radar-viewport" class="col-md-7 fp-frame overflow-hidden" style="border-right: 1px solid #134970FF">
         <Radar :width="700" :height="600" :waypoints="waypoints" />
       </div>
-      <div class="col-md-3 p-0">
-        <!-- Additional panel content -->
+      <div class="col-md-3 fp-frame">
+        <TabPages :pages="myPages"> </TabPages>
       </div>
     </div>
   </div>

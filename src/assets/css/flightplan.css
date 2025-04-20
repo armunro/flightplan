@@ -159,6 +159,7 @@ nav {
 *************************************/
 
 .fp-frame {
-    border-right: 1px solid #134970FF
+    border-right: 1px solid #134970FF;
+    padding:0px !important;
 }
 .fp-frame-header {}
