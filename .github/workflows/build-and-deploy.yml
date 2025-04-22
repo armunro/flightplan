@@ -1,9 +1,13 @@
-name: Build and Deploy Vue App
+name: Build and Deploy Vue App to GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # Or the branch you deploy from
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -11,23 +15,24 @@ jobs:
 
     steps:
       - name: 📥 Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🟢 Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🛠️ Build with Vite
+      - name: 🛠️ Build app
         run: npm run build
 
-      - name: 📤 Upload build output
+      - name: 📤 Upload static site artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: dist
+          path: ./dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
