@@ -5,12 +5,13 @@ import Radar from "./Radar/Radar.vue"
 import Tone from "./Tone.vue";
 import TabPages from "./TabPages.vue";
 import Test from "./Test.vue";
+import Timer from "./Timer.vue";
 
 
 
 const myPages = [
   { title: 'Home', component: Tone },
-  { title: 'Settings', component: Test }
+  { title: 'Settings', component: Timer }
 ]
 
 const props = defineProps({
