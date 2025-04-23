@@ -2,7 +2,7 @@
   <div
       id="fp-radar-viewport"
       class="fp-radar-container"
-      :style="{ width: trueWidth + 'px', height: trueHeight + 'px', float: 'left' }"
+      :style="{ width: trueWidth + 'px', height: trueHeight + 'px' }"
   >
     <RadarBackground :width="trueWidth" :height="trueHeight" />
     <RadarRanger :width="trueWidth" :height="trueHeight" />

@@ -3,7 +3,7 @@
 </script>
 
 <template>
-<div>Inop.</div>
+<p>Editor</p>
 </template>
 
 <style scoped>

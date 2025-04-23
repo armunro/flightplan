@@ -1,20 +1,13 @@
 <script setup>
-import { defineProps } from 'vue'
+import {defineProps, onMounted} from 'vue'
 import CardList from "./CardList.vue"
 import Radar from "./Radar/Radar.vue"
-import Tone from "./Tone.vue";
 import TabPages from "./TabPages.vue";
-import Test from "./Test.vue";
 import Timer from "./Timer.vue";
+import Events from "./Events.vue";
+import PlanEditor from "./PlanEditor.vue";
 
-
-
-const myPages = [
-  { title: 'Home', component: Tone },
-  { title: 'Settings', component: Timer }
-]
-
-const props = defineProps({
+const { waypoints, time } = defineProps({
   waypoints: {
     type: Array,
     default: () => []
@@ -24,6 +17,20 @@ const props = defineProps({
     default: () => ""
   }
 })
+
+const rightPages = [
+  { title: 'Events', component: Events, },
+  { title: 'Settings', component: Timer }
+]
+const middlePages = [
+  { title: 'Radar', component: Radar, props:{ width:700, height:600,waypoints: waypoints } },
+  { title: 'Plan', component: PlanEditor, props:{ width:700, height:600,WAYPOINTS: waypoints } },
+
+]
+
+onMounted(() => {
+})
+
 </script>
 
 <template>
@@ -53,10 +60,10 @@ const props = defineProps({
         </div>
       </div>
       <div id="fp-radar-viewport" class="col-md-7 fp-frame overflow-hidden" style="border-right: 1px solid #134970FF">
-        <Radar :width="700" :height="600" :waypoints="waypoints" />
+        <TabPages :pages="middlePages"></TabPages>
       </div>
       <div class="col-md-3 fp-frame">
-        <TabPages :pages="myPages"> </TabPages>
+        <TabPages :pages="rightPages" :tab-position="'top'">  </TabPages>
       </div>
     </div>
   </div>
