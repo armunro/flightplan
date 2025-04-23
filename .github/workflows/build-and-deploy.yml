@@ -28,18 +28,9 @@ jobs:
       - name: 🛠️ Build app
         run: npm run build
 
-      - name: 📤 Upload static site artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: 🚀Deploy to GitHub Pages🚀  // --> this deploys to gh-pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: 🚀 Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
