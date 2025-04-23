@@ -41,9 +41,9 @@ export const planStore = defineStore('plan', {
                     },
                     {
                         Type: 'Event',
-                        Key: 'CAL: DESSAS ORTHO',
+                        Key: 'CAL: ORTHO',
                         Source: 'O365',
-                        Title: "Dessa's Ortho",
+                        Title: "Ortho Appt",
                         Link: '',
                         TargetStart: '2023-09-16T19:00:00.000Z',
                         Spans: [
