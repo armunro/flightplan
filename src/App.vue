@@ -11,7 +11,7 @@ store.activatePlan(store.plans[0]);
 </script>
 
 <template>
-  <Layout :waypoints="store.activePlan.waypoints"></Layout>
+  <Layout ></Layout>
 </template>
 
 <style scoped>

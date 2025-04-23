@@ -8,22 +8,18 @@ import Events from "./Events.vue";
 import PlanEditor from "./PlanEditor.vue";
 import Tone from "./Tone.vue";
 import Clock from "./Clock.vue";
-import IconDropdown from "./IconDropdown.vue";
+import {planStore} from '../stores/PlanStore.js';
 
-const { waypoints, time } = defineProps({
-  waypoints: {
-    type: Array,
-    default: () => []
-  }
-})
+const store = planStore();
+
 
 const rightPages = [
   { title: 'Events', component: Events, },
   { title: 'Settings', component: Timer }
 ]
 const middlePages = [
-  { title: 'Radar', component: Radar, props:{ width:700, height:600,waypoints: waypoints } },
-  { title: 'Plan', component: PlanEditor, props:{ waypoints: waypoints } },
+  { title: 'Radar', component: Radar, props:{ width:700, height:600,waypoints: store.activePlan.waypoints } },
+  { title: 'Plan', component: PlanEditor },
   { title: 'Tone', component: Tone, props:{} },
 
 
@@ -40,7 +36,9 @@ onMounted(() => {
       <div class="info-slot p-3">
         <a class="navbar-brand" href="#">FlightPlan</a>
       </div>
-      <div class="info-slot"><span class="fp-label">I1</span></div>
+      <div class="info-slot"><span class="fp-label">Plan</span>
+      {{ store.activePlan.name}}
+      </div>
       <div class="info-slot"><span class="fp-label">I2</span></div>
       <div class="info-slot"><span class="fp-label">I3</span></div>
       <div class="info-slot"><span class="fp-label">I4</span></div>
@@ -57,7 +55,7 @@ onMounted(() => {
     <div class="row main-container">
       <div class="col-md-2 p-0">
         <div class="fp-frame">
-          <CardList :waypoints="waypoints" />
+          <CardList :waypoints="store.activePlan.waypoints" />
         </div>
       </div>
       <div id="fp-radar-viewport" class="col-md-7 fp-frame overflow-hidden" style="border-right: 1px solid #134970FF">

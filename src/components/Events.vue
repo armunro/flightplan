@@ -5,8 +5,8 @@
 
     <ul class="list-group" v-if="events.length">
       <li class="list-group-item" v-for="event in events" :key="event.id">
-        <strong>{{ event.subject }}</strong><br />
-        {{ new Date(event.start.dateTime).toLocaleString() }} - {{ new Date(event.end.dateTime).toLocaleString() }}
+        <strong class="fp-ref">{{ event.subject }}</strong><br />
+        {{ new Date(event.start.dateTime).toLocaleString() }} <br> {{ new Date(event.end.dateTime).toLocaleString() }}
       </li>
     </ul>
     <p v-else-if="account">No events found.</p>
