@@ -117,15 +117,9 @@ nav {
 .navbar-brand {
     font-size: 1.5rem
 }
-/* Tabs and Pages*/
-.nav-item.fp-tab {}
-.nav-item.fp-tab button{border-radius: 0 !important;
-    padding: 1rem 2rem;
-}
-.tab-content.fp-tab-content {border-radius: 0 !important; padding:0 !important;}
+
 .task-card {
     padding: 5px;
-
     border-bottom: 1px solid #3c4349;
 }
 

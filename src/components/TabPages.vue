@@ -96,4 +96,11 @@ const contentClass = computed(() => {
   background-color: #343a40;
   color: #fff;
 }
+/* Tabs and Pages*/
+.nav-item.fp-tab {}
+.nav-item.fp-tab button{border-radius: 0 !important;
+  padding: 1rem 2rem;
+}
+.tab-content.fp-tab-content {border-radius: 0 !important; padding:0 !important;}
+
 </style>

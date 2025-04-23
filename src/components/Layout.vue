@@ -6,15 +6,14 @@ import TabPages from "./TabPages.vue";
 import Timer from "./Timer.vue";
 import Events from "./Events.vue";
 import PlanEditor from "./PlanEditor.vue";
+import Tone from "./Tone.vue";
+import Clock from "./Clock.vue";
+import IconDropdown from "./IconDropdown.vue";
 
 const { waypoints, time } = defineProps({
   waypoints: {
     type: Array,
     default: () => []
-  },
-  time: {
-    type: String,
-    default: () => ""
   }
 })
 
@@ -24,7 +23,9 @@ const rightPages = [
 ]
 const middlePages = [
   { title: 'Radar', component: Radar, props:{ width:700, height:600,waypoints: waypoints } },
-  { title: 'Plan', component: PlanEditor, props:{ width:700, height:600,WAYPOINTS: waypoints } },
+  { title: 'Plan', component: PlanEditor, props:{ waypoints: waypoints } },
+  { title: 'Tone', component: Tone, props:{} },
+
 
 ]
 
@@ -47,7 +48,7 @@ onMounted(() => {
       <div class="info-slot"><span class="fp-label">I6</span></div>
       <div class="info-slot"><span class="fp-label">I7</span></div>
       <div class="info-slot clock">
-        <span id="current-time">{{ time }}</span>
+      <Clock></Clock>
       </div>
     </div>
   </nav>

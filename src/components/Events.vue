@@ -1,6 +1,5 @@
 <template>
   <div class="container mt-4">
-    <h3>My Calendar Events</h3>
     <button v-if="!account" class="btn btn-primary mb-3" @click="signIn">Sign In</button>
     <button v-else class="btn btn-secondary mb-3" @click="signOut">Sign Out</button>
 
