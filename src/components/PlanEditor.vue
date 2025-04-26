@@ -13,7 +13,7 @@
 
     <div v-for="(wp, index) in store.activePlan.waypoints" :key="index" class="card mb-3">
       <div class="card-header position-relative">
-        <i :class="['fa-regular', getIconClass(wp.Type)]" :style="{color: wp.Color}"></i>Waypoint {{ index + 1 }}
+        <i :class="['fa-regular', getIconClass(wp.Type)]" :style="{color: wp.Color}"></i>&nbsp;Waypoint {{ index + 1 }}
         <button type="button" class="btn-close position-absolute top-0 end-0 m-2" @click="removeWaypoint(index)"
                 aria-label="Close"></button>
       </div>

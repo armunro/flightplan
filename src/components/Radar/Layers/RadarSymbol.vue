@@ -5,15 +5,14 @@
           class="fp-radar-symbol"
           :style="{ top: translateY(wp) + 'px', left: translateX(wp.Key) + 'px' }"
       >
-        <i :class="['fa-regular', getIconCLass(wp.Type)] " ></i>
-        <span class="fp-label">{{ wp.Key }}</span>
+        <i :class="['fa-regular', getIconCLass(wp.Type)] " ></i>&nbsp;<span class="fp-label">{{ wp.Key }}</span>
       </div>
-      <div
-          v-for="(span, spanIndex) in wp.Spans"
-          :key="spanIndex"
-          class="fp-radar-spanline"
-          :style="{ top: translateSpanY(span) + 'px', left: translateX(wp.Key) + 'px' }"
-      ></div>
+<!--      <div-->
+<!--          v-for="(span, spanIndex) in wp.Spans"-->
+<!--          :key="spanIndex"-->
+<!--          class="fp-radar-spanline"-->
+<!--          :style="{ top: translateSpanY(span) + 'px', left: translateX(wp.Key) + 'px' }"-->
+<!--      ></div>-->
     </template>
   </div>
 </template>
