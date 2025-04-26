@@ -71,7 +71,6 @@
 </template>
 
 <script setup>
-import {reactive, ref} from 'vue';
 import IconDropdown from "./IconDropdown.vue";
 import {planStore} from '../stores/PlanStore.js';
 import {typesStore} from "../stores/TypesStore.js";
@@ -95,7 +94,6 @@ function addWaypoint() {
     Link: '',
     TargetStart: '',
     Spans: [],
-    Symbol: {Class: '', Unicode: '', Color: '#000000'}
   });
 }
 
