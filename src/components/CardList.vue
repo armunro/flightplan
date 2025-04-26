@@ -4,19 +4,16 @@
   </div>
 </template>
 
-<script>
-import Card from "./Card.vue";
+<script setup>
+import { defineProps } from 'vue'
+import Card from './Card.vue'
 
-export default {
-  name: 'CardList',
-  components: {Card},
-  props: {
-    waypoints: {
-      name: Array,
-      required: true
-    }
+const props = defineProps({
+  waypoints: {
+    type: Array,
+    required: true
   }
-}
+})
 </script>
 
 <style scoped>

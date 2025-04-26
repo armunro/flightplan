@@ -108,6 +108,6 @@ export default {
   position: absolute;
   width: 2px;
   height: 10px;
-
+  background-color: #ccc;
 }
 </style>
