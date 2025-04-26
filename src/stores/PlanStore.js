@@ -18,6 +18,7 @@ export const planStore = defineStore('plan', {
                     {
                         Type: 'Task',
                         Key: 'MH-123',
+                        Color: "White",
                         Source: 'ClickUp',
                         Title: 'Laundry - Adults',
                         Link: '',
@@ -30,6 +31,7 @@ export const planStore = defineStore('plan', {
                         Type: 'Task',
                         Key: 'MH-124',
                         Source: 'ClickUp',
+                        Color: "White",
                         Title: 'Laundry - Kids',
                         Link: '',
                         TargetStart: '2023-09-16T18:00:00.000Z',
@@ -40,6 +42,7 @@ export const planStore = defineStore('plan', {
                     {
                         Type: 'Event',
                         Key: 'CAL: ORTHO',
+                        Color: "White",
                         Source: 'O365',
                         Title: "Ortho Appt",
                         Link: '',

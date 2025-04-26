@@ -13,7 +13,7 @@
 
     <div v-for="(wp, index) in store.activePlan.waypoints" :key="index" class="card mb-3">
       <div class="card-header position-relative">
-        <i :class="wp.Symbol.Class" :style="{color: wp.Symbol.Color}"></i>Waypoint {{ index + 1 }}
+        <i :class="['fa-regular', getIconClass(wp.Type)]" :style="{color: wp.Color}"></i>Waypoint {{ index + 1 }}
         <button type="button" class="btn-close position-absolute top-0 end-0 m-2" @click="removeWaypoint(index)"
                 aria-label="Close"></button>
       </div>
@@ -27,7 +27,7 @@
           </div>
           <div class="col-md-1">
             <label class="form-label"> Color</label>
-            <input v-model="wp.Symbol.Color" type="color" class="form-control form-control-color w-100"/>
+            <input v-model="wp.Color" type="color" class="form-control form-control-color w-100"/>
           </div>
           <div class="col-md-3">
             <label class="form-label">Key</label>
@@ -74,9 +74,11 @@
 import {reactive, ref} from 'vue';
 import IconDropdown from "./IconDropdown.vue";
 import {planStore} from '../stores/PlanStore.js';
+import {typesStore} from "../stores/TypesStore.js";
 import EventTypeDropdown from "./EventTypeDropdown.vue";
 
 const store = planStore();
+const typStore = typesStore();
 
 const getTodayName = () => {
   const today = new Date();
@@ -111,6 +113,10 @@ function addSpan(wpIndex) {
 
 function removeSpan(wpIndex, sIndex) {
   store.activePlan.waypoints[wpIndex].Spans.splice(sIndex, 1);
+}
+
+function getIconClass(waypointType){
+  return typStore.getIconClass(waypointType)
 }
 </script>
 
