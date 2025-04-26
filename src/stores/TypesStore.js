@@ -6,158 +6,158 @@ export const typesStore = defineStore('types', {
         return {
             waypointTypes: [
                 {
-                    type: 'Task',
+                    name: 'Task',
                     category: 'Action-Oriented',
                     description: 'A concrete item to complete',
                     icon: 'fa-check-square'
                 },
                 {
-                    type: 'Errand',
+                    name: 'Errand',
                     category: 'Action-Oriented',
                     description: 'A location-based or physical-world task',
                     icon: 'fa-shopping-basket'
                 },
                 {
-                    type: 'Follow-Up',
+                    name: 'Follow-Up',
                     category: 'Action-Oriented',
                     description: 'A reminder to check back or ping someone',
                     icon: 'fa-reply'
                 },
                 {
-                    type: 'Delegation',
+                    name: 'Delegation',
                     category: 'Action-Oriented',
                     description: 'A task you\'ve handed off to someone else',
                     icon: 'fa-user-tag'
                 },
                 {
-                    type: 'Review',
+                    name: 'Review',
                     category: 'Action-Oriented',
                     description: 'A block of time to review or audit',
                     icon: 'fa-clipboard-check'
                 },
                 {
-                    type: 'Email',
+                    name: 'Email',
                     category: 'Communication',
                     description: 'A message to send or read',
                     icon: 'fa-envelope'
                 },
-                {type: 'Phone', category: 'Communication', description: 'A call to make or expect', icon: 'fa-phone'},
+                {name: 'Phone', category: 'Communication', description: 'A call to make or expect', icon: 'fa-phone'},
                 {
-                    type: 'Meeting',
+                    name: 'Meeting',
                     category: 'Communication',
                     description: 'A scheduled conversation or gathering',
                     icon: 'fa-users'
                 },
                 {
-                    type: 'Appointment',
+                    name: 'Appointment',
                     category: 'Communication',
                     description: 'A scheduled personal or external event',
                     icon: 'fa-calendar-check'
                 },
                 {
-                    type: 'Checkpoint',
+                    name: 'Checkpoint',
                     category: 'Planning & Strategy',
                     description: 'A key milestone in a longer process',
                     icon: 'fa-flag-checkered'
                 },
                 {
-                    type: 'Deadline',
+                    name: 'Deadline',
                     category: 'Planning & Strategy',
                     description: 'A hard end time or due moment',
                     icon: 'fa-hourglass-end'
                 },
                 {
-                    type: 'Sync Point',
+                    name: 'Sync Point',
                     category: 'Planning & Strategy',
                     description: 'Where multiple tasks or people align',
                     icon: 'fa-link'
                 },
                 {
-                    type: 'Brainstorm',
+                    name: 'Brainstorm',
                     category: 'Planning & Strategy',
                     description: 'Creative or ideation time',
                     icon: 'fa-lightbulb'
                 },
                 {
-                    type: 'Focus Session',
+                    name: 'Focus Session',
                     category: 'Mental & Emotional',
                     description: 'Dedicated time for deep work',
                     icon: 'fa-bullseye'
                 },
                 {
-                    type: 'Break',
+                    name: 'Break',
                     category: 'Mental & Emotional',
                     description: 'Rest, recovery, or reset',
                     icon: 'fa-mug-saucer'
                 },
                 {
-                    type: 'Mood Check',
+                    name: 'Mood Check',
                     category: 'Mental & Emotional',
                     description: 'Log or reflect on emotional state',
                     icon: 'fa-face-smile'
                 },
                 {
-                    type: 'Motivation',
+                    name: 'Motivation',
                     category: 'Mental & Emotional',
                     description: 'Inspiration, affirmation, or self-talk',
                     icon: 'fa-quote-left'
                 },
                 {
-                    type: 'Note',
+                    name: 'Note',
                     category: 'Information & Notes',
                     description: 'A textual note or idea',
                     icon: 'fa-sticky-note'
                 },
                 {
-                    type: 'Reference',
+                    name: 'Reference',
                     category: 'Information & Notes',
                     description: 'A saved link, file, or document',
                     icon: 'fa-bookmark'
                 },
                 {
-                    type: 'Journal',
+                    name: 'Journal',
                     category: 'Information & Notes',
                     description: 'A personal reflection or entry',
                     icon: 'fa-pen-fancy'
                 },
                 {
-                    type: 'Transit',
+                    name: 'Transit',
                     category: 'Location-Based',
                     description: 'Movement from one location to another',
                     icon: 'fa-route'
                 },
                 {
-                    type: 'Visit',
+                    name: 'Visit',
                     category: 'Location-Based',
                     description: 'A stop at a specific place',
                     icon: 'fa-map-marker-alt'
                 },
                 {
-                    type: 'Location Alert',
+                    name: 'Location Alert',
                     category: 'Location-Based',
                     description: 'Triggered on arrival at a specific place',
                     icon: 'fa-bell-on'
                 },
                 {
-                    type: 'Reminder',
+                    name: 'Reminder',
                     category: 'Digital & System',
                     description: 'A ping or alert of any kind',
                     icon: 'fa-bell'
                 },
                 {
-                    type: 'Form Submission',
+                    name: 'Form Submission',
                     category: 'Digital & System',
                     description: 'Time to fill or check a form',
                     icon: 'fa-file-signature'
                 },
                 {
-                    type: 'System Check',
+                    name: 'System Check',
                     category: 'Digital & System',
                     description: 'Scheduled review of automated systems',
                     icon: 'fa-server'
                 },
                 {
-                    type: 'Content Publish',
+                    name: 'Content Publish',
                     category: 'Digital & System',
                     description: 'Time to post or publish something',
                     icon: 'fa-share-square'
@@ -173,5 +173,13 @@ export const typesStore = defineStore('types', {
             }]
         }
     },
-    actions: {},
+    actions: {
+        getIconClass(waypointType){
+
+            const find = this.waypointTypes.find(x => x.name === waypointType);
+            if(find?.icon !== undefined) return find.icon;
+            else return "fa-square";
+
+        }
+    },
 })

@@ -66,7 +66,7 @@ let app = createApp({
                     activePlanId: '',
                     activeWpt: 'XXX',
                     contact: {
-                        type: "type",
+                        name: "type",
                         title: "title"
                     },
                     waypoint: {

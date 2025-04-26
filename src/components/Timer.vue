@@ -15,7 +15,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 // Props
 const props = defineProps({
   targetDate: {
-    type: String,
+    name: String,
     required: true,
   }
 })

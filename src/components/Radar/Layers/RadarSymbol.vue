@@ -5,7 +5,7 @@
           class="fp-radar-symbol"
           :style="{ top: translateY(wp) + 'px', left: translateX(wp.Key) + 'px' }"
       >
-        <i class="fa-regular fa-square"></i>
+        <i :class="['fa-regular', getIconCLass(wp.Type)] " ></i>
         <span class="fp-label">{{ wp.Key }}</span>
       </div>
       <div
@@ -20,6 +20,9 @@
 
 <script setup>
 import { watch, onMounted } from 'vue'
+import {typesStore} from '../../../stores/TypesStore.js';
+
+const store = typesStore();
 
 const props = defineProps({
   width: Number,
@@ -30,11 +33,6 @@ const props = defineProps({
 const symbolYOffset = -30
 const hours = 8.6
 
-const typeGlyphs = {
-  Jira: '\uf219',
-  Case: '\uf7d4',
-  Default: '\uf60b'
-}
 
 function trueHeight() {
   return props.height * window.devicePixelRatio
@@ -42,6 +40,9 @@ function trueHeight() {
 
 function trueWidth() {
   return props.width * window.devicePixelRatio
+}
+function getIconCLass(waypointType){
+  return store.getIconClass(waypointType)
 }
 
 function init() {
@@ -107,6 +108,6 @@ export default {
   position: absolute;
   width: 2px;
   height: 10px;
-  background-color: #ccc;
+
 }
 </style>

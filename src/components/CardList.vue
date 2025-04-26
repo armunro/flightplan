@@ -12,7 +12,7 @@ export default {
   components: {Card},
   props: {
     waypoints: {
-      type: Array,
+      name: Array,
       required: true
     }
   }

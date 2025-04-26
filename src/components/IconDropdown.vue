@@ -40,7 +40,7 @@ import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    name: String,
     default: null
   }
 })

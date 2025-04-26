@@ -13,7 +13,7 @@ export default {
   name: 'Card',
   props: {
     data: {
-      type: Object,
+      name: Object,
       required: true
     }
   },

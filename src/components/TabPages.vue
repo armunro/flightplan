@@ -38,12 +38,12 @@ import { ref, computed, defineProps } from 'vue'
 
 const props = defineProps({
   pages: {
-    type: Array,
+    name: Array,
     required: true,
     // Format: [{ title: 'Tab Name', component: SFC, props: PROPS }]
   },
   tabPosition: {
-    type: String,
+    name: String,
     default: 'top',
     validator: val => ['top', 'bottom', 'left', 'right'].includes(val),
   }

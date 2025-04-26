@@ -24,8 +24,7 @@ export const planStore = defineStore('plan', {
                         TargetStart: '2023-09-16T17:00:00.000Z',
                         Spans: [
                             {Type: 'Work', Start: '2023-09-16T17:00:00.000Z', End: '2023-09-16T17:20:00.000Z'}
-                        ],
-                        Symbol: {Class: '', Unicode: '\uf219', Color: '#FFFFFF'}
+                        ]
                     },
                     {
                         Type: 'Task',
@@ -37,7 +36,6 @@ export const planStore = defineStore('plan', {
                         Spans: [
                             {Type: 'Work', Start: '2023-09-16T18:00:00.000Z', End: '2023-09-16T18:20:00.000Z'}
                         ],
-                        Symbol: {Class: '', Unicode: '\uf219', Color: '#FFFFFF'}
                     },
                     {
                         Type: 'Event',
@@ -50,7 +48,6 @@ export const planStore = defineStore('plan', {
                             {Type: 'Attend', Start: '2023-09-16T19:00:00.000Z', End: '2023-09-16T19:00:00.000Z'},
                             {Type: 'Transit', Start: '2023-09-16T18:40:00.000Z', End: '2023-09-16T18:55:00.000Z'}
                         ],
-                        Symbol: {Class: '', Unicode: '\uf219', Color: '#FFFFFF'}
                     }
                 ])
             }));
