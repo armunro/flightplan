@@ -1,12 +1,13 @@
 <template>
   <div class="dropdown">
     <button
-        class="btn btn-outline-primary dropdown-toggle w-100 text-start"
+        class="btn btn-outline-primary dropdown-toggle w-100 text-start d-flex align-items-center gap-2"
         type="button"
         data-bs-toggle="dropdown"
         aria-expanded="false"
     >
-      {{ selectedEvent?.name || 'Type' }}
+      <i v-if="selectedEvent" :class="['fa', selectedEvent.icon, 'text-primary']"></i>
+      <span>{{ selectedEvent?.name || 'Type' }}</span>
     </button>
     <ul class="dropdown-menu w-100 p-2" style="max-height: 300px; overflow-y: auto;">
       <li>
