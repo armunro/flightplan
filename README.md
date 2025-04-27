@@ -1,59 +1,26 @@
 # FlightPlan
 Productivity and wellbeing for nerds.
-![img.png](img.png)
 
-```mermaid
-classDiagram
+## Concepts
 
-    class TimeSpan {
-        start: DateTime
-        end: DateTime
+### Waypoints
+Waypoints are FlightPlan's way of representing external time/task management resources like tasks and events, as visual checkpoints. 
+```json
+ {
+  "type": "Task",
+  "key": "MH-123",
+  "source": "ClickUp",
+  "color": "White",
+  "title": "Laundry - Adults",
+  "link": "",
+  "time": "2023-09-16T17:00:00.000Z",
+  "spans": [
+    {
+      "spanType": "Work",
+      "start": "2023-09-16T17:00:00.000Z",
+      "end": "2023-09-16T17:20:00.000Z"
     }
-    
-    class Task {
-        id: Uuid
-        source: String
-        key: String
-        link: String
-        priority: String
-        spans: TimeSpan
-        cycles: List:Cycle
-    }
+  ]
+}
 
-    class Source {
-        id: Uuid
-        name: String
-    }
-
-    class Cycle {
-        id: Uuid
-        start: DateTime
-        end: DateTime
-    }
-
-    class Event {
-        id: Uuid
-        title: String
-        location: string
-        start: DateTime
-        end: DateTime
-    }
-
-    class Transit {
-        timeBefore: TimeSpan
-        timeAfter: TimeSpan
-        Notes: string
-    }
-
-    class Reminder {
-        id: Uuid
-        time: DateTime
-        content: String
-    }
-
-    Task "1" --> "1..*" Cycle
-
-    Task "1" --> "1..0" TimeSpan
-    Event "1" --> "0..*" Transit
-    
 ```

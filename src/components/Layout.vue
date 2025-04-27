@@ -9,20 +9,19 @@ import PlanEditor from "./PlanEditor.vue";
 import Tone from "./Tone.vue";
 import Clock from "./Clock.vue";
 import {planStore} from '../stores/PlanStore.js';
+import WaypointViewer from "./WaypointViewer.vue";
 
 const store = planStore();
 
 
 const rightPages = [
-  { title: 'Events', component: Events, },
-  { title: 'Settings', component: Timer }
+  {title: 'Waypoint', component: WaypointViewer},
+  {title: 'Events', component: Events,},
+
 ]
 const middlePages = [
-  { title: 'Radar', component: Radar, props:{ width:700, height:600,waypoints: store.activePlan.waypoints } },
-  { title: 'Plan', component: PlanEditor },
-  { title: 'Tone', component: Tone, props:{} },
-
-
+  {title: 'Radar', component: Radar, props: {width: 700, height: 600, waypoints: store.activePlan.waypoints}},
+  {title: 'Plan', component: PlanEditor}
 ]
 
 onMounted(() => {
@@ -37,7 +36,7 @@ onMounted(() => {
         <a class="navbar-brand" href="#">FlightPlan</a>
       </div>
       <div class="info-slot"><span class="fp-label">Plan</span>
-      {{ store.activePlan.name}}
+        {{ store.activePlan.name }}
       </div>
       <div class="info-slot"><span class="fp-label">I2</span></div>
       <div class="info-slot"><span class="fp-label">I3</span></div>
@@ -46,7 +45,7 @@ onMounted(() => {
       <div class="info-slot"><span class="fp-label">I6</span></div>
       <div class="info-slot"><span class="fp-label">I7</span></div>
       <div class="info-slot clock">
-      <Clock></Clock>
+        <Clock></Clock>
       </div>
     </div>
   </nav>
@@ -55,14 +54,14 @@ onMounted(() => {
     <div class="row main-container">
       <div class="col-md-2 p-0">
         <div class="fp-frame">
-          <CardList :waypoints="store.activePlan.waypoints" />
+          <CardList :waypoints="store.activePlan.waypoints"/>
         </div>
       </div>
       <div id="fp-radar-viewport" class="col-md-7 fp-frame overflow-hidden" style="border-right: 1px solid #134970FF">
         <TabPages :pages="middlePages"></TabPages>
       </div>
       <div class="col-md-3 fp-frame">
-        <TabPages :pages="rightPages" :tab-position="'top'">  </TabPages>
+        <TabPages :pages="rightPages" :tab-position="'top'"></TabPages>
       </div>
     </div>
   </div>

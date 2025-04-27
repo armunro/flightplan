@@ -1,6 +1,6 @@
 <template>
   <div class="task-card">
-    <i :class="['fa-regular', getIconCLass(data.Type)] "></i>&nbsp;<span class="fp-ref">{{ data.Key }}</span> FROM <span class="fp-source">{{ data.Source }}</span><br />
+    <i :class="['fa-regular', getIconCLass(data.Type)] " :style="{color: data.Color}"></i>&nbsp;<span class="fp-ref">{{ data.Key }}</span> FROM <span class="fp-source">{{ data.Source }}</span><br />
     <div v-for="(span, index) in data.Spans" :key="index">
       <span class="fp-label">{{ span.Type }}</span><br />
       <span class="fp-value">{{ formatDateRange(span.Start, span.End) }}</span>
