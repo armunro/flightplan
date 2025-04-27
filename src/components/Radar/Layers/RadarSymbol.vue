@@ -51,7 +51,7 @@ function translateY(task) {
 }
 
 function translateSpanY(span) {
-  const date = new Date('2023-09-16T23:59:00.000Z')
+  const date = new Date('2023-09-17T00:00:00.000Z')
   const targetDate = new Date(span.Start)
   const diff = targetDate - date
   let y = (diff / 1000 / 60 / 60) * props.height / hours
