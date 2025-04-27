@@ -10,12 +10,13 @@ import Tone from "./Tone.vue";
 import Clock from "./Clock.vue";
 import {planStore} from '../stores/PlanStore.js';
 import WaypointViewer from "./WaypointViewer.vue";
+import InfoBlock from "./InfoBlock.vue";
 
 const store = planStore();
 
 
 const rightPages = [
-  {title: 'Waypoint', component: WaypointViewer},
+  //{title: 'Waypoint', component: WaypointViewer},
   {title: 'Events', component: Events,},
 
 ]
@@ -35,15 +36,13 @@ onMounted(() => {
       <div class="info-slot p-3">
         <a class="navbar-brand" href="#">FlightPlan</a>
       </div>
-      <div class="info-slot"><span class="fp-label">Plan</span>
-        {{ store.activePlan.name }}
-      </div>
-      <div class="info-slot"><span class="fp-label">I2</span></div>
-      <div class="info-slot"><span class="fp-label">I3</span></div>
-      <div class="info-slot"><span class="fp-label">I4</span></div>
-      <div class="info-slot"><span class="fp-label">I5</span></div>
-      <div class="info-slot"><span class="fp-label">I6</span></div>
-      <div class="info-slot"><span class="fp-label">I7</span></div>
+      <InfoBlock :value="store.activePlan.name" label="Plan"></InfoBlock>
+      <InfoBlock value="" label="I2"></InfoBlock>
+      <InfoBlock value="" label="I3"></InfoBlock>
+      <InfoBlock value="" label="I4"></InfoBlock>
+      <InfoBlock value="" label="I5"></InfoBlock>
+      <InfoBlock value="" label="I6"></InfoBlock>
+      <InfoBlock value="" label="I7"></InfoBlock>
       <div class="info-slot clock">
         <Clock></Clock>
       </div>
