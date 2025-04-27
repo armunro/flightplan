@@ -51,15 +51,15 @@ onMounted(() => {
 
   <div class="container-fluid main-container">
     <div class="row main-container">
-      <div class="col-md-2 p-0">
+      <div class="col-md-2 p-0 main-container">
         <div class="fp-frame">
           <CardList :waypoints="store.activePlan.waypoints"/>
         </div>
       </div>
-      <div id="fp-radar-viewport" class="col-md-7 fp-frame overflow-hidden" style="border-right: 1px solid #134970FF">
+      <div id="fp-radar-viewport" class="col-md-7 fp-frame  main-container overflow-hidden" style="border-right: 1px solid #134970FF">
         <TabPages :pages="middlePages"></TabPages>
       </div>
-      <div class="col-md-3 fp-frame">
+      <div class="col-md-3 fp-frame main-container">
         <TabPages :pages="rightPages" :tab-position="'top'"></TabPages>
       </div>
     </div>

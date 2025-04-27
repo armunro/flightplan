@@ -1,5 +1,5 @@
 <template>
-  <div id="fp-radar-symbol-layer" :style="{ width: width + 'px', height: height + 'px' }">
+  <div id="fp-radar-symbol-layer" class="overflow-hidden" :style="{ width: width + 'px', height: height + 'px' }">
     <template v-for="(wp, index) in waypoints" :key="wp.Key">
       <div
           class="fp-radar-symbol"
@@ -33,13 +33,7 @@ const symbolYOffset = -30
 const hours = 8.6
 
 
-function trueHeight() {
-  return props.height * window.devicePixelRatio
-}
 
-function trueWidth() {
-  return props.width * window.devicePixelRatio
-}
 function getIconCLass(waypointType){
   return store.getIconClass(waypointType)
 }
