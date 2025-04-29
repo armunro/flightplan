@@ -1,12 +1,10 @@
 <script setup>
-import {defineProps, onMounted} from 'vue'
+import { onMounted} from 'vue'
 import CardList from "./CardList.vue"
 import Radar from "./Radar/Radar.vue"
 import TabPages from "./TabPages.vue";
-import Timer from "./Timer.vue";
 import Events from "./Events.vue";
 import PlanEditor from "./PlanEditor.vue";
-import Tone from "./Tone.vue";
 import Clock from "./Clock.vue";
 import {planStore} from '../stores/PlanStore.js';
 import WaypointViewer from "./WaypointViewer.vue";
