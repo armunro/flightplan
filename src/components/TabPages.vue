@@ -14,7 +14,7 @@
     </ul>
 
     <!-- Content -->
-    <div class="tab-content fp-tab-content p-3 border bg-dark text-light" :class="contentClass">
+    <div class="tab-content fp-tab-content text-light" :class="contentClass">
       <component :is="pages[activeTab].component" v-bind="pages[activeTab].props" />
     </div>
 
