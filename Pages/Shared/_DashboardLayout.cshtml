@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - FlightPlan</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-darker: #0d1117;
+            --bg-dark: #161b22;
+            --bg-card: #21262d;
+            --border-primary: #30363d;
+            --text-primary: #c9d1d9;
+            --text-muted: #aab2bb;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-orange: #f0883e;
+            --accent-purple: #bc8cff;
+            --jira-blue: #0052cc;
+            --scrollbar-thumb: #484f58;
+            --scrollbar-track: #0d1117;
+        }
+        body {
+            background-color: var(--bg-darker) !important;
+            color: var(--text-primary) !important;
+            font-family: 'Noto Sans', sans-serif;
+        }
+        /* Remove rounded corners from panels and badges */
+        .card, .card-header, .card-footer, .badge {
+            border-radius: 4px !important;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 5px;
+            border: 2px solid var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6e7681;
+        }
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+        .text-info {
+            color: var(--accent-blue) !important;
+        }
+        .bg-dark {
+            background-color: var(--bg-dark) !important;
+        }
+        .border-secondary {
+            border-color: var(--border-primary) !important;
+        }
+        .navbar {
+            background-color: var(--bg-dark) !important;
+            border-bottom: 1px solid var(--border-primary) !important;
+        }
+    </style>
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="d-flex flex-column bg-dark text-light" style="min-height: 100vh;">
+    @RenderBody()
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

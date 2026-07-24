@@ -1,0 +1,17 @@
+﻿@page "/Notepad"
+@using FlightPlan.Services
+@model FlightPlan.Pages.NotepadModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Notepad";
+}
+
+<div id="app"></div>
+
+@section Scripts {
+    @Html.ViteAsset("notepad.html")
+}
+@section Head {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    @Html.ViteStyle("notepad.html")
+}

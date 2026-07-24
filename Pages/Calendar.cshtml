@@ -1,0 +1,16 @@
+@page "/Calendar"
+@using FlightPlan.Services
+@{
+    ViewData["Title"] = "Calendar";
+    Layout = "_DashboardLayout";
+}
+
+<div id="app"></div>
+
+@section Head {
+    @Html.ViteStyle("calendar.html")
+}
+
+@section Scripts {
+    @Html.ViteAsset("calendar.html")
+}

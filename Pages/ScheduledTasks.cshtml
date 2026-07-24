@@ -1,0 +1,16 @@
+﻿@page "/ScheduledTasks"
+@using FlightPlan.Services
+@{
+    ViewData["Title"] = "Scheduled Tasks";
+    Layout = "_DashboardLayout";
+}
+
+<div id="app"></div>
+
+@section Head {
+    @Html.ViteStyle("scheduled-tasks.html")
+}
+
+@section Scripts {
+    @Html.ViteAsset("scheduled-tasks.html")
+}

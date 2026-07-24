@@ -1,0 +1,492 @@
+﻿<template>
+  <div class="vh-100 d-flex flex-row overflow-hidden">
+    <Navbar />
+    <div class="flex-grow-1 overflow-hidden d-flex flex-column">
+      <div class="flex-grow-1 overflow-hidden d-flex flex-row">
+      <!-- Sidebar for files -->
+      <div class="file-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+        <div class="sidebar-header">
+          <h5 v-if="!sidebarCollapsed" class="mb-0">Files</h5>
+          <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
+            <button class="btn-icon ms-0" @click="createNewFile" title="New File">
+              <i class="bi bi-plus-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="file-list flex-grow-1 overflow-auto">
+          <div 
+            v-for="file in files" 
+            :key="file" 
+            class="file-item"
+            :class="{ 'active': currentFile === file }"
+            @click="selectFile(file)"
+            :title="sidebarCollapsed ? file : ''"
+          >
+            <div class="file-icon-wrapper">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div v-if="!sidebarCollapsed" class="d-flex align-items-center flex-grow-1 min-w-0">
+              <span class="text-truncate flex-grow-1" :title="file">{{ file }}</span>
+              <button class="btn btn-sm btn-link text-danger p-0 ms-2 opacity-0 delete-btn" @click.stop="deleteFile(file)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+            <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sidebar Resizer -->
+      <div v-if="!sidebarCollapsed" class="sidebar-resizer" @mousedown="startSidebarResize"></div>
+
+      <!-- Main Editor Area -->
+      <div class="main-area d-flex flex-column flex-grow-1">
+        <div class="controls-bar d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <h5 class="mb-0 me-3"><i class="bi bi-journal-text"></i> {{ currentFile || 'No file selected' }}</h5>
+            <div v-if="currentFile" class="save-status small" :class="{ 'text-success': saveStatus === 'Saved', 'text-warning': saveStatus === 'Saving...', 'text-danger': saveStatus === 'Error' }">
+              {{ saveStatus }}
+            </div>
+          </div>
+        </div>
+
+        <div v-if="currentFile" class="editor-area flex-grow-1 overflow-hidden">
+          <MdEditor 
+            v-model="content" 
+            theme="dark" 
+            @onChange="onInput" 
+            :completions="completions"
+            language="en-US"
+            style="height: 100%"
+          />
+        </div>
+        <div v-else class="flex-grow-1 d-flex align-items-center justify-content-center text-muted">
+          Select or create a file to start writing
+        </div>
+      </div> <!-- Close main-area (42) -->
+    </div> <!-- Close flex-row (5) -->
+  </div> <!-- Close main-wrapper (4) -->
+</div> <!-- Close vh-100 (2) -->
+</template>
+
+<script setup>
+import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue';
+import Navbar from './components/Navbar.vue';
+import { MdEditor } from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
+
+const files = ref([]);
+const currentFile = ref(null);
+const content = ref('');
+const saveStatus = ref('');
+const saveTimeout = ref(null);
+
+const loadSetting = (key, defaultValue) => {
+  const val = localStorage.getItem(key);
+  if (!val) return defaultValue;
+  try {
+    return JSON.parse(val);
+  } catch (e) {
+    return defaultValue;
+  }
+};
+
+const sidebarCollapsed = ref(loadSetting('notepadSidebarCollapsed', false));
+const sidebarWidth = ref(loadSetting('notepadSidebarWidth', 260));
+const isResizingSidebar = ref(false);
+let sidebarStartX = 0;
+let sidebarStartWidth = 0;
+
+const sidebarStyle = computed(() => {
+  if (sidebarCollapsed.value) return {};
+  return { 
+    width: sidebarWidth.value + 'px',
+    transition: isResizingSidebar.value ? 'none' : 'width 0.3s ease'
+  };
+});
+
+watch(sidebarWidth, (newVal) => {
+  localStorage.setItem('notepadSidebarWidth', JSON.stringify(newVal));
+});
+
+const startSidebarResize = (e) => {
+  isResizingSidebar.value = true;
+  sidebarStartX = e.clientX;
+  sidebarStartWidth = sidebarWidth.value;
+  
+  document.addEventListener('mousemove', doSidebarResize);
+  document.addEventListener('mouseup', stopSidebarResize);
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+  
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+const doSidebarResize = (e) => {
+  if (!isResizingSidebar.value) return;
+  const delta = e.clientX - sidebarStartX;
+  const newWidth = sidebarStartWidth + delta;
+  if (newWidth > 150 && newWidth < 600) {
+    sidebarWidth.value = newWidth;
+  }
+};
+
+const stopSidebarResize = () => {
+  isResizingSidebar.value = false;
+  document.removeEventListener('mousemove', doSidebarResize);
+  document.removeEventListener('mouseup', stopSidebarResize);
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+};
+
+watch(sidebarCollapsed, (newVal) => {
+  localStorage.setItem('notepadSidebarCollapsed', JSON.stringify(newVal));
+});
+
+const completions = [
+  (context) => {
+    const word = context.matchBefore(/\/\w*/);
+    if (!word || (word.from === word.to && !context.explicit)) {
+      return null;
+    }
+    return {
+      from: word.from,
+      options: [
+        { label: '/h1', type: 'text', apply: '# ', detail: 'Heading 1' },
+        { label: '/h2', type: 'text', apply: '## ', detail: 'Heading 2' },
+        { label: '/h3', type: 'text', apply: '### ', detail: 'Heading 3' },
+        { label: '/list', type: 'text', apply: '- ', detail: 'Bullet List' },
+        { label: '/todo', type: 'text', apply: '- [ ] ', detail: 'Todo List' },
+        { label: '/code', type: 'text', apply: '```\n\n```', detail: 'Code Block' },
+        { label: '/table', type: 'text', apply: '| Column 1 | Column 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |', detail: 'Table' },
+        { label: '/bold', type: 'text', apply: '****', detail: 'Bold' },
+        { label: '/italic', type: 'text', apply: '__', detail: 'Italic' },
+        { label: '/quote', type: 'text', apply: '> ', detail: 'Blockquote' },
+        { label: '/link', type: 'text', apply: '[]()', detail: 'Link' },
+        { label: '/image', type: 'text', apply: '![]()', detail: 'Image' },
+      ],
+    };
+  },
+];
+
+const loadFileList = async () => {
+  try {
+    const response = await fetch('/api/notepad/files');
+    if (response.ok) {
+      files.value = await response.json();
+      if (files.value.length > 0 && !currentFile.value) {
+        selectFile(files.value[0]);
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load file list:', e);
+  }
+};
+
+const selectFile = async (filename) => {
+  if (saveTimeout.value) {
+    clearTimeout(saveTimeout.value);
+    await saveNote();
+  }
+  
+  currentFile.value = filename;
+  saveStatus.value = 'Loading...';
+  try {
+    const response = await fetch(`/api/notepad/${filename}`);
+    if (response.ok) {
+      const data = await response.json();
+      content.value = data.content;
+      saveStatus.value = 'Loaded';
+    }
+  } catch (e) {
+    console.error('Failed to load note:', e);
+    saveStatus.value = 'Error loading';
+  }
+};
+
+const createNewFile = async () => {
+  const name = prompt('Enter filename (e.g. notes.md):');
+  if (name) {
+    if (!name.endsWith('.md')) {
+      alert('Filename must end with .md');
+      return;
+    }
+
+    try {
+      // Create the file on the server immediately to avoid 404 when selecting it
+      const response = await fetch(`/api/notepad/${name}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '' })
+      });
+
+      if (response.ok) {
+        if (!files.value.includes(name)) {
+          files.value.push(name);
+          // Sort files if needed, or just let it be at the end
+          files.value.sort();
+        }
+        selectFile(name);
+      } else {
+        console.error('Failed to create file on server');
+        alert('Failed to create file');
+      }
+    } catch (e) {
+      console.error('Error creating file:', e);
+      alert('Error creating file');
+    }
+  }
+};
+
+const deleteFile = async (filename) => {
+  if (!confirm(`Delete ${filename}?`)) return;
+  try {
+    const response = await fetch(`/api/notepad/${filename}`, { method: 'DELETE' });
+    if (response.ok) {
+      files.value = files.value.filter(f => f !== filename);
+      if (currentFile.value === filename) {
+        currentFile.value = null;
+        content.value = '';
+      }
+    }
+  } catch (e) {
+    console.error('Failed to delete file:', e);
+  }
+};
+
+const onInput = () => {
+  saveStatus.value = 'Modified';
+  if (saveTimeout.value) clearTimeout(saveTimeout.value);
+  saveTimeout.value = setTimeout(saveNote, 1000);
+};
+
+const saveNote = async () => {
+  if (!currentFile.value) return;
+  saveStatus.value = 'Saving...';
+  try {
+    const response = await fetch(`/api/notepad/${currentFile.value}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content.value })
+    });
+    if (response.ok) {
+      saveStatus.value = 'Saved';
+    } else {
+      saveStatus.value = 'Error';
+    }
+  } catch (e) {
+    console.error('Failed to save note:', e);
+    saveStatus.value = 'Error';
+  } finally {
+    saveTimeout.value = null;
+  }
+};
+
+onMounted(loadFileList);
+
+onUnmounted(() => {
+  if (saveTimeout.value) clearTimeout(saveTimeout.value);
+});
+</script>
+
+<style>
+.form-control::placeholder {
+  color: #aab2bb !important;
+  opacity: 0.6 !important;
+}
+</style>
+
+<style scoped>
+.sidebar-header {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-primary);
+  height: 60px;
+}
+
+.file-sidebar.collapsed .sidebar-header {
+  padding: 1rem 0;
+  justify-content: center;
+}
+
+.sidebar-header h5 {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  background-color: var(--bg-dark);
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  padding: 8px;
+  box-shadow: none !important;
+}
+
+.sidebar-toggle:hover {
+  color: var(--text-primary);
+}
+
+.sidebar-toggle:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.file-sidebar.collapsed .sidebar-toggle {
+  margin-left: 0;
+}
+
+.file-sidebar {
+  width: 260px;
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border-primary);
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.sidebar-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  z-index: 10;
+  margin-left: -2px;
+  margin-right: -2px;
+  flex-shrink: 0;
+}
+
+.sidebar-resizer:hover, .sidebar-resizer:active {
+  background-color: var(--accent-blue);
+}
+
+.file-sidebar.collapsed {
+  width: 50px !important;
+}
+
+.controls-bar {
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-primary);
+  min-height: 60px;
+}
+
+.controls-bar h5 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.file-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s, padding 0.3s ease;
+  border-left: 3px solid transparent;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.file-sidebar.collapsed .file-item {
+  padding: 0.75rem 0;
+  justify-content: center;
+}
+
+.file-item:hover {
+  background-color: var(--bg-card);
+}
+
+.file-item.active {
+  background-color: rgba(88, 166, 255, 0.1);
+  border-left-color: var(--accent-blue);
+}
+
+.file-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.file-sidebar.collapsed .file-icon-wrapper {
+  margin-right: 0;
+}
+
+.file-item:hover .delete-btn {
+  opacity: 1 !important;
+}
+
+.btn-icon {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: var(--border-primary);
+}
+
+.main-area {
+  background-color: var(--bg-darker);
+}
+
+.editor-area {
+  background-color: var(--bg-darker);
+}
+
+:deep(.md-editor) {
+  border: none !important;
+  --md-bk-color: var(--bg-darker);
+}
+
+:deep(.md-editor-toolbar-wrapper) {
+  background-color: var(--bg-dark) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+}
+
+:deep(.md-editor-content) {
+  background-color: var(--bg-darker) !important;
+}
+
+:deep(.md-editor-preview-wrapper) {
+  background-color: var(--bg-darker) !important;
+}
+
+:deep(.md-editor-footer) {
+  background-color: var(--bg-dark) !important;
+  border-top: 1px solid var(--border-primary) !important;
+}
+</style>

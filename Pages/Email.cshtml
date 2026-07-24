@@ -1,0 +1,16 @@
+@page "/Email"
+@using FlightPlan.Services
+@{
+    ViewData["Title"] = "Email";
+    Layout = "_DashboardLayout";
+}
+
+<div id="app"></div>
+
+@section Head {
+    @Html.ViteStyle("email.html")
+}
+
+@section Scripts {
+    @Html.ViteAsset("email.html")
+}
