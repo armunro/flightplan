@@ -43,6 +43,18 @@ public class ScheduledTaskService
         {
             var yaml = File.ReadAllText(path);
             _scheduledTasks = _deserializer.Deserialize<List<ScheduledTask>>(yaml) ?? new List<ScheduledTask>();
+            
+            // Fix any empty GUIDs
+            var updated = false;
+            foreach (var task in _scheduledTasks)
+            {
+                if (task.Id == Guid.Empty)
+                {
+                    task.Id = Guid.NewGuid();
+                    updated = true;
+                }
+            }
+            if (updated) SaveTasks();
         }
     }
 
@@ -59,12 +71,17 @@ public class ScheduledTaskService
 
     public async Task AddTaskAsync(ScheduledTask task)
     {
+        if (task.Id == Guid.Empty)
+        {
+            task.Id = Guid.NewGuid();
+        }
+        
         _scheduledTasks.Add(task);
-        SaveTasks();
         if (task.IsEnabled)
         {
             await ScheduleQuartzJob(task);
         }
+        SaveTasks();
     }
 
     public async Task UpdateTaskAsync(ScheduledTask task)
@@ -75,18 +92,21 @@ public class ScheduledTaskService
             var wasEnabled = existing.IsEnabled;
             
             existing.Name = task.Name;
+            existing.RecurrenceType = task.RecurrenceType;
+            existing.StartDate = task.StartDate;
+            existing.StartTime = task.StartTime;
+            existing.Interval = task.Interval;
+            existing.IntervalUnit = task.IntervalUnit;
             existing.CronSchedule = task.CronSchedule;
             existing.IsEnabled = task.IsEnabled;
-            existing.ProjectId = task.ProjectId;
-            existing.ListId = task.ListId;
+            existing.StatusId = task.StatusId;
+            existing.TaskTypeId = task.TaskTypeId;
             existing.TaskTitleTemplate = task.TaskTitleTemplate;
             existing.TaskDescription = task.TaskDescription;
             existing.Priority = task.Priority;
-            existing.StatusId = task.StatusId;
-            existing.TaskTypeId = task.TaskTypeId;
+            existing.ProjectId = task.ProjectId;
+            existing.ListId = task.ListId;
             
-            SaveTasks();
-
             if (wasEnabled)
             {
                 await UnscheduleQuartzJob(task.Id);
@@ -95,6 +115,8 @@ public class ScheduledTaskService
             {
                 await ScheduleQuartzJob(existing);
             }
+
+            SaveTasks();
         }
     }
 
@@ -135,14 +157,59 @@ public class ScheduledTaskService
             .UsingJobData("TaskId", task.Id.ToString())
             .Build();
 
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity($"trigger_{task.Id}", "scheduled_tasks")
-            .WithCronSchedule(NormalizeCronExpression(task.CronSchedule))
-            .Build();
+        ITrigger trigger;
+
+        if (task.RecurrenceType == "Custom" && task.StartDate.HasValue)
+        {
+            var startAt = task.StartDate.Value.Date;
+            if (!string.IsNullOrEmpty(task.StartTime) && TimeSpan.TryParse(task.StartTime, out var time))
+            {
+                startAt = startAt.Add(time);
+            }
+
+            var triggerBuilder = TriggerBuilder.Create()
+                .WithIdentity($"trigger_{task.Id}", "scheduled_tasks")
+                .StartAt(new DateTimeOffset(startAt));
+
+            switch (task.IntervalUnit)
+            {
+                case "Days":
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval));
+                    break;
+                case "Weeks":
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInWeeks(task.Interval));
+                    break;
+                case "Months":
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInMonths(task.Interval));
+                    break;
+                case "Years":
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInYears(task.Interval));
+                    break;
+                default:
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval));
+                    break;
+            }
+
+            trigger = triggerBuilder.Build();
+        }
+        else
+        {
+            trigger = TriggerBuilder.Create()
+                .WithIdentity($"trigger_{task.Id}", "scheduled_tasks")
+                .WithCronSchedule(NormalizeCronExpression(task.CronSchedule))
+                .Build();
+        }
 
         await scheduler.ScheduleJob(job, trigger);
         
-        task.NextRun = trigger.GetNextFireTimeUtc()?.LocalDateTime;
+        var nextFireTime = (await scheduler.GetTrigger(trigger.Key))?.GetNextFireTimeUtc();
+        if (nextFireTime.HasValue && nextFireTime.Value < DateTimeOffset.UtcNow)
+        {
+            // If the next fire time is in the past, get the next one after now
+            nextFireTime = trigger.GetFireTimeAfter(DateTimeOffset.UtcNow);
+        }
+        
+        task.NextRun = nextFireTime?.LocalDateTime;
     }
 
     private string NormalizeCronExpression(string cron)
@@ -184,13 +251,24 @@ public class ScheduledTaskService
         await scheduler.UnscheduleJob(triggerKey);
     }
     
-    public void UpdateLastRun(Guid taskId, DateTime lastRun)
+    public async Task UpdateLastRunAsync(Guid taskId, DateTime lastRun)
     {
         var task = GetTaskById(taskId);
         if (task != null)
         {
             task.LastRun = lastRun;
-            // Update next run
+            
+            // Re-schedule to update NextRun
+            try 
+            {
+                await UnscheduleQuartzJob(taskId);
+                await ScheduleQuartzJob(task);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to re-schedule task {task.Name} after run: {ex.Message}");
+            }
+
             SaveTasks();
         }
     }
@@ -209,7 +287,7 @@ public class CreateTaskFromTemplateJob : IJob
         _storageService = storageService;
     }
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
         var taskIdStr = context.MergedJobDataMap.GetString("TaskId");
         if (Guid.TryParse(taskIdStr, out var taskId))
@@ -235,10 +313,9 @@ public class CreateTaskFromTemplateJob : IJob
                     );
                     
                     _projectManager.SaveProjectsToYaml(_storageService.GetProjectsPath());
-                    _scheduledTaskService.UpdateLastRun(taskId, DateTime.Now);
+                    await _scheduledTaskService.UpdateLastRunAsync(taskId, DateTime.Now);
                 }
             }
         }
-        return Task.CompletedTask;
     }
 }

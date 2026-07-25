@@ -66,12 +66,52 @@
                       <input v-model="form.name" type="text" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Daily Standup Prep">
                     </div>
                     <div class="mb-3">
+                      <label class="form-label">Recurrence Type</label>
+                      <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="recurrenceType" id="recurrenceCron" value="Cron" v-model="form.recurrenceType">
+                        <label class="btn btn-outline-secondary" for="recurrenceCron">Cron Expression</label>
+                        
+                        <input type="radio" class="btn-check" name="recurrenceType" id="recurrenceCustom" value="Custom" v-model="form.recurrenceType">
+                        <label class="btn btn-outline-secondary" for="recurrenceCustom">Custom Reoccurrence</label>
+                      </div>
+                    </div>
+
+                    <div v-if="form.recurrenceType === 'Cron'" class="mb-3">
                       <label class="form-label">Cron Schedule</label>
                       <input v-model="form.cronSchedule" type="text" class="form-control bg-dark text-light border-secondary" placeholder="0 0 9 ? * MON-FRI">
                       <CronEditor v-model="form.cronSchedule" />
-                      <div v-if="form.nextRun" class="mt-2 small text-accent">
-                        Next Run: {{ formatDate(form.nextRun) }}
+                    </div>
+
+                    <div v-if="form.recurrenceType === 'Custom'">
+                      <div class="row mb-3">
+                        <div class="col-6">
+                          <label class="form-label">Start Date</label>
+                          <input v-model="form.startDate" type="date" class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label">Start Time</label>
+                          <input v-model="form.startTime" type="time" class="form-control bg-dark text-light border-secondary">
+                        </div>
                       </div>
+                      <div class="row mb-3">
+                        <div class="col-6">
+                          <label class="form-label">Every X</label>
+                          <input v-model.number="form.interval" type="number" min="1" class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label">Unit</label>
+                          <select v-model="form.intervalUnit" class="form-select bg-dark text-light border-secondary">
+                            <option value="Days">Days</option>
+                            <option value="Weeks">Weeks</option>
+                            <option value="Months">Months</option>
+                            <option value="Years">Years</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="form.nextRun" class="mb-3 small text-accent">
+                      Next Run: {{ formatDate(form.nextRun) }}
                     </div>
                     <div class="form-check form-switch mb-3">
                       <input v-model="form.isEnabled" class="form-check-input" type="checkbox" id="isEnabled">
@@ -136,6 +176,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import CronEditor from './components/CronEditor.vue';
 import * as api from './js/scheduled-tasks-api';
@@ -185,6 +226,11 @@ watch(sidebarCollapsed, (newVal) => {
 const form = ref({
   id: null,
   name: '',
+  recurrenceType: 'Cron',
+  startDate: new Date().toISOString().split('T')[0],
+  startTime: '09:00',
+  interval: 1,
+  intervalUnit: 'Days',
   cronSchedule: '0 0 9 ? * MON-FRI',
   isEnabled: true,
   projectId: '',
@@ -212,11 +258,16 @@ const selectedProject = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return form.value.name && 
-         form.value.cronSchedule && 
+  const basicValid = form.value.name && 
          form.value.projectId && 
          form.value.listId && 
          form.value.taskTitleTemplate;
+
+  if (form.value.recurrenceType === 'Cron') {
+    return basicValid && form.value.cronSchedule;
+  } else {
+    return basicValid && form.value.startDate && form.value.interval > 0;
+  }
 });
 
 const sidebarStyle = computed(() => {
@@ -236,7 +287,12 @@ const fetchProjects = async () => {
 
 const selectTask = (task) => {
   selectedTaskId.value = task.id;
-  form.value = { ...task };
+  // Format dates for the date input (YYYY-MM-DD)
+  const taskToSelect = { ...task };
+  if (taskToSelect.startDate) {
+    taskToSelect.startDate = new Date(taskToSelect.startDate).toISOString().split('T')[0];
+  }
+  form.value = taskToSelect;
 };
 
 watch(selectedTaskId, (newId) => {
@@ -249,6 +305,11 @@ const resetForm = () => {
   form.value = {
     id: null,
     name: '',
+    recurrenceType: 'Cron',
+    startDate: new Date().toISOString().split('T')[0],
+    startTime: '09:00',
+    interval: 1,
+    intervalUnit: 'Days',
     cronSchedule: '0 0 9 ? * MON-FRI',
     isEnabled: true,
     projectId: projects.value[0]?.id || '',
@@ -263,25 +324,49 @@ const resetForm = () => {
 };
 
 const saveTask = async () => {
+  const taskToSave = { ...form.value };
+  // Ensure startDate is correctly handled for the API
+  if (taskToSave.startDate) {
+    // If it's just a date string from input, convert to full ISO or let backend parse it
+    // HTML date input gives YYYY-MM-DD which .NET should handle if mapped to DateTime?
+  }
+  
   if (selectedTaskId.value) {
-    await api.updateScheduledTask(selectedTaskId.value, form.value);
+    try {
+      await api.updateScheduledTask(selectedTaskId.value, taskToSave);
+      showToast('Scheduled task updated successfully');
+    } catch (e) {
+      showToast('Failed to update scheduled task', 'error');
+    }
   } else {
-    const newTask = await api.createScheduledTask({ ...form.value, id: '00000000-0000-0000-0000-000000000000' });
-    if (newTask) selectedTaskId.value = newTask.id;
+    try {
+      const newTask = await api.createScheduledTask({ ...taskToSave, id: '00000000-0000-0000-0000-000000000000' });
+      if (newTask) {
+        selectedTaskId.value = newTask.id;
+        showToast('Scheduled task created successfully');
+      }
+    } catch (e) {
+      showToast('Failed to create scheduled task', 'error');
+    }
   }
   await fetchTasks();
   // If we just created, update the form with the one from server (which has ID and nextRun)
   if (selectedTaskId.value) {
     const updated = scheduledTasks.value.find(t => t.id === selectedTaskId.value);
-    if (updated) form.value = { ...updated };
+    if (updated) selectTask(updated);
   }
 };
 
 const confirmDelete = async () => {
   if (confirm('Are you sure you want to delete this scheduled task?')) {
-    await api.deleteScheduledTask(selectedTaskId.value);
-    selectedTaskId.value = null;
-    await fetchTasks();
+    try {
+      await api.deleteScheduledTask(selectedTaskId.value);
+      showToast('Scheduled task deleted');
+      selectedTaskId.value = null;
+      await fetchTasks();
+    } catch (e) {
+      showToast('Failed to delete scheduled task', 'error');
+    }
   }
 };
 
