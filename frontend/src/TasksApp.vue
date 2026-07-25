@@ -1357,6 +1357,10 @@ label, .form-label {
   min-width: 0;
 }
 
+.list:has(.show) .list-header {
+  z-index: 1;
+}
+
 .list-header {
   padding: 0.75rem 1rem;
   display: flex;
@@ -1432,7 +1436,7 @@ label, .form-label {
 
 /* Ensure that when a row has an open dropdown, it goes above the sticky header */
 .tasks-grid:has(.show) .tasks-header-row {
-  z-index: 0;
+  z-index: 1;
 }
 
 .tasks-header {

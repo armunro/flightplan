@@ -275,6 +275,10 @@
     min-width: fit-content;
     position: relative;
 }
+
+.tasks-grid:has(.show) {
+    z-index: 1001;
+}
 .tasks-grid::-webkit-scrollbar,
 .task-grid::-webkit-scrollbar { display: none; }
 .tasks-header-row,
@@ -285,7 +289,7 @@
     position: relative; 
     border-bottom: 1px solid var(--border-primary); 
     min-width: fit-content; 
-    z-index: 1; /* Ensure headers stay below dropdowns from rows below */
+    z-index: 1000; /* Ensure headers stay below dropdowns from rows below */
 }
 
 .tasks-header.sortable,
@@ -380,7 +384,7 @@
 }
 
 .tasks-row:has(.show), .task-row:has(.show) {
-    z-index: 100;
+    z-index: 2000;
 }
 
 /* Ensure subtask containers also take full width */
