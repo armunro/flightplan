@@ -7,6 +7,8 @@
         <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
         <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
         <UsingMicrosoftNETSdkWorkloads>false</UsingMicrosoftNETSdkWorkloads>
+        <SpaRoot>frontend\</SpaRoot>
+        <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,17 +29,23 @@
  
 
 
-    <Target Name="BuildFrontend" BeforeTargets="BeforeBuild">
-        <Message Importance="high" Text="--- Building Frontend ---" />
-        <Exec WorkingDirectory="frontend" Command="npm install" />
-        <Exec WorkingDirectory="frontend" Command="npm run build" />
+    <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="'$(Configuration)' == 'Debug'">
+        <Message Importance="high" Text="--- Building Frontend (Debug) ---" />
+        <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+        <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+        <ItemGroup>
+            <Content Include="wwwroot\**" />
+        </ItemGroup>
     </Target>
 
-    <Target Name="CopyFrontendToOutput" AfterTargets="BuildFrontend" BeforeTargets="Build">
-        <ItemGroup>
-            <FrontendFiles Include="wwwroot\**" />
-        </ItemGroup>
-        <Copy SourceFiles="@(FrontendFiles)" DestinationFolder="$(OutputPath)wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Target Name="PublishFrontend" BeforeTargets="ComputeFilesToPublish" Condition="'$(Configuration)' == 'Release'">
+        <Message Importance="high" Text="--- Building Frontend (Release) ---" />
+        <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+        <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
     </Target>
+
+    <ItemGroup>
+        <None Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
 
 </Project>
