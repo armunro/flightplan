@@ -428,7 +428,7 @@
 .tasks-header { 
     font-weight: 600; 
     color: var(--text-muted); 
-    font-size: 0.9em; 
+    font-size: 0.875rem; 
     text-transform: uppercase; 
     padding: 8px 12px; 
     border-right: none; 
@@ -437,13 +437,13 @@
     position: relative;
 }
 .tasks-header:first-child { border-left: none !important; }
-.grid-header { font-weight: 600; color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; padding: 8px 12px; }
-.date-cell { font-size: 0.9em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.grid-header { font-weight: 600; color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase; padding: 8px 12px; }
+.date-cell { font-size: 0.875rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .link-cell { justify-content: center; }
-.task-link { color: var(--accent-blue); text-decoration: none; font-size: 0.9em; font-weight: 600; }
+.task-link { color: var(--accent-blue); text-decoration: none; font-size: 0.875rem; font-weight: 600; }
 .task-link:hover { text-decoration: underline; color: var(--text-primary); }
 .no-link { color: var(--border-primary); }
-.estimate-cell { font-size: 0.9em; color: var(--text-primary); justify-content: center; }
+.estimate-cell { font-size: 0.875rem; color: var(--text-primary); justify-content: center; }
 .estimate-input {
     background: var(--bg-dark);
     color: var(--text-primary);
@@ -452,7 +452,7 @@
     width: 60px;
     padding: 2px 4px;
     text-align: center;
-    font-size: 0.9em;
+    font-size: 0.875rem;
 }
 .estimate-input:focus {
     outline: none;
@@ -491,7 +491,7 @@
     opacity: 0.7;
 }
 
-.priority { font-weight: 700; font-size: 0.9em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
+.priority { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
 .priority-Critical { background: #ff0000; color: #ffffff; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 .priority-Highest { background: #ff4500; color: #ffffff; }
 .priority-High { background: #ffa500; color: #000000; }
@@ -555,9 +555,9 @@
 .priority-select:focus { outline: 1px solid var(--accent-blue); }
 
 .priority-badge { cursor: pointer; }
-.status-badge { font-weight: 700; font-size: 0.9em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
+.status-badge { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
 
-.add-row { color: var(--text-muted); cursor: pointer; font-style: italic; font-size: 0.9em; }
+.add-row { color: var(--text-muted); cursor: pointer; font-style: italic; font-size: 0.875rem; }
 .add-row:hover { color: var(--text-primary); background-color: var(--bg-card); }
 
 .add-subtask-btn { color: var(--text-muted); cursor: pointer; font-size: 1.2em; font-weight: bold; width: 24px; text-align: center; display: block; line-height: 1; }
@@ -619,7 +619,7 @@
 .context-menu-item {
     padding: 8px 16px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.875rem;
     color: var(--text-primary);
     transition: background 0.2s;
 }

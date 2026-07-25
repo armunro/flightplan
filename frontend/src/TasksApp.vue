@@ -409,7 +409,7 @@ export default {
 
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
-      context.font = '0.9rem "Segoe UI", Roboto, Helvetica, Arial, sans-serif'; // Match your app's font
+      context.font = '0.875rem "Segoe UI", Roboto, Helvetica, Arial, sans-serif'; // Match your app's font
 
       const getTextWidth = (text) => {
         if (!text) return 0;

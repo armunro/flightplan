@@ -570,7 +570,7 @@ export default {
     display: flex;
     align-items: center;
     min-width: 0;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     position: relative;
 }
 
@@ -592,7 +592,7 @@ export default {
 .status-badge, .priority-badge, .type-badge {
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: white;
     white-space: nowrap;
@@ -672,7 +672,7 @@ export default {
     color: var(--text-primary);
     padding: 2px 4px;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
 }
 
 .drag-over-before { border-top: 2px solid var(--accent-blue) !important; }
