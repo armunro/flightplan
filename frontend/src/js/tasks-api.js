@@ -96,19 +96,24 @@ export async function bulkUpdateTasks(taskIds, data) {
     }
 }
 
-export async function moveTask(taskId, targetListId, targetTaskId, position = 2) {
+export async function moveTask(taskId, targetListId, targetTaskId, position = 'Inside') {
     try {
-        await fetch(`/api/tasks/${taskId}/move`, {
+        const response = await fetch(`/api/tasks/${taskId}/move`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ targetListId, targetTaskId, position })
         });
+        if (!response.ok) {
+            console.error('Error moving task:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Error details:', errorText);
+        }
     } catch (error) {
         console.error('Error moving task:', error);
     }
 }
 
-export async function bulkMoveTasks(taskIds, targetListId, targetTaskId, position = 2) {
+export async function bulkMoveTasks(taskIds, targetListId, targetTaskId, position = 'Inside') {
     try {
         await fetch('/api/tasks/bulk-move', {
             method: 'POST',
@@ -132,7 +137,7 @@ export async function addList(projectId, name) {
     }
 }
 
-export async function moveList(projectId, listId, targetListId, position = 1) {
+export async function moveList(projectId, listId, targetListId, position = 'After') {
     try {
         await fetch(`/api/projects/${projectId}/lists/${listId}/move`, {
             method: 'POST',
@@ -178,7 +183,7 @@ export async function addProject(data) {
     }
 }
 
-export async function moveProject(projectId, targetProjectId, position = 1) {
+export async function moveProject(projectId, targetProjectId, position = 'After') {
     try {
         await fetch(`/api/projects/${projectId}/move`, {
             method: 'POST',

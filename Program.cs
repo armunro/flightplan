@@ -145,7 +145,11 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<IViteAssetService, ViteAssetService>();
 

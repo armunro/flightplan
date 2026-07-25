@@ -226,9 +226,11 @@
                     </div>
                   </div>
 
-                  <template v-for="(task, index) in getSortedTasks(list.tasks)" :key="task.id">
+                    <template v-for="(task, index) in getSortedTasks(list.tasks)" :key="task.id">
                     <task-row :task="task" 
                               :depth="0" 
+                              :parent-task-id="null"
+                              :previous-task-id="index > 0 ? getSortedTasks(list.tasks)[index-1].id : null"
                               :projectStatuses="selectedProject.statuses" 
                               :projectTaskTypes="selectedProject.taskTypes" 
                               :projectPriorities="selectedProject.priorities" 

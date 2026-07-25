@@ -14,8 +14,8 @@
                 <input type="checkbox" :checked="isSelected" @mousedown="onCheckboxMouseDown($event)" @click.stop="onCheckboxClick($event)">
             </div>
             <div class="tasks-cell task-title-container" 
-                 :class="{'subtask-indent': depth > 0}"
-                 :style="depth > 0 ? { paddingLeft: (depth * 20) + 8 + 'px' } : {}">
+                 :style="depth > 0 ? { paddingLeft: (depth * 20) + 24 + 'px' } : {}">
+                <span v-if="depth > 0" class="subtask-indent"></span>
                 <span class="task-title"
                       ref="titleElement"
                       contenteditable="true" 
@@ -118,6 +118,8 @@
             <template v-for="(sub, index) in getSortedSubtasks(task.subtasks)" :key="sub.id">
                 <task-row :task="sub" 
                           :depth="depth + 1" 
+                          :parent-task-id="task.id"
+                          :previous-task-id="index > 0 ? getSortedSubtasks(task.subtasks)[index-1].id : null"
                           :project-statuses="projectStatuses" 
                           :project-task-types="projectTaskTypes" 
                           :project-priorities="projectPriorities" 
@@ -145,7 +147,7 @@ export default {
     components: {
         DateTimeSelector
     },
-    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds'],
+    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds', 'parentTaskId', 'previousTaskId'],
     emits: ['refresh', 'open-task', 'context-menu', 'toggle-select'],
     setup(props, { emit }) {
         const dropPosition = ref(null); // 'before', 'after', 'inside'
@@ -274,7 +276,7 @@ export default {
             console.log('[DEBUG_LOG] Dragged task ID:', draggedTaskId);
 
             if (draggedTaskId && draggedTaskId !== props.task.id) {
-                const positionMap = { 'before': 0, 'after': 1, 'inside': 2 };
+                const positionMap = { 'before': 'Before', 'after': 'After', 'inside': 'Inside' };
                 await moveTask(draggedTaskId, null, props.task.id, positionMap[pos]);
                 emit('refresh');
             }
@@ -305,23 +307,31 @@ export default {
         };
 
         const onTitleTabKeyDown = async (e) => {
-            console.log('[DEBUG_LOG] onTitleTabKeyDown triggered', e.key);
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            // If Tab is pressed, create a new subtask
-            const defaultStatusId = props.projectStatuses?.length > 0 ? props.projectStatuses[0].id : null;
-            console.log('[DEBUG_LOG] Adding subtask for task:', props.task.id);
+            console.log('[DEBUG_LOG] onTitleTabKeyDown triggered', e.key, 'Shift:', e.shiftKey);
+            e.preventDefault();
+            e.stopPropagation();
+
             try {
-                // Ensure the current title is saved before creating subtask
+                // Ensure the current title is saved before moving
                 await onUpdateTitle(e);
-                const newSubtask = await addSubtask(props.task.id, "", defaultStatusId); 
-                console.log('[DEBUG_LOG] Subtask added:', newSubtask);
-                emit('refresh');
-                return false;
+
+                if (e.shiftKey) {
+                    // Shift+Tab: Promote task (outdent)
+                    if (props.parentTaskId) {
+                        console.log('[DEBUG_LOG] Promoting task:', props.task.id, 'to be sibling of:', props.parentTaskId);
+                        await moveTask(props.task.id, null, props.parentTaskId, 'After'); // Shift+Tab: Promote task (outdent)
+                        emit('refresh');
+                    }
+                } else {
+                    // Tab: Demote task (indent)
+                    if (props.previousTaskId) {
+                        console.log('[DEBUG_LOG] Demoting task:', props.task.id, 'to be subtask of:', props.previousTaskId);
+                        await moveTask(props.task.id, null, props.previousTaskId, 'Inside'); // Tab: Demote task (indent)
+                        emit('refresh');
+                    }
+                }
             } catch (err) {
-                console.error('[DEBUG_LOG] Error adding subtask:', err);
+                console.error('[DEBUG_LOG] Error moving task:', err);
             }
         };
 

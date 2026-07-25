@@ -479,8 +479,18 @@
 .task-title-container { display: flex; align-items: center; gap: 8px; width: 100%; }
 .task-title { font-weight: 500; color: var(--text-primary); flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .task-title-container .action-link-icon { flex-shrink: 0; }
-.subtask-indent { color: var(--text-muted); font-size: 0.95em; position: relative; padding-left: var(--indent-padding, 20px); }
-.subtask-indent::before { content: '└'; position: absolute; left: calc(var(--indent-padding, 20px) - 15px); color: var(--border-primary); }
+.subtask-indent { color: var(--text-muted); font-size: 0.95em; position: relative; }
+.subtask-indent::before { 
+    content: '\F285'; 
+    font-family: 'bootstrap-icons'; 
+    position: absolute; 
+    left: -18px; 
+    color: var(--text-muted); 
+    font-size: 0.75em; 
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+}
 
 .priority { font-weight: 700; font-size: 0.9em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
 .priority-Critical { background: #ff0000; color: #ffffff; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
