@@ -188,15 +188,10 @@ const startContentResize = (e) => {
   const container = document.querySelector('.github-content-wrapper');
   if (!container) return;
   
-  const containerRect = container.getBoundingClientRect();
-  const startX = e.clientX;
-  const startPercent = contentSplitWidth.value;
-
   const onMouseMove = (moveEvent) => {
-    const deltaX = moveEvent.clientX - startX;
-    const deltaPercent = (deltaX / containerRect.width) * 100;
-    const newPercent = Math.max(20, Math.min(80, startPercent + deltaPercent));
-    contentSplitWidth.value = newPercent;
+    const containerRect = container.getBoundingClientRect();
+    const newPercent = ((moveEvent.clientX - containerRect.left) / containerRect.width) * 100;
+    contentSplitWidth.value = Math.max(20, Math.min(80, newPercent));
   };
 
   const onMouseUp = () => {

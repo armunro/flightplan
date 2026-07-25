@@ -126,6 +126,8 @@ const currentPath = computed(() => {
   border-bottom: 1px solid var(--border-primary);
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .navbar-header.collapsed {
