@@ -3,14 +3,15 @@
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column">
       <div id="app-content" class="calendar-app-container flex-grow-1" :class="{ 'editing-folders': isEditingFolders }">
-      <div class="calendar-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-        <div class="sidebar-header">
+      <div class="calendar-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+        <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
           <h5 v-if="!sidebarCollapsed">Calendars</h5>
           <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
             <button class="btn-icon ms-0" @click="isEditingFolders = !isEditingFolders" :title="isEditingFolders ? 'Save Calendars' : 'Edit Calendars'">
               <i class="bi" :class="isEditingFolders ? 'bi-check-lg text-success' : 'bi-pencil-square'"></i>
             </button>
           </div>
+          <i v-else class="bi bi-calendar3"></i>
         </div>
         <div class="folder-list">
           <div v-if="loading" class="sidebar-loading">
@@ -82,8 +83,8 @@
             </div>
           </template>
         </div>
-        <div class="sidebar-footer">
-          <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+        <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
+          <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
             <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
           </button>
         </div>
@@ -448,14 +449,14 @@ onMounted(() => {
 }
 
 .calendar-sidebar {
-  width: 260px;
+  width: 230px;
   border-right: 1px solid var(--border-primary);
   display: flex;
   flex-direction: column;
   background-color: var(--bg-dark);
   overflow: hidden;
   flex-shrink: 0;
-  z-index: 1;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-resizer {
@@ -483,18 +484,11 @@ onMounted(() => {
 }
 
 .sidebar-header {
-  padding: 0 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  height: 60px;
-  box-sizing: border-box;
+  /* height and other properties moved to global.css */
 }
 
 .calendar-sidebar.collapsed .sidebar-header {
-  padding: 0;
-  justify-content: center;
+  /* alignment handled by global.css */
 }
 
 .sidebar-header h5 {
@@ -512,7 +506,7 @@ onMounted(() => {
 
 .folder-item {
   position: relative;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -522,7 +516,7 @@ onMounted(() => {
 }
 
 .calendar-sidebar.collapsed .folder-item {
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   justify-content: center;
 }
 
@@ -670,31 +664,11 @@ onMounted(() => {
 }
 
 .sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
+  /* properties moved to global.css */
 }
 
 .sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 8px;
-  box-shadow: none !important;
-}
-
-.sidebar-toggle:hover {
-  color: var(--text-primary);
-}
-
-.sidebar-toggle:focus {
-  outline: none;
-  box-shadow: none;
+  /* properties moved to global.css */
 }
 
 :deep(.fc) {
@@ -762,20 +736,6 @@ onMounted(() => {
 :deep(.fc-theme-bootstrap5 a) {
   color: inherit;
   text-decoration: none;
-}
-
-.btn-icon {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cal-grid {

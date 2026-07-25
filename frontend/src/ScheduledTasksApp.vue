@@ -3,16 +3,18 @@
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column">
       <div id="app-content" class="scheduled-tasks-app-container flex-grow-1">
-        <div class="tasks-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-          <div class="sidebar-header">
+        <div class="tasks-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+          <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
             <h5 v-if="!sidebarCollapsed">Schedules</h5>
             <button 
-              class="btn-icon text-accent ms-auto" 
+              v-if="!sidebarCollapsed"
+              class="btn-icon ms-auto" 
               @click="selectedTaskId = null" 
               title="New Schedule"
             >
               <i class="bi bi-plus-lg"></i>
             </button>
+            <i v-else class="bi bi-clock-history"></i>
           </div>
           <div class="project-list">
             <div 
@@ -27,8 +29,8 @@
               <span v-if="!sidebarCollapsed" class="project-name text-truncate">{{ task.name }}</span>
             </div>
           </div>
-          <div class="sidebar-footer">
-            <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+          <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
+            <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
               <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
             </button>
           </div>
@@ -218,7 +220,10 @@ const isFormValid = computed(() => {
 });
 
 const sidebarStyle = computed(() => {
-  return { width: sidebarCollapsed.value ? '50px' : `${sidebarWidth.value}px` };
+  return { 
+    width: sidebarCollapsed.value ? '50px' : `${sidebarWidth.value}px`,
+    transition: isResizingSidebar.value ? 'none' : 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+  };
 });
 
 const fetchTasks = async () => {
@@ -302,47 +307,46 @@ onMounted(async () => {
 
 .scheduled-tasks-app-container {
     display: flex;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
 }
 
 .tasks-sidebar {
+  width: 230px;
   background-color: var(--bg-dark);
   border-right: 1px solid var(--border-primary);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
-  z-index: 1;
-  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tasks-sidebar.collapsed {
   width: 50px !important;
 }
 
-.sidebar-header {
-  padding: 0 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  height: 60px;
+.sidebar-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  z-index: 10;
+  margin-left: -2px;
+  margin-right: -2px;
   flex-shrink: 0;
-  background-color: var(--bg-dark);
-  box-sizing: border-box;
 }
 
-.tasks-sidebar.collapsed .sidebar-header {
-  padding: 0;
-  justify-content: center;
+.sidebar-resizer:hover, .sidebar-resizer:active {
+  background-color: var(--accent-blue);
 }
 
-.sidebar-header h5 {
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-  color: var(--text-primary);
+.main-content {
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-darker);
 }
 
 .project-list {
@@ -354,7 +358,7 @@ onMounted(async () => {
 
 .project-item {
   position: relative;
-  padding: 0.75rem 1rem;
+  padding: 8px 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -362,10 +366,11 @@ onMounted(async () => {
   border-left: 3px solid transparent;
   min-width: 0;
   color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 .tasks-sidebar.collapsed .project-item {
-  padding: 0.75rem 0;
+  padding: 10px 0;
   justify-content: center;
 }
 
@@ -387,58 +392,7 @@ onMounted(async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.95rem;
-}
-
-.sidebar-resizer {
-  width: 4px;
-  cursor: col-resize;
-  background-color: transparent;
-  transition: background-color 0.2s;
-  z-index: 10;
-  margin-left: -2px;
-  margin-right: -2px;
-  flex-shrink: 0;
-}
-
-.sidebar-resizer:hover, .sidebar-resizer:active {
-  background-color: var(--accent-blue);
-}
-
-.sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
-  flex-shrink: 0;
-}
-
-.sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 8px;
-  box-shadow: none !important;
-}
-
-.sidebar-toggle:hover {
-  color: var(--text-primary);
-}
-
-.sidebar-toggle:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.main-content {
-  flex-grow: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  font-size: 0.9rem;
 }
 
 .text-accent {

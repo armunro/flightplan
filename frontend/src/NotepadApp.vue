@@ -5,13 +5,14 @@
       <div class="flex-grow-1 overflow-hidden d-flex flex-row">
       <!-- Sidebar for files -->
       <div class="file-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-        <div class="sidebar-header">
+        <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
           <h5 v-if="!sidebarCollapsed" class="mb-0">Files</h5>
           <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
-            <button class="btn-icon ms-0" @click="createNewFile" title="New File">
+            <button class="btn-icon" @click="createNewFile" title="New File">
               <i class="bi bi-plus-lg"></i>
             </button>
           </div>
+          <i v-else class="bi bi-sticky"></i>
         </div>
         <div class="file-list flex-grow-1 overflow-auto">
           <div 
@@ -33,8 +34,8 @@
             </div>
           </div>
         </div>
-        <div class="sidebar-footer">
-          <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+        <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
+          <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
             <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
           </button>
         </div>
@@ -45,7 +46,7 @@
 
       <!-- Main Editor Area -->
       <div class="main-area d-flex flex-column flex-grow-1">
-        <div class="controls-bar d-flex justify-content-between align-items-center">
+        <div class="controls-bar">
           <div class="d-flex align-items-center">
             <h5 class="mb-0 me-3"><i class="bi bi-journal-text"></i> {{ currentFile || 'No file selected' }}</h5>
             <div v-if="currentFile" class="save-status small" :class="{ 'text-success': saveStatus === 'Saved', 'text-warning': saveStatus === 'Saving...', 'text-danger': saveStatus === 'Error' }">
@@ -105,7 +106,7 @@ const sidebarStyle = computed(() => {
   if (sidebarCollapsed.value) return {};
   return { 
     width: sidebarWidth.value + 'px',
-    transition: isResizingSidebar.value ? 'none' : 'width 0.3s ease'
+    transition: isResizingSidebar.value ? 'none' : 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
   };
 });
 
@@ -302,65 +303,24 @@ onUnmounted(() => {
 </style>
 
 <style scoped>
-.sidebar-header {
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  height: 60px;
-}
-
-.file-sidebar.collapsed .sidebar-header {
-  padding: 1rem 0;
-  justify-content: center;
-}
-
-.sidebar-header h5 {
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
-}
-
-.sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 8px;
-  box-shadow: none !important;
-}
-
-.sidebar-toggle:hover {
-  color: var(--text-primary);
-}
-
-.sidebar-toggle:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.file-sidebar.collapsed .sidebar-toggle {
-  margin-left: 0;
-}
-
 .file-sidebar {
-  width: 260px;
+  width: 230px;
   background-color: var(--bg-dark);
   border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
   z-index: 1;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-sidebar.collapsed {
+  width: 50px !important;
+}
+
+.sidebar-header h5 {
+  white-space: nowrap;
 }
 
 .sidebar-resizer {
@@ -378,26 +338,8 @@ onUnmounted(() => {
   background-color: var(--accent-blue);
 }
 
-.file-sidebar.collapsed {
-  width: 50px !important;
-}
-
-.controls-bar {
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  min-height: 60px;
-}
-
-.controls-bar h5 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
 .file-item {
-  padding: 0.75rem 1rem;
+  padding: 8px 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -405,10 +347,11 @@ onUnmounted(() => {
   border-left: 3px solid transparent;
   min-width: 0;
   overflow: hidden;
+  font-size: 0.9rem;
 }
 
 .file-sidebar.collapsed .file-item {
-  padding: 0.75rem 0;
+  padding: 10px 0;
   justify-content: center;
 }
 
@@ -422,12 +365,12 @@ onUnmounted(() => {
 }
 
 .file-icon-wrapper {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
+  margin-right: 10px;
   font-size: 1.1rem;
   flex-shrink: 0;
   color: var(--text-muted);
@@ -439,24 +382,6 @@ onUnmounted(() => {
 
 .file-item:hover .delete-btn {
   opacity: 1 !important;
-}
-
-.btn-icon {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-icon:hover {
-  background-color: var(--border-primary);
 }
 
 .main-area {

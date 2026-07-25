@@ -4,9 +4,12 @@
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <div id="app-content" class="tasks-app-container flex-grow-1">
         <div class="tasks-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-          <div class="sidebar-header">
+          <div class="sidebar-header d-flex align-items-center">
             <h5 v-if="!sidebarCollapsed">Projects</h5>
-            <button v-if="!sidebarCollapsed" class="btn-icon" @click="onAddProject" title="Add Project">+</button>
+            <button v-if="!sidebarCollapsed" class="btn-icon ms-auto" @click="onAddProject" title="Add Project">+</button>
+            <div v-else class="mx-auto">
+              <i class="bi bi-check2-square"></i>
+            </div>
           </div>
           <div class="project-list">
             <div v-if="loading" class="sidebar-loading">
@@ -33,8 +36,8 @@
             </div>
           </template>
         </div>
-        <div class="sidebar-footer">
-            <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+        <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
+            <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
               <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
             </button>
           </div>
@@ -312,7 +315,7 @@ export default {
       if (sidebarCollapsed.value) return {};
       return { 
         width: sidebarWidth.value + 'px',
-        transition: isResizingSidebar.value ? 'none' : 'width 0.3s ease'
+        transition: isResizingSidebar.value ? 'none' : 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       };
     });
 
@@ -1152,6 +1155,22 @@ label, .form-label {
   z-index: 1;
 }
 
+.tasks-sidebar.collapsed .sidebar-header {
+  justify-content: center;
+}
+
+.tasks-sidebar {
+  width: 230px;
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .sidebar-resizer {
   width: 4px;
   cursor: col-resize;
@@ -1169,45 +1188,6 @@ label, .form-label {
 
 .tasks-sidebar.collapsed {
   width: 50px !important;
-}
-
-.sidebar-header {
-  padding: 0 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  height: 60px;
-  background-color: var(--bg-dark);
-  box-sizing: border-box;
-}
-
-.sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
-}
-
-.sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 8px;
-  box-shadow: none !important;
-}
-
-.sidebar-toggle:hover {
-  color: var(--text-primary);
-}
-
-.sidebar-toggle:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 .sidebar-header h5 {
@@ -1305,38 +1285,6 @@ label, .form-label {
 
 .project-title-area h2 {
   outline: none;
-}
-
-.btn-toggle, .btn-add-list, .btn-icon {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.btn-icon {
-  margin-left: 0.5rem;
-}
-
-.btn-group .btn {
-  border-color: var(--border-primary);
-  color: var(--text-primary);
-  background-color: var(--bg-card);
-}
-
-.btn-group .btn:hover {
-  background-color: var(--border-primary);
-  color: var(--text-primary);
-}
-
-.btn-group .btn.active {
-  background-color: var(--accent-blue);
-  color: white;
-  border-color: var(--accent-blue);
 }
 
 .project-content {

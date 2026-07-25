@@ -1,23 +1,23 @@
 ﻿<template>
   <div class="vh-100 d-flex flex-row overflow-hidden">
     <Navbar />
-    <div class="flex-grow-1 overflow-auto bg-darker main-content p-4">
+    <div class="flex-grow-1 overflow-auto bg-darker main-content p-3">
       <div class="container-fluid">
-        <header class="mb-5 mt-3">
-          <h1 class="display-4 fw-bold text-light">Welcome back</h1>
-          <p class="text-muted lead">Here's what's happening across your projects today.</p>
+        <header class="mb-3 mt-1">
+          <h1 class="display-6 fw-bold text-light">Welcome back</h1>
+          <p class="text-muted lead fs-7" style="font-size: 0.85rem;">Here's what's happening across your projects today.</p>
         </header>
 
         <div class="row g-4 mb-5">
           <div v-for="item in visibleMenuItems" :key="item.id" class="col-12 col-md-6 col-lg-4 col-xl-3">
             <a :href="item.href" class="text-decoration-none h-100 d-block">
               <div class="card h-100 dashboard-card border-0">
-                <div class="card-body d-flex flex-column p-4">
-                  <div class="icon-wrapper mb-3" :style="{ color: item.color }">
+                <div class="card-body d-flex flex-column p-3">
+                  <div class="icon-wrapper mb-2" :style="{ color: item.color }">
                     <i class="bi" :class="item.icon"></i>
                   </div>
-                  <h3 class="card-title h5 mb-2 text-light">{{ item.name }}</h3>
-                  <p class="card-text small mb-4">{{ item.description }}</p>
+                  <h3 class="card-title h6 mb-2 text-light">{{ item.name }}</h3>
+                  <p class="card-text mb-3" style="font-size: 0.8rem;">{{ item.description }}</p>
                   <div class="mt-auto d-flex align-items-center text-primary-link">
                     <span class="small fw-bold">Open Module</span>
                     <i class="bi bi-arrow-right ms-2 transition-icon"></i>
@@ -148,14 +148,14 @@ const visibleMenuItems = computed(() => {
 }
 
 .icon-wrapper {
-  font-size: 2rem;
-  height: 60px;
-  width: 60px;
+  font-size: 1.5rem;
+  height: 50px;
+  width: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .text-primary-link {

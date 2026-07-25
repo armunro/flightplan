@@ -28,14 +28,15 @@
     </div>
 
     <div id="app-content" class="email-app-container flex-grow-1" :class="{ 'editing-folders': isEditingFolders }">
-        <div class="email-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-          <div class="sidebar-header">
+        <div class="email-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+          <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
             <h5 v-if="!sidebarCollapsed">Folders</h5>
             <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
               <button class="btn-icon ms-0" @click="isEditingFolders = !isEditingFolders" :title="isEditingFolders ? 'Save Folders' : 'Edit Folders'">
                 <i class="bi" :class="isEditingFolders ? 'bi-check-lg text-success' : 'bi-pencil-square'"></i>
               </button>
             </div>
+            <i v-else class="bi bi-folder2"></i>
           </div>
           <div class="folder-list">
             <div v-if="foldersLoading" class="sidebar-loading">
@@ -110,8 +111,8 @@
               </div>
             </template>
           </div>
-          <div class="sidebar-footer">
-            <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+          <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
+            <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
               <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
             </button>
           </div>
@@ -1077,14 +1078,14 @@ label, .form-label {
 }
 
 .email-sidebar {
-  width: 260px;
+  width: 230px;
   border-right: 1px solid var(--border-primary);
   display: flex;
   flex-direction: column;
   background-color: var(--bg-dark);
   overflow: hidden;
   flex-shrink: 0;
-  z-index: 1;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-resizer {
@@ -1112,51 +1113,23 @@ label, .form-label {
 }
 
 .sidebar-header {
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  height: 60px;
+  /* height and other properties moved to global.css */
 }
 
 .email-sidebar.collapsed .sidebar-header {
-  padding: 1rem 0;
-  justify-content: center;
+  /* alignment handled by global.css */
 }
 
 .sidebar-header h5 {
-  margin: 0;
-  font-weight: 600;
   white-space: nowrap;
 }
 
 .sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
+  /* properties moved to global.css */
 }
 
 .sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  border: none !important;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 8px;
-  box-shadow: none !important;
-}
-
-.sidebar-toggle:hover {
-  color: var(--text-primary);
-}
-
-.sidebar-toggle:focus {
-  outline: none;
-  box-shadow: none;
+  /* properties moved to global.css */
 }
 
 .email-sidebar.collapsed .sidebar-toggle {
@@ -1172,7 +1145,7 @@ label, .form-label {
 
 .folder-item {
   position: relative;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1182,7 +1155,7 @@ label, .form-label {
 }
 
 .email-sidebar.collapsed .folder-item {
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   justify-content: center;
 }
 
@@ -1355,38 +1328,17 @@ label, .form-label {
 }
 
 .controls-bar {
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-primary);
-  min-height: 60px;
-  flex-shrink: 0;
+  /* height and other properties moved to global.css */
 }
 
 .page-title-area h2 {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
+  /* font-size moved to global.css */
 }
 
 .email-content-scrollable {
   flex-grow: 1;
   overflow-y: auto;
-}
-
-.btn-icon {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .email-list {

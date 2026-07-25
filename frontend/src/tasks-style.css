@@ -2,93 +2,73 @@
 
 .tasks-app-container {
     display: flex;
-    height: calc(100vh - 56px); /* Adjust based on navbar height */
+    height: 100%;
     overflow: hidden;
 }
 
 .tasks-sidebar {
-    width: 250px;
+    width: 230px;
     background-color: var(--bg-dark);
     border-right: 1px solid var(--border-primary);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
 }
 
-.sidebar-header {
-    height: 60px;
-    padding: 0 15px;
-    border-bottom: 1px solid var(--border-primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-}
-
-.sidebar-header h5 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 1.1em;
-}
-
-.btn-icon {
-    background: none;
-    border: none;
-    color: var(--accent-blue);
-    font-size: 1.5em;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0 5px;
+.tasks-sidebar.collapsed {
+    width: 50px !important;
 }
 
 .project-list {
-    flex-grow: 1;
-    overflow-y: auto;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 0;
 }
 
 .project-item {
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: background-color 0.2s;
-    user-select: none;
+  position: relative;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+  border-left: 3px solid transparent;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.tasks-sidebar.collapsed .project-item {
+  padding: 10px 0;
+  justify-content: center;
 }
 
 .project-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-card);
 }
 
 .project-item.active {
-    background-color: var(--accent-blue);
-    color: white;
-}
-
-.project-task-count {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-muted);
-    font-size: 0.75em;
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin-left: 8px;
-}
-
-.project-item.active .project-task-count {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+  background-color: rgba(88, 166, 255, 0.1);
+  border-left-color: var(--accent-blue);
 }
 
 .project-item.active .project-name {
-    color: white;
+    color: var(--text-primary);
+}
+
+.project-item .bi {
+  color: var(--accent-blue);
+  flex-shrink: 0;
 }
 
 .project-name {
-    flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
 }
 
 .main-content {
@@ -109,16 +89,6 @@
     font-style: italic;
 }
 
-.controls-bar {
-    height: 60px;
-    background: var(--bg-dark);
-    padding: 0 15px;
-    border-bottom: 1px solid var(--border-primary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-}
 
 .project-title-area {
     flex-grow: 1;
@@ -691,9 +661,6 @@
 .project-header .drag-handle:active { cursor: grabbing; }
 .project-header h2 { margin: 0; color: var(--text-primary); font-size: 1.1em; flex-grow: 1; border: 1px solid transparent; }
 .project-header h2:focus { border-bottom: 1px solid var(--accent-blue); outline: none; }
-
-.project-title-area h2 { margin: 0; color: var(--text-primary); font-size: 1.3em; border: 1px solid transparent; }
-.project-title-area h2:focus { border-bottom: 1px solid var(--accent-blue); outline: none; }
 
 /* Bulk Action Bar */
 .bulk-action-bar {

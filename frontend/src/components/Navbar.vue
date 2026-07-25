@@ -1,6 +1,6 @@
 <template>
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
-    <div class="navbar-header d-flex align-items-center">
+    <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
         <i class="bi bi-airplane-engines-fill brand-icon"></i>
         <span v-if="!isCollapsed" class="brand-text">FlightPlan</span>
@@ -21,16 +21,22 @@
       </ul>
     </div>
 
-    <div class="navbar-footer mt-auto">
-      <a href="/Settings" 
-         class="nav-link settings-link" 
-         :class="{ active: currentPath === 'settings' }"
-         :title="isCollapsed ? 'Settings' : ''">
-        <i class="bi bi-gear"></i>
-        <span v-if="!isCollapsed" class="nav-text">Settings</span>
-      </a>
-      <div class="toggle-wrapper d-flex p-2" :class="isCollapsed ? 'justify-content-center' : 'justify-content-end'">
-        <button class="btn btn-link toggle-btn" @click="toggleNavbar" :title="isCollapsed ? 'Expand' : 'Collapse'">
+    <div class="navbar-footer d-flex flex-column mt-auto">
+      <div class="footer-links">
+        <ul class="nav nav-pills flex-column">
+          <li class="nav-item">
+            <a href="/Settings" 
+               class="nav-link settings-link" 
+               :class="{ active: currentPath === 'settings' }"
+               :title="isCollapsed ? 'Settings' : ''">
+              <i class="bi bi-gear"></i>
+              <span v-if="!isCollapsed" class="nav-text">Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-footer" :class="{ 'collapsed': isCollapsed }">
+        <button class="sidebar-toggle" @click="toggleNavbar" :title="isCollapsed ? 'Expand' : 'Collapse'">
           <i class="bi" :class="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
         </button>
       </div>
@@ -101,24 +107,30 @@ const currentPath = computed(() => {
 
 <style scoped>
 .main-navbar {
-  width: 260px;
+  width: 230px;
   height: 100vh;
   background-color: var(--bg-dark);
   border-right: 1px solid var(--border-primary);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
-  z-index: 1000;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
 }
 
 .main-navbar.collapsed {
-  width: 68px;
+  width: 50px;
 }
 
 .navbar-header {
-  height: 60px;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  height: 50px;
+  padding: 0 15px;
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  align-items: center;
+}
+
+.navbar-header.collapsed {
+  padding: 0;
+  justify-content: center;
 }
 
 .navbar-brand {
@@ -129,9 +141,9 @@ const currentPath = computed(() => {
 }
 
 .brand-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: var(--accent-blue);
-  min-width: 30px;
+  min-width: 20px;
 }
 
 .brand-text {
@@ -175,10 +187,14 @@ const currentPath = computed(() => {
   margin: 2px 8px;
 }
 
+.main-navbar.collapsed .nav-item {
+  margin: 2px 0;
+}
+
 .nav-link {
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 10px;
   border-radius: 8px;
   color: var(--text-muted);
   transition: all 0.2s ease;
@@ -187,22 +203,32 @@ const currentPath = computed(() => {
   text-decoration: none;
 }
 
+.main-navbar.collapsed .nav-link {
+  justify-content: center;
+  padding: 10px 0;
+  border-radius: 0;
+}
+
 .nav-link i {
-  font-size: 1.4rem;
-  min-width: 32px;
+  font-size: 1.15rem;
+  min-width: 20px;
   display: flex;
   justify-content: center;
 }
 
 .nav-text {
   margin-left: 10px;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
   transform: translateX(2px);
+}
+
+.main-navbar.collapsed .nav-link:hover {
+  transform: none;
 }
 
 .nav-link.active {
@@ -213,15 +239,25 @@ const currentPath = computed(() => {
   border-radius: 0 4px 4px 0;
   margin-left: -8px;
   padding-left: 17px;
-  text-shadow: 0 0 8px rgba(88, 166, 255, 0.3);
+}
+
+.main-navbar.collapsed .nav-link.active {
+  margin-left: 0;
+  padding-left: 0;
+  border-radius: 0;
+  border-left-width: 4px;
 }
 
 .navbar-footer {
-  padding-bottom: 15px;
+  background-color: var(--bg-dark);
+}
+
+.footer-links {
+  padding: 8px 0;
 }
 
 .settings-link {
-  margin: 0 8px;
+  margin: 0;
 }
 
 /* Hide scrollbar for nav-sections */

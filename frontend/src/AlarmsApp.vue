@@ -42,11 +42,11 @@
                     </div>
                   </div>
 
-                  <h5 class="text-light mb-1">{{ alarm.title }}</h5>
-                  <p class=" small mb-3">{{ alarm.type === 0 ? 'Timer' : 'Countdown' }}</p>
+                  <h5 class="text-light mb-1" style="font-size: 1rem;">{{ alarm.title }}</h5>
+                  <p class="small mb-2" style="font-size: 0.8rem;">{{ alarm.type === 0 ? 'Timer' : 'Countdown' }}</p>
 
-                  <div class="timer-display mb-4">
-                    <div class="display-4 fw-mono text-center" :class="getTimerClass(alarm)">
+                  <div class="timer-display mb-3">
+                    <div class="display-6 fw-mono text-center" :class="getTimerClass(alarm)">
                       {{ formatTimeRemaining(alarm) }}
                     </div>
                   </div>
@@ -63,12 +63,11 @@
               </div>
             </div>
 
-            <!-- Empty State -->
-            <div v-if="alarms.length === 0" class="col-12 text-center py-5">
-              <div class="py-5">
-                <i class="bi bi-alarm display-1 mb-3 d-block"></i>
-                <h4 class="text-light">No alarms yet</h4>
-                <p class="">Create your first timer or countdown to get started.</p>
+            <div v-if="alarms.length === 0" class="col-12 text-center py-4">
+              <div class="py-4">
+                <i class="bi bi-alarm display-4 mb-3 d-block"></i>
+                <h5 class="text-light">No alarms yet</h5>
+                <p class="small">Create your first timer or countdown to get started.</p>
               </div>
             </div>
           </div>
@@ -277,6 +276,17 @@ const getTimerClass = (alarm) => {
 </script>
 
 <style scoped>
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.controls-bar {
+  /* height and other properties moved to global.css */
+}
+
 .icon-circle {
   width: 48px;
   height: 48px;

@@ -5,7 +5,7 @@
       <div class="github-app-container flex-grow-1">
         <!-- Sidebar -->
         <div class="github-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-          <div class="sidebar-header">
+          <div class="sidebar-header d-flex align-items-center">
             <h5 v-if="!sidebarCollapsed">GitHub Filters</h5>
           </div>
           
@@ -51,8 +51,8 @@
             </template>
           </div>
 
-          <div class="sidebar-footer">
-            <button class="btn-icon sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+          <div class="sidebar-footer" :class="sidebarCollapsed ? 'justify-content-center' : 'justify-content-end'">
+            <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
               <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
             </button>
           </div>
@@ -211,20 +211,11 @@ onMounted(() => {
 }
 
 .sidebar-header {
-  height: 60px;
-  padding: 0 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-primary);
-  box-sizing: border-box;
+  /* height and other properties moved to global.css */
 }
 
 .sidebar-header h5 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .filter-list {
@@ -273,29 +264,6 @@ onMounted(() => {
   margin-right: 0;
 }
 
-.sidebar-footer {
-  padding: 0.5rem;
-  display: flex;
-  justify-content: flex-end;
-  background-color: var(--bg-dark);
-  border-top: 1px solid var(--border-primary);
-}
-
-.btn-icon {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  padding: 4px 8px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.btn-icon:hover {
-  color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
 .sidebar-toggle {
   display: flex;
   align-items: center;
@@ -332,15 +300,7 @@ onMounted(() => {
 }
 
 .controls-bar {
-  height: 60px;
-  min-height: 60px;
-  padding: 0 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--bg-dark);
-  border-bottom: 1px solid var(--border-primary);
-  box-sizing: border-box;
+  /* height and other properties moved to global.css */
 }
 
 .github-content-wrapper {

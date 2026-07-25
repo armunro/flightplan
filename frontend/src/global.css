@@ -17,6 +17,7 @@ body {
   background-color: var(--bg-darker) !important;
   color: var(--text-primary) !important;
   font-family: 'Noto Sans', sans-serif !important;
+  font-size: 0.9rem !important;
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -64,8 +65,8 @@ body {
 }
 
 .controls-bar {
-  height: 60px;
-  padding: 0 15px;
+  height: 50px;
+  padding: 0 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -76,7 +77,101 @@ body {
 
 .controls-bar h1, .controls-bar h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+.sidebar-header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-bottom: 1px solid var(--border-primary);
+  background-color: var(--bg-dark);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.sidebar-header.collapsed {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.sidebar-header h1, .sidebar-header h2, .sidebar-header h3, .sidebar-header h4, .sidebar-header h5, .sidebar-header h6,
+.controls-bar h1, .controls-bar h2, .controls-bar h3, .controls-bar h4, .controls-bar h5, .controls-bar h6 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.sidebar-header h5, .controls-bar h5, .sidebar-header h2, .controls-bar h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.controls-bar h1.h3, .controls-bar h3, .controls-bar .h3 {
+  font-size: 1.25rem !important;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  background-color: var(--bg-dark);
+  box-sizing: border-box;
+  border-top: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.sidebar-footer.collapsed {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 6px;
+  box-shadow: none !important;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+}
+
+.sidebar-toggle:hover {
+  color: var(--text-primary);
+}
+
+.sidebar-toggle:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.1);
 }
