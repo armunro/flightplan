@@ -59,9 +59,8 @@
     color: var(--text-primary);
 }
 
-.project-item .bi {
-  color: var(--accent-blue);
-  flex-shrink: 0;
+.project-item .project-icon-wrapper i {
+  color: white;
 }
 
 .project-name {
