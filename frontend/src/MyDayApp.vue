@@ -107,13 +107,14 @@
                   No recent emails.
                 </div>
                 <div v-else class="list-group list-group-flush">
-                  <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-3">
+                  <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2">
                     <a :href="email.webLink" target="_blank" class="text-decoration-none text-reset">
-                      <div class="d-flex justify-content-between">
-                        <span class="fw-bold small text-truncate me-2 text-primary">{{ email.from }}</span>
-                        <span class="text-muted extra-small whitespace-nowrap">{{ formatRelativeTime(email.receivedDateTime) }}</span>
+                      <div class="d-flex align-items-baseline">
+                        <span class="fw-bold small text-truncate text-primary" style="max-width: 200px;">{{ email.from }}</span>
+                        <span class="mx-2 text-muted extra-small">—</span>
+                        <span class="small text-truncate text-accent-blue flex-grow-1">{{ email.subject }}</span>
+                        <span class="text-muted extra-small whitespace-nowrap ms-2">{{ formatRelativeTime(email.receivedDateTime) }}</span>
                       </div>
-                      <div class="small text-truncate text-accent-blue my-1">{{ email.subject }}</div>
                       <div class="extra-small text-muted text-truncate">{{ email.bodyPreview }}</div>
                     </a>
                   </div>
@@ -208,14 +209,8 @@ onMounted(() => {
 }
 
 .controls-bar {
-  height: 50px;
-  min-height: 50px;
-  background-color: var(--bg-dark);
-  border-bottom: 1px solid var(--border-primary);
-  display: flex;
-  align-items: center;
+  /* height and background moved to global.css */
   padding: 0 20px;
-  flex-shrink: 0;
   color: var(--text-primary);
 }
 

@@ -72,7 +72,7 @@ body {
   align-items: center;
   border-bottom: 1px solid var(--border-primary);
   flex-shrink: 0;
-  background-color: var(--bg-darker);
+  background-color: var(--bg-dark);
 }
 
 .controls-bar h1, .controls-bar h2 {
