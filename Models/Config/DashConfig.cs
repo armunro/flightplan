@@ -6,6 +6,19 @@ public class DashConfig
     public GitHubConfig GitHub { get; set; } = new();
     public MicrosoftGraphConfig MicrosoftGraph { get; set; } = new();
     public List<PageVisibility> PageVisibilities { get; set; } = new();
+    public List<ColorScheme> ColorSchemes { get; set; } = new();
+}
+
+public class ColorScheme
+{
+    public string Name { get; set; } = string.Empty;
+    public List<ColorSchemeColor> Colors { get; set; } = new();
+}
+
+public class ColorSchemeColor
+{
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
 }
 
 public class PageVisibility

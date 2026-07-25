@@ -62,6 +62,8 @@
                 <SettingsPageVisibility v-if="activeCategory === 'visibility'" 
                                         :pageVisibilities="config.pageVisibilities" 
                                         :allPages="allPages" />
+                <SettingsColorSchemes v-if="activeCategory === 'colorschemes'" 
+                                     :colorSchemes="config.colorSchemes" />
               </div>
             </div>
           </div>
@@ -78,6 +80,7 @@ import SettingsJira from './components/SettingsJira.vue';
 import SettingsGitHub from './components/SettingsGitHub.vue';
 import SettingsMicrosoftGraph from './components/SettingsMicrosoftGraph.vue';
 import SettingsPageVisibility from './components/SettingsPageVisibility.vue';
+import SettingsColorSchemes from './components/SettingsColorSchemes.vue';
 import { fetchSettings, updateSettings } from './js/dashboard-api';
 import { showToast } from './components/Toast.vue';
 
@@ -95,7 +98,8 @@ const config = ref({
   jira: { url: '', username: '', apiToken: '', queries: [] },
   gitHub: { organization: '', username: '', accessToken: '' },
   microsoftGraph: { tenantId: '', clientId: '' },
-  pageVisibilities: []
+  pageVisibilities: [],
+  colorSchemes: []
 });
 
 const allPages = [
@@ -107,6 +111,7 @@ const allPages = [
   { id: 'calendar', name: 'Calendar' },
   { id: 'links', name: 'Links' },
   { id: 'notepad', name: 'Notepad' },
+  { id: 'colorschemes', name: 'Color Schemes' },
   { id: 'debug', name: 'Diagnostics' }
 ];
 
@@ -114,7 +119,8 @@ const categories = [
   { id: 'jira', name: 'Jira', icon: 'bi bi-jira', color: '#0052CC' },
   { id: 'github', name: 'GitHub', icon: 'bi bi-github', color: '#333' },
   { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft', color: '#00a4ef' },
-  { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye', color: '#6f42c1' }
+  { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye', color: '#6f42c1' },
+  { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette', color: '#e83e8c' }
 ];
 
 const activeCategory = ref('jira');
