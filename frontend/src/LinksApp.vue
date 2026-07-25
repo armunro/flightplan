@@ -705,7 +705,6 @@ label, .form-label {
   background-color: var(--bg-dark);
   overflow: hidden;
   flex-shrink: 0;
-  z-index: 1;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
