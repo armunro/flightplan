@@ -670,14 +670,17 @@
     background: var(--bg-card);
     border: 1px solid var(--accent-blue);
     border-radius: 8px;
-    padding: 8px 24px;
+    padding: 8px 32px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 32px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     z-index: 2000;
     color: var(--text-primary);
     animation: slideInDown 0.3s ease-out;
+    white-space: nowrap;
+    min-width: 600px;
+    justify-content: space-between;
 }
 
 @keyframes slideInDown {
@@ -688,9 +691,9 @@
 .bulk-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     border-right: 1px solid var(--border-primary);
-    padding-right: 20px;
+    padding-right: 24px;
 }
 
 .selected-count {

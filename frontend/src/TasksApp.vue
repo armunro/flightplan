@@ -93,14 +93,14 @@
                         </li>
                       </ul>
                     </div>
-                    <button class="btn btn-sm btn-outline-light" @click="showBulkDateDialog = true">
-                      <i class="bi bi-pencil-square"></i> Bulk Edit
+                    <button class="btn btn-sm btn-outline-light" @click="showBulkDateDialog = true" title="Bulk Edit">
+                      <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-light" @click="onShowMoveDialog()">
-                      <i class="bi bi-arrow-right-short"></i> Move
+                    <button class="btn btn-sm btn-outline-light" @click="onShowMoveDialog()" title="Move Tasks">
+                      <i class="bi bi-arrow-right-short"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" @click="onBulkDelete">
-                      <i class="bi bi-trash"></i> Delete
+                    <button class="btn btn-sm btn-danger" @click="onBulkDelete" title="Delete Tasks">
+                      <i class="bi bi-trash"></i>
                     </button>
                   </div>
                 </div>
@@ -402,6 +402,9 @@ export default {
     const autosizeColumns = () => {
       if (!selectedProject.value) return;
 
+      const container = document.querySelector('.project-content');
+      const availableWidth = container ? container.clientWidth - 40 : 1200; // 40 for selection column and some buffer
+
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       context.font = '14px "Noto Sans"'; // Match your app's font
@@ -426,7 +429,7 @@ export default {
       selectedProject.value.lists.forEach(l => {
         if (l.tasks) checkTasks(l.tasks, 0);
       });
-      newWidths[0] = Math.min(800, Math.max(200, Math.ceil(maxNameWidth + padding)));
+      newWidths[0] = Math.max(200, Math.ceil(maxNameWidth + padding));
 
       // 1: Type
       let maxTypeWidth = getTextWidth('Type');
@@ -490,6 +493,25 @@ export default {
         if (l.tasks) checkEst(l.tasks);
       });
       newWidths[6] = Math.max(80, Math.ceil(maxEstWidth + padding));
+
+      // 7: Deadline (represented as 0 in columnWidths, meaning it takes 1fr)
+      // No fixed width for the last column in this logic.
+
+      // Adjust widths if total exceeds available width
+      const totalFixedWidth = newWidths.slice(0, 7).reduce((a, b) => a + b, 0);
+      const minLastColumnWidth = 100;
+      
+      if (totalFixedWidth + minLastColumnWidth > availableWidth) {
+        const excess = totalFixedWidth + minLastColumnWidth - availableWidth;
+        // Reduce Task Name column first (index 0)
+        if (newWidths[0] - excess >= 200) {
+          newWidths[0] -= excess;
+        } else {
+          // If we can't take it all from Task Name, set it to min and spread the rest?
+          // For now, just cap it to available space even if it's below min
+          newWidths[0] = Math.max(100, newWidths[0] - excess);
+        }
+      }
 
       columnWidths.value = newWidths;
       localStorage.setItem('columnWidths', JSON.stringify(newWidths));
