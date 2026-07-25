@@ -107,10 +107,9 @@ public class ScheduledTaskService
             existing.ProjectId = task.ProjectId;
             existing.ListId = task.ListId;
             
-            if (wasEnabled)
-            {
-                await UnscheduleQuartzJob(task.Id);
-            }
+            // Explicitly unschedule first to be safe, regardless of wasEnabled
+            await UnscheduleQuartzJob(task.Id);
+
             if (existing.IsEnabled)
             {
                 await ScheduleQuartzJob(existing);
@@ -152,6 +151,9 @@ public class ScheduledTaskService
     {
         var scheduler = await _schedulerFactory.GetScheduler();
         
+        // Ensure we don't have existing job/trigger for this task
+        await UnscheduleQuartzJob(task.Id);
+        
         var job = JobBuilder.Create<CreateTaskFromTemplateJob>()
             .WithIdentity($"job_{task.Id}", "scheduled_tasks")
             .UsingJobData("TaskId", task.Id.ToString())
@@ -174,19 +176,19 @@ public class ScheduledTaskService
             switch (task.IntervalUnit)
             {
                 case "Days":
-                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval));
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval).WithMisfireHandlingInstructionDoNothing());
                     break;
                 case "Weeks":
-                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInWeeks(task.Interval));
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInWeeks(task.Interval).WithMisfireHandlingInstructionDoNothing());
                     break;
                 case "Months":
-                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInMonths(task.Interval));
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInMonths(task.Interval).WithMisfireHandlingInstructionDoNothing());
                     break;
                 case "Years":
-                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInYears(task.Interval));
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInYears(task.Interval).WithMisfireHandlingInstructionDoNothing());
                     break;
                 default:
-                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval));
+                    triggerBuilder.WithCalendarIntervalSchedule(x => x.WithIntervalInDays(task.Interval).WithMisfireHandlingInstructionDoNothing());
                     break;
             }
 
@@ -261,8 +263,11 @@ public class ScheduledTaskService
             // Re-schedule to update NextRun
             try 
             {
-                await UnscheduleQuartzJob(taskId);
-                await ScheduleQuartzJob(task);
+                // UnscheduleQuartzJob is already called inside ScheduleQuartzJob
+                if (task.IsEnabled)
+                {
+                    await ScheduleQuartzJob(task);
+                }
             }
             catch (Exception ex)
             {
