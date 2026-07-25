@@ -24,7 +24,7 @@
         <div v-else-if="data" class="sections-stack h-100 d-flex flex-column">
           <!-- Calendar Section -->
           <div v-if="data.calendarVisible" class="section-container mb-4 d-flex flex-column">
-            <div class="card d-flex flex-column">
+            <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-calendar3 me-2 text-info"></i>
                 <h6 class="mb-0 text-primary">Today's Events</h6>
@@ -59,7 +59,7 @@
 
           <!-- Tasks Section -->
           <div v-if="data.tasksDueToday" class="section-container mb-4 d-flex flex-column">
-            <div class="card d-flex flex-column">
+            <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-check2-square me-2 text-success"></i>
                 <h6 class="mb-0 text-primary">Tasks Due Today</h6>
@@ -96,7 +96,7 @@
 
           <!-- Email Section -->
           <div v-if="data.emailVisible" class="section-container mb-0 d-flex flex-column">
-            <div class="card d-flex flex-column">
+            <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-envelope me-2 text-warning"></i>
                 <h6 class="mb-0 text-primary">Recent Emails</h6>
