@@ -1,8 +1,5 @@
 ﻿<template>
   <div class="card bg-dark text-light border-secondary">
-    <div class="card-header border-secondary">
-      <h5 class="mb-0"><i class="bi bi-github me-2"></i>GitHub Configuration</h5>
-    </div>
     <div class="card-body">
       <div class="mb-3">
         <label class="form-label">Organization</label>

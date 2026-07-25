@@ -1,8 +1,5 @@
 ﻿<template>
   <div class="card bg-dark text-light border-secondary">
-    <div class="card-header border-secondary">
-      <h5 class="mb-0"><i class="bi bi-eye me-2"></i>Page Visibility</h5>
-    </div>
     <div class="card-body">
       <p class="small text-muted mb-3">Choose which modules are visible in the sidebar and dashboard.</p>
       <div class="row">

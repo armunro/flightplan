@@ -35,19 +35,24 @@
 
         <!-- Main Content -->
         <div class="main-content">
-          <div class="settings-container p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h3>
-                <i :class="currentCategory.icon" class="me-2"></i>
-                {{ currentCategory.name }} Settings
-              </h3>
-              <div>
-                <button class="btn btn-primary" @click="save" :disabled="saving">
-                  {{ saving ? 'Saving...' : 'Save Changes' }}
-                </button>
-              </div>
+          <div class="controls-bar">
+            <div class="d-flex align-items-center">
+              <i :class="currentCategory.icon" class="me-2 fs-5"></i>
+              <h5 class="mb-0">{{ currentCategory.name }} Settings</h5>
             </div>
+            <div class="d-flex align-items-center gap-2">
+              <button v-if="activeCategory === 'colorschemes'" class="btn btn-success" @click="addScheme">
+                <i class="bi bi-plus-lg me-2"></i>
+                Add Scheme
+              </button>
+              <button class="btn btn-primary" @click="save" :disabled="saving">
+                <i class="bi bi-save me-2"></i>
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </div>
 
+          <div class="settings-container p-4">
             <div v-if="loading" class="text-center p-5">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -180,6 +185,15 @@ const stopSidebarResize = () => {
   document.removeEventListener('mouseup', stopSidebarResize);
   document.body.style.cursor = '';
   document.body.style.userSelect = '';
+};
+
+const addScheme = () => {
+  config.value.colorSchemes.push({
+    name: 'New Scheme',
+    colors: [
+      { name: 'Primary', color: '#007bff' }
+    ]
+  });
 };
 
 onMounted(async () => {
@@ -336,13 +350,18 @@ const save = async () => {
 
 .main-content {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background-color: var(--bg-darker);
 }
 
 .settings-container {
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 .card {

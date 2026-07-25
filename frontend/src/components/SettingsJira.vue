@@ -1,8 +1,5 @@
 ﻿<template>
   <div class="card bg-dark text-light border-secondary">
-    <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-      <h5 class="mb-0"><i class="bi bi-jira me-2"></i>Jira Configuration</h5>
-    </div>
     <div class="card-body">
       <div class="row">
         <div class="col-md-12 mb-3">
