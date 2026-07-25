@@ -390,6 +390,13 @@ public class ProjectManager
     
     public enum MovePosition { Before, After, Inside }
 
+    public bool DeleteProject(Guid projectId)
+    {
+        var project = FindProjectById(projectId);
+        if (project == null) return false;
+        return _projects.Remove(project);
+    }
+
     public TaskItem? MoveTask(Guid taskId, Guid? targetListId, Guid? targetTaskId, MovePosition position = MovePosition.Inside)
     {
         var task = FindTaskById(taskId);

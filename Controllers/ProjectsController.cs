@@ -145,4 +145,13 @@ public class ProjectsController : ControllerBase
         _projectManager.SaveProjectsToYaml(_storageService.GetProjectsPath());
         return NoContent();
     }
+    [HttpDelete("{projectId:guid}")]
+    public IActionResult DeleteProject(Guid projectId)
+    {
+        if (!_projectManager.DeleteProject(projectId))
+            return NotFound("Project not found");
+
+        _projectManager.SaveProjectsToYaml(_storageService.GetProjectsPath());
+        return NoContent();
+    }
 }

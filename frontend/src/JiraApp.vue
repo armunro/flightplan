@@ -107,6 +107,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import JiraIssues from './components/JiraIssues.vue';
 import JiraIssueDetail from './components/JiraIssueDetail.vue';
@@ -179,14 +180,14 @@ const handleCreateTask = async ({ issue, targetListId }) => {
 
         if (response.ok) {
             showCreateTaskDialog.value = false;
-            // Optionally show a toast or success message
+            showToast('Task created successfully!', 'success');
         } else {
             const error = await response.text();
-            alert(`Failed to create task: ${error}`);
+            showToast(`Failed to create task: ${error}`, 'error');
         }
     } catch (error) {
         console.error('Error creating task:', error);
-        alert('Error creating task');
+        showToast('Error creating task', 'error');
     }
 };
 

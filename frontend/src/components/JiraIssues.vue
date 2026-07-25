@@ -68,6 +68,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { showToast } from './Toast.vue';
 import { fetchJiraIssues, fetchJiraQueries, fetchJiraStarred, toggleJiraStar } from '../js/dashboard-api';
 import { unassignJiraIssue } from '../js/tasks-api';
 
@@ -144,7 +145,7 @@ const copyToClipboard = async (text, html) => {
     }
   } catch (err) {
     console.error('Failed to copy: ', err);
-    alert('Failed to copy rich text. Falling back to plain text. Error: ' + err.message);
+    showToast('Failed to copy rich text. Falling back to plain text. Error: ' + err.message, 'warning');
     // Fallback to plain text if rich copy fails (e.g. permission issues in some environments)
     try {
       await navigator.clipboard.writeText(text);
@@ -277,11 +278,11 @@ const unassignIssue = async (issue) => {
     if (success) {
       loadIssues();
     } else {
-      alert('Failed to unassign issue');
+      showToast('Failed to unassign issue', 'error');
     }
   } catch (error) {
     console.error('Error unassigning issue:', error);
-    alert('Error unassigning issue');
+    showToast('Error unassigning issue', 'error');
   }
 };
 

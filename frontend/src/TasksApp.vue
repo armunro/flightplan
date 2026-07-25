@@ -154,7 +154,8 @@
                             :project="projectDialogData"
                             :is-new="projectDialogIsNew"
                             @close="showProjectDialog = false"
-                            @save="onSaveProject"></project-dialog>
+                            @save="onSaveProject"
+                            @delete="onDeleteProject"></project-dialog>
 
             <div class="project-content">
               <div v-for="list in selectedProject.lists" :key="list.id" class="list"
@@ -255,13 +256,14 @@
 
 <script>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import TaskRow from './components/TaskRow.vue';
 import TaskDetail from './components/TaskDetail.vue';
 import MoveTaskDialog from './components/MoveTaskDialog.vue';
 import BulkDateDialog from './components/BulkDateDialog.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
-import { addTask, moveTask, bulkMoveTasks, addList, moveList, deleteList, updateProject, addProject, moveProject, deleteTask, bulkDeleteTasks, bulkUpdateTasks } from './js/tasks-api';
+import { addTask, moveTask, bulkMoveTasks, addList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, bulkUpdateTasks } from './js/tasks-api';
 import { findTaskInProjects, formatFriendlyDate, formatEstimate } from './js/utils';
 
 export default {
@@ -788,21 +790,28 @@ export default {
     };
 
     const onSaveProject = async (formData) => {
-      if (projectDialogIsNew.value) {
-        await addProject(formData);
-      } else {
-        await updateProject(projectDialogData.value.id, {
-          name: formData.name,
-          icon: formData.icon,
-          color: formData.color,
-          description: formData.description,
-          statuses: formData.statuses,
-          taskTypes: formData.taskTypes,
-          priorities: formData.priorities
-        });
+      try {
+        if (projectDialogIsNew.value) {
+          await addProject(formData);
+          showToast('Project created successfully', 'success');
+        } else {
+          await updateProject(projectDialogData.value.id, {
+            name: formData.name,
+            icon: formData.icon,
+            color: formData.color,
+            description: formData.description,
+            statuses: formData.statuses,
+            taskTypes: formData.taskTypes,
+            priorities: formData.priorities
+          });
+          showToast('Project updated successfully', 'success');
+        }
+        showProjectDialog.value = false;
+        fetchProjects();
+      } catch (error) {
+        console.error('Error saving project:', error);
+        showToast('Failed to save project', 'error');
       }
-      showProjectDialog.value = false;
-      fetchProjects();
     };
 
     const onUpdateProjectName = async (e, project) => {
@@ -1039,6 +1048,25 @@ export default {
       localStorage.setItem('sidebarCollapsed', JSON.stringify(newVal));
     });
 
+    const onDeleteProject = async (projectId) => {
+      try {
+        await deleteProject(projectId);
+        showProjectDialog.value = false;
+        showToast('Project deleted successfully', 'success');
+        
+        // If the deleted project was selected, clear selection
+        if (selectedProjectId.value === projectId) {
+          selectedProjectId.value = null;
+          localStorage.removeItem('selectedProjectId');
+        }
+        
+        await fetchProjects();
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        showToast('Failed to delete project', 'error');
+      }
+    };
+
     return {
       projects,
       collapsedLists,
@@ -1092,6 +1120,7 @@ export default {
       projectDialogIsNew,
       projectDialogData,
       onSaveProject,
+      onDeleteProject,
       selectedTaskIds,
       onToggleSelect,
       onSelectAll,

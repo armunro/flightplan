@@ -123,6 +123,7 @@
 
 <script>
 import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { showToast } from './Toast.vue';
 import DateTimeSelector from './DateTimeSelector.vue';
 import { updateTask } from '../js/tasks-api';
 import { formatForInput, formatToISO } from '../js/utils';
@@ -228,7 +229,7 @@ export default {
           console.log('Successfully copied rich text to clipboard');
         }).catch(err => {
           console.error('Failed to copy rich text: ', err);
-          alert('Failed to copy rich text. Falling back to plain text. Error: ' + err.message);
+          showToast('Failed to copy rich text. Falling back to plain text. Error: ' + err.message, 'warning');
           navigator.clipboard.writeText(text);
         });
       } else {

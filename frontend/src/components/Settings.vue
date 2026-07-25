@@ -116,6 +116,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { showToast } from './Toast.vue';
 import { fetchSettings, updateSettings } from '../js/dashboard-api';
 
 const emit = defineEmits(['saved']);
@@ -168,11 +169,11 @@ const save = async () => {
   saving.value = true;
   try {
     await updateSettings(config.value);
-    alert('Settings saved successfully!');
+    showToast('Settings saved successfully!', 'success');
     emit('saved');
   } catch (e) {
     console.error('Failed to save settings:', e);
-    alert('Failed to save settings: ' + e.message);
+    showToast('Failed to save settings: ' + e.message, 'error');
   } finally {
     saving.value = false;
   }

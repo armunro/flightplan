@@ -50,6 +50,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { showToast } from './Toast.vue';
 import { fetchSettings, updateSettings } from '../js/dashboard-api';
 
 const emit = defineEmits(['close', 'saved']);
@@ -88,7 +89,7 @@ const save = async () => {
     emit('close');
   } catch (e) {
     console.error('Failed to save settings:', e);
-    alert('Failed to save settings: ' + e.message);
+    showToast('Failed to save settings: ' + e.message, 'error');
   } finally {
     saving.value = false;
   }

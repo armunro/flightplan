@@ -76,6 +76,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
@@ -214,7 +215,7 @@ const createNewFile = async () => {
   const name = prompt('Enter filename (e.g. notes.md):');
   if (name) {
     if (!name.endsWith('.md')) {
-      alert('Filename must end with .md');
+      showToast('Filename must end with .md', 'warning');
       return;
     }
 
@@ -235,11 +236,11 @@ const createNewFile = async () => {
         selectFile(name);
       } else {
         console.error('Failed to create file on server');
-        alert('Failed to create file');
+        showToast('Failed to create file', 'error');
       }
     } catch (e) {
       console.error('Error creating file:', e);
-      alert('Error creating file');
+      showToast('Error creating file', 'error');
     }
   }
 };

@@ -190,6 +190,16 @@ export async function moveProject(projectId, targetProjectId, position = 1) {
     }
 }
 
+export async function deleteProject(projectId) {
+    try {
+        await fetch(`/api/projects/${projectId}`, {
+            method: 'DELETE'
+        });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+    }
+}
+
 export async function unassignJiraIssue(issueKey) {
     try {
         const response = await fetch(`/api/jira/unassign?key=${issueKey}`, {

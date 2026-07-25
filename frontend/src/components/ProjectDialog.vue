@@ -90,10 +90,17 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" @click="$emit('close')">Cancel</button>
-        <button class="btn btn-primary" :disabled="!form.name" @click="onSave">
-          {{ isNew ? 'Create Project' : 'Save Changes' }}
-        </button>
+        <div class="footer-left">
+          <button v-if="!isNew" class="btn btn-outline-danger" @click="onDelete">
+            <i class="bi bi-trash"></i> Delete Project
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-outline-secondary" @click="$emit('close')">Cancel</button>
+          <button class="btn btn-primary" :disabled="!form.name" @click="onSave">
+            {{ isNew ? 'Create Project' : 'Save Changes' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -114,7 +121,7 @@ export default {
       default: false
     }
   },
-  emits: ['close', 'save'],
+  emits: ['close', 'save', 'delete'],
   setup(props, { emit }) {
     const nameInput = ref(null);
     const activeTab = ref('general');
@@ -180,6 +187,12 @@ export default {
       }
     };
 
+    const onDelete = () => {
+      if (confirm(`Are you sure you want to delete the project "${props.project.name}"? This will delete all tasks and lists within it.`)) {
+        emit('delete', props.project.id);
+      }
+    };
+
     const displayIconClass = computed(() => {
       const icon = form.icon || 'bi-folder';
       return icon.startsWith('bi-') ? `bi ${icon}` : `bi bi-${icon}`;
@@ -196,6 +209,7 @@ export default {
       addPriority,
       removePriority,
       onSave,
+      onDelete,
       displayIconClass
     };
   }
@@ -342,7 +356,12 @@ export default {
   padding: 16px;
   border-top: 1px solid var(--border-primary);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-right {
+  display: flex;
   gap: 12px;
 }
 

@@ -1,5 +1,6 @@
 <template>
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
+    <Toast />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
         <i class="bi bi-airplane-engines-fill brand-icon"></i>
@@ -46,6 +47,7 @@
 
 <script setup>
 import { computed, ref, onMounted } from 'vue';
+import Toast from './Toast.vue';
 import { fetchSettings } from '../js/dashboard-api';
 
 const isCollapsed = ref(localStorage.getItem('navbar-collapsed') === 'true');

@@ -370,6 +370,7 @@
 
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import FolderSelect from './components/FolderSelect.vue';
 import { formatFriendlyDate } from './js/utils.js';
@@ -832,7 +833,7 @@ const applyToAll = async (ruleName) => {
           try {
             const update = JSON.parse(data);
             if (update.error) {
-              alert(`Error applying rule: ${update.error}`);
+              showToast(`Error applying rule: ${update.error}`, 'error');
               applyingRuleName.value = null;
               return;
             }
@@ -852,7 +853,7 @@ const applyToAll = async (ruleName) => {
     
   } catch (error) {
     console.error('Error applying rule to all:', error);
-    alert('Failed to apply rule: ' + error.message);
+    showToast('Failed to apply rule: ' + error.message, 'error');
     applyingRuleName.value = null;
   }
 };
@@ -869,7 +870,7 @@ const createTask = async (email) => {
       method: 'POST'
     });
     if (response.ok) {
-      alert('Task created successfully!');
+      showToast('Task created successfully!', 'success');
     }
   } catch (error) {
     console.error('Error creating task:', error);
@@ -938,7 +939,7 @@ const addAction = () => {
 
 const saveRule = async () => {
   if (!editingRule.value.name) {
-    alert('Rule name is required');
+    showToast('Rule name is required', 'warning');
     return;
   }
   
