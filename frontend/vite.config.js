@@ -26,7 +26,6 @@ export default defineConfig({
         jira: resolve(__dirname, 'jira.html'),
         debug: resolve(__dirname, 'debug.html'),
         'scheduled-tasks': resolve(__dirname, 'scheduled-tasks.html'),
-        alarms: resolve(__dirname, 'alarms.html'),
       },
     },
   },

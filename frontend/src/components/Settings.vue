@@ -131,7 +131,6 @@ const allPages = [
   { id: 'github', name: 'GitHub' },
   { id: 'tasks', name: 'Tasks' },
   { id: 'scheduledtasks', name: 'Schedules' },
-  { id: 'alarms', name: 'Alarms' },
   { id: 'email', name: 'Email' },
   { id: 'calendar', name: 'Calendar' },
   { id: 'links', name: 'Links' },

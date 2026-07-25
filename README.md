@@ -82,8 +82,6 @@ pageVisibilities:
     visible: true
   - id: "scheduledtasks"
     visible: true
-  - id: "alarms"
-    visible: true
   - id: "email"
     visible: true
   - id: "calendar"
@@ -183,16 +181,6 @@ pageVisibilities:
   taskTitleTemplate: "Prepare for Standup - {date}"
   taskDescription: "Review PRs and tasks completed yesterday."
   priority: "Medium"
-```
-
-#### Alarms (`alarms.yaml`)
-```yaml
-- id: "f0000000-0000-0000-0000-000000000001"
-  title: "Tea Break"
-  type: "Timer"
-  duration: "00:10:00"
-  isActive: true
-  isCompleted: false
 ```
 
 #### Automation Rules (`Rules/*.yaml`)

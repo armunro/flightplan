@@ -73,7 +73,6 @@ const navItems = [
   { id: 'github', name: 'Github', href: '/Github', icon: 'bi-github' },
   { id: 'tasks', name: 'Tasks', href: '/Tasks', icon: 'bi-check2-square' },
   { id: 'scheduledtasks', name: 'Schedules', href: '/ScheduledTasks', icon: 'bi-clock-history' },
-  { id: 'alarms', name: 'Alarms', href: '/Alarms', icon: 'bi-alarm' },
   { id: 'email', name: 'Email', href: '/Email', icon: 'bi-envelope' },
   { id: 'calendar', name: 'Calendar', href: '/Calendar', icon: 'bi-calendar3' },
   { id: 'links', name: 'Links', href: '/Links', icon: 'bi-link-45deg' },
@@ -97,7 +96,6 @@ const currentPath = computed(() => {
   if (path === '/settings') return 'settings';
   if (path === '/tasks') return 'tasks';
   if (path === '/scheduledtasks') return 'scheduledtasks';
-  if (path === '/alarms') return 'alarms';
   if (path === '/email') return 'email';
   if (path === '/calendar') return 'calendar';
   if (path === '/links') return 'links';

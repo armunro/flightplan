@@ -15,7 +15,6 @@ public interface IStorageService
     string GetCalendarPreferencesPath();
     string GetBookmarksPath();
     string GetScheduledTasksPath();
-    string GetAlarmsPath();
 }
 
 public class StorageService : IStorageService
@@ -40,7 +39,6 @@ public class StorageService : IStorageService
     public string GetCalendarPreferencesPath() => Path.Combine(_basePath, "calendar_preferences.json");
     public string GetBookmarksPath() => Path.Combine(_basePath, "bookmarks.yaml");
     public string GetScheduledTasksPath() => Path.Combine(_basePath, "scheduled_tasks.yaml");
-    public string GetAlarmsPath() => Path.Combine(_basePath, "alarms.yaml");
     
     public string GetRulesDirectory()
     {

@@ -56,7 +56,6 @@ if (!File.Exists(configPath))
             new PageVisibility { Id = "github", Visible = true },
             new PageVisibility { Id = "tasks", Visible = true },
             new PageVisibility { Id = "scheduledtasks", Visible = true },
-            new PageVisibility { Id = "alarms", Visible = true },
             new PageVisibility { Id = "email", Visible = true },
             new PageVisibility { Id = "calendar", Visible = true },
             new PageVisibility { Id = "links", Visible = true },
@@ -101,7 +100,6 @@ if (dashConfig.PageVisibilities == null || dashConfig.PageVisibilities.Count == 
         new PageVisibility { Id = "github", Visible = true },
         new PageVisibility { Id = "tasks", Visible = true },
         new PageVisibility { Id = "scheduledtasks", Visible = true },
-        new PageVisibility { Id = "alarms", Visible = true },
         new PageVisibility { Id = "email", Visible = true },
         new PageVisibility { Id = "calendar", Visible = true },
         new PageVisibility { Id = "links", Visible = true },
@@ -133,7 +131,6 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder.RegisterType<JiraStarredService>().AsSelf().SingleInstance();
     containerBuilder.RegisterType<GitHubStarredService>().AsSelf().SingleInstance();
     containerBuilder.RegisterType<ScheduledTaskService>().AsSelf().SingleInstance();
-    containerBuilder.RegisterType<AlarmService>().As<IAlarmService>().SingleInstance();
 
     // Migration for projects.yaml
     var projectsPath = storageService.GetProjectsPath();
