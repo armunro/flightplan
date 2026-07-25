@@ -73,7 +73,9 @@
                   :selectedIssueKey="selectedIssue?.key" 
                   :currentQuery="currentQuery"
                   :showStarredOnly="showStarredOnly"
+                  :projects="projects"
                   @select-issue="selectedIssue = $event" 
+                  @create-task="openCreateTaskDialog"
                 />
               </div>
 
@@ -92,6 +94,14 @@
       @close="showQueriesDialog = false" 
       @saved="loadFilters" 
     />
+
+    <CreateJiraTaskDialog
+      v-if="showCreateTaskDialog"
+      :issue="issueToCreate"
+      :projects="projects"
+      @close="showCreateTaskDialog = false"
+      @create="handleCreateTask"
+    />
   </div>
 </template>
 
@@ -101,6 +111,7 @@ import Navbar from './components/Navbar.vue';
 import JiraIssues from './components/JiraIssues.vue';
 import JiraIssueDetail from './components/JiraIssueDetail.vue';
 import JiraQueriesDialog from './components/JiraQueriesDialog.vue';
+import CreateJiraTaskDialog from './components/CreateJiraTaskDialog.vue';
 import { fetchJiraQueries } from './js/dashboard-api';
 
 const selectedIssue = ref(null);
@@ -109,6 +120,9 @@ const currentQuery = ref('');
 const showStarredOnly = ref(true);
 const loadingFilters = ref(false);
 const showQueriesDialog = ref(false);
+const showCreateTaskDialog = ref(false);
+const issueToCreate = ref(null);
+const projects = ref([]);
 
 // Sidebar state
 const sidebarCollapsed = ref(localStorage.getItem('jiraSidebarCollapsed') === 'true');
@@ -136,16 +150,44 @@ const selectQuery = (query) => {
 const loadFilters = async () => {
   loadingFilters.value = true;
   try {
-    const data = await fetchJiraQueries();
-    queries.value = data;
+    const [queriesData, projectsData] = await Promise.all([
+      fetchJiraQueries(),
+      fetch('/api/projects').then(res => res.json())
+    ]);
+    queries.value = queriesData;
+    projects.value = projectsData;
     if (queries.value.length > 0 && !currentQuery.value) {
       currentQuery.value = queries.value[0].jql;
     }
   } catch (e) {
-    console.error('Error loading Jira filters:', e);
+    console.error('Error loading Jira filters or projects:', e);
   } finally {
     loadingFilters.value = false;
   }
+};
+
+const openCreateTaskDialog = (issue) => {
+    issueToCreate.value = issue;
+    showCreateTaskDialog.value = true;
+};
+
+const handleCreateTask = async ({ issue, targetListId }) => {
+    try {
+        const response = await fetch(`/api/tasks/from-jira?key=${encodeURIComponent(issue.key)}&summary=${encodeURIComponent(issue.summary)}&link=${encodeURIComponent(issue.url)}&listId=${targetListId}`, {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            showCreateTaskDialog.value = false;
+            // Optionally show a toast or success message
+        } else {
+            const error = await response.text();
+            alert(`Failed to create task: ${error}`);
+        }
+    } catch (error) {
+        console.error('Error creating task:', error);
+        alert('Error creating task');
+    }
 };
 
 // Resize logic

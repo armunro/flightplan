@@ -83,10 +83,14 @@ const props = defineProps({
   showStarredOnly: {
     type: Boolean,
     default: true
+  },
+  projects: {
+    type: Array,
+    default: () => []
   }
 });
 
-const emit = defineEmits(['select-issue']);
+const emit = defineEmits(['select-issue', 'create-task']);
 
 const issues = ref([]);
 const starredKeys = ref(new Set());
@@ -257,23 +261,10 @@ const selectIssue = (issue) => {
   emit('select-issue', issue);
 };
 
-const createTask = async (issue) => {
+const createTask = (issue) => {
   if (!issue) return;
-  try {
-    const response = await fetch(`/api/tasks/from-jira?key=${encodeURIComponent(issue.key)}&summary=${encodeURIComponent(issue.summary)}&link=${encodeURIComponent(issue.url)}`, {
-      method: 'POST'
-    });
-    
-    if (response.ok) {
-      alert(`Task created for ${issue.key} in "Jira" project`);
-    } else {
-      const error = await response.text();
-      alert(`Failed to create task: ${error}`);
-    }
-  } catch (error) {
-    console.error('Error creating task:', error);
-    alert('Error creating task');
-  }
+  emit('create-task', issue);
+  closeMenu();
 };
 
 const unassignIssue = async (issue) => {

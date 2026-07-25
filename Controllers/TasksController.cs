@@ -292,20 +292,30 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("from-jira")]
-    public IActionResult CreateFromJira([FromQuery] string key, [FromQuery] string summary, [FromQuery] string link)
+    public IActionResult CreateFromJira([FromQuery] string key, [FromQuery] string summary, [FromQuery] string link, [FromQuery] Guid? listId)
     {
-        // Find or create "Jira" project
-        var project = _pm.GetAllProjects().FirstOrDefault(p => p.Name.Equals("Jira", StringComparison.OrdinalIgnoreCase));
-        if (project == null)
+        TaskList? list = null;
+
+        if (listId.HasValue)
         {
-            project = _pm.CreateProject("Jira", "Tasks created from Jira issues");
+            list = _pm.FindListById(listId.Value);
         }
 
-        // Find or create "Inbox" list in that project
-        var list = project.Lists.FirstOrDefault(l => l.Name.Equals("Inbox", StringComparison.OrdinalIgnoreCase));
         if (list == null)
         {
-            list = _pm.AddListToProject(project, "Inbox");
+            // Find or create "Jira" project
+            var project = _pm.GetAllProjects().FirstOrDefault(p => p.Name.Equals("Jira", StringComparison.OrdinalIgnoreCase));
+            if (project == null)
+            {
+                project = _pm.CreateProject("Jira", "Tasks created from Jira issues");
+            }
+
+            // Find or create "Inbox" list in that project
+            list = project.Lists.FirstOrDefault(l => l.Name.Equals("Inbox", StringComparison.OrdinalIgnoreCase));
+            if (list == null)
+            {
+                list = _pm.AddListToProject(project, "Inbox");
+            }
         }
 
         var title = $"[{key}] {summary}";
