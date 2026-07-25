@@ -1089,21 +1089,6 @@ label, .form-label {
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar-resizer {
-  width: 4px;
-  cursor: col-resize;
-  background-color: transparent;
-  transition: background-color 0.2s;
-  z-index: 10;
-  margin-left: -2px;
-  margin-right: -2px;
-  flex-shrink: 0;
-}
-
-.sidebar-resizer:hover, .sidebar-resizer:active {
-  background-color: var(--accent-blue);
-}
-
 .editing-folders .email-sidebar {
   border-right-color: var(--accent-blue);
   box-shadow: 2px 0 10px rgba(0, 123, 255, 0.2);

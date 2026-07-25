@@ -713,21 +713,6 @@ label, .form-label {
   width: 50px !important;
 }
 
-.sidebar-resizer {
-  width: 4px;
-  cursor: col-resize;
-  background-color: transparent;
-  transition: background-color 0.2s;
-  z-index: 10;
-  margin-left: -2px;
-  margin-right: -2px;
-  flex-shrink: 0;
-}
-
-.sidebar-resizer:hover, .sidebar-resizer:active {
-  background-color: var(--accent-blue);
-}
-
 .sidebar-header {
   /* height and other properties moved to global.css */
 }

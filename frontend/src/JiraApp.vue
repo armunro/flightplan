@@ -345,43 +345,6 @@ onMounted(() => {
   color: var(--text-primary);
 }
 
-.sidebar-resizer {
-  width: 4px;
-  cursor: col-resize;
-  background: transparent;
-  transition: background 0.2s;
-  z-index: 10;
-}
-
-.sidebar-resizer:hover {
-  background: var(--accent-blue);
-}
-
-.content-resizer {
-  width: 4px;
-  cursor: col-resize;
-  background: transparent;
-  transition: background 0.2s;
-  z-index: 10;
-  border-left: 1px solid var(--border-primary);
-  border-right: 1px solid var(--border-primary);
-}
-
-.content-resizer:hover {
-  background: var(--accent-blue);
-}
-
-.main-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.controls-bar {
-  /* height and other properties moved to global.css */
-}
-
 .jira-content-wrapper {
   flex-grow: 1;
   overflow: hidden;
