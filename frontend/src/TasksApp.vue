@@ -1343,6 +1343,12 @@ label, .form-label {
   border-radius: 8px;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.list:has(.show) {
+  z-index: 1000;
 }
 
 .list.collapsed {
@@ -1359,7 +1365,8 @@ label, .form-label {
   left: 0;
   width: fit-content;
   min-width: 100%;
-  z-index: 20;
+  z-index: 2;
+  background-color: var(--bg-dark);
 }
 
 .list-actions-dropdown {
@@ -1419,8 +1426,13 @@ label, .form-label {
   border-bottom: 1px solid var(--border-primary);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1;
   display: grid;
+}
+
+/* Ensure that when a row has an open dropdown, it goes above the sticky header */
+.tasks-grid:has(.show) .tasks-header-row {
+  z-index: 0;
 }
 
 .tasks-header {
