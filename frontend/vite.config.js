@@ -10,7 +10,7 @@ export default defineConfig({
   },
   build: {
     outDir: '../wwwroot/assets',
-    emptyOutDir: true,
+    emptyOutDir: false,
     assetsDir: '.',
     manifest: true,
     rollupOptions: {
@@ -26,7 +26,13 @@ export default defineConfig({
         jira: resolve(__dirname, 'jira.html'),
         debug: resolve(__dirname, 'debug.html'),
         'scheduled-tasks': resolve(__dirname, 'scheduled-tasks.html'),
+        'my-day': resolve(__dirname, 'my-day.html'),
       },
+      output: {
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
+        assetFileNames: `[name].[ext]`
+      }
     },
   },
   server: {

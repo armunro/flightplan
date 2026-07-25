@@ -1,0 +1,15 @@
+﻿@page "/MyDay"
+@using FlightPlan.Services
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "My Day";
+}
+
+<div id="app" class="p-0"></div>
+
+@section Scripts {
+    @Html.ViteAsset("my-day.html")
+}
+@section Head {
+    @Html.ViteStyle("my-day.html")
+}

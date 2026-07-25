@@ -69,6 +69,7 @@ const toggleNavbar = () => {
 
 const navItems = [
   { id: 'dashboard', name: 'Dashboard', href: '/Dashboard', icon: 'bi-grid-1x2-fill' },
+  { id: 'myday', name: 'My Day', href: '/MyDay', icon: 'bi-sun' },
   { id: 'jira', name: 'Jira', href: '/Jira', icon: 'bi-kanban' },
   { id: 'github', name: 'Github', href: '/Github', icon: 'bi-github' },
   { id: 'tasks', name: 'Tasks', href: '/Tasks', icon: 'bi-check2-square' },

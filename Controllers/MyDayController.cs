@@ -1,0 +1,119 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using FlightPlan.Services;
+using FlightPlan.Models;
+using FlightPlan.Models.Config;
+using FlightPlan.Core.Models;
+using FlightPlan.Core.Interfaces;
+
+namespace FlightPlan.Controllers;
+
+public record MyDayDto(
+    List<TaskItem> TasksDueToday,
+    List<EmailWithRulesDto> RecentEmails,
+    List<CalendarEventResponseDto> TodaysEvents,
+    bool EmailVisible,
+    bool CalendarVisible
+);
+
+[ApiController]
+[Route("api/[controller]")]
+public class MyDayController : ControllerBase
+{
+    private readonly ProjectManager _projectManager;
+    private readonly IGraphService _graphService;
+    private readonly IRuleService _ruleService;
+    private readonly DashConfig _config;
+
+    public MyDayController(ProjectManager projectManager, IGraphService graphService, IRuleService ruleService, DashConfig config)
+    {
+        _projectManager = projectManager;
+        _graphService = graphService;
+        _ruleService = ruleService;
+        _config = config;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetMyDay()
+    {
+        var today = DateTime.Today;
+        var tomorrow = today.AddDays(1);
+
+        var emailVisible = _config.PageVisibilities.FirstOrDefault(v => v.Id == "email")?.Visible ?? true;
+        var calendarVisible = _config.PageVisibilities.FirstOrDefault(v => v.Id == "calendar")?.Visible ?? true;
+
+        // 1. Tasks due today
+        var allProjects = _projectManager.GetAllProjects();
+        var tasksDueToday = new List<TaskItem>();
+        foreach (var project in allProjects)
+        {
+            foreach (var list in project.Lists)
+            {
+                tasksDueToday.AddRange(FindTasksDueToday(list.Tasks, today, tomorrow));
+            }
+        }
+
+        // 2. Recent emails (Inbox)
+        var recentEmails = new List<EmailWithRulesDto>();
+        if (emailVisible)
+        {
+            try
+            {
+                var emails = await _graphService.GetEmailsAsync("inbox", 10);
+                var rules = _ruleService.GetAllRules();
+                recentEmails = emails.Select(email => new EmailWithRulesDto(
+                    email.Id,
+                    email.Subject,
+                    email.From,
+                    email.FromAddress,
+                    email.ReceivedDateTime,
+                    email.BodyPreview,
+                    email.WebLink,
+                    rules.Where(r => _ruleService.Matches(r, email)).Select(r => new MatchingRuleDto(r.Name, r.Color))
+                        .ToList()
+                )).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the whole request
+            }
+        }
+
+        // 3. Today's events
+        var todaysEvents = new List<CalendarEventResponseDto>();
+        if (calendarVisible)
+        {
+            try
+            {
+                var events = await _graphService.GetNextEventsAsync(null, 20, today, tomorrow);
+                todaysEvents = events.Select(e => new CalendarEventResponseDto(
+                    e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId
+                )).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the whole request
+            }
+        }
+
+        return Ok(new MyDayDto(tasksDueToday, recentEmails, todaysEvents, emailVisible, calendarVisible));
+    }
+
+    private List<TaskItem> FindTasksDueToday(List<TaskItem> tasks, DateTime today, DateTime tomorrow)
+    {
+        var result = new List<TaskItem>();
+        foreach (var task in tasks)
+        {
+            if (!task.IsCompleted && task.End.HasValue && task.End.Value >= today && task.End.Value < tomorrow)
+            {
+                result.Add(task);
+            }
+            
+            // Recurse into subtasks
+            if (task.Subtasks.Any())
+            {
+                result.AddRange(FindTasksDueToday(task.Subtasks, today, tomorrow));
+            }
+        }
+        return result;
+    }
+}
