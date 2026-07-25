@@ -76,24 +76,27 @@
             </div>
           </div>
 
-          <div class="github-content-wrapper">
-            <div class="row g-0 h-100">
-              <!-- GitHub PRs List Section -->
-              <div class="col-5 h-100 border-end border-secondary overflow-auto module-list-pane">
-                <GitHubPrs 
-                  :selectedPrUrl="selectedPr?.url" 
-                  :currentQuery="currentQuery"
-                  :showStarredOnly="showStarredOnly"
-                  @select-pr="selectedPr = $event" 
-                />
-              </div>
-
-              <!-- GitHub PR Detail Section -->
-              <div class="col-7 h-100 overflow-auto module-detail-pane">
-                <GitHubPrDetail :pr="selectedPr" />
-              </div>
-            </div>
+      <div class="github-content-wrapper">
+        <div class="d-flex h-100 overflow-hidden">
+          <!-- GitHub PRs List Section -->
+          <div class="h-100 border-end border-secondary overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%' }">
+            <GitHubPrs 
+              :selectedPrUrl="selectedPr?.url" 
+              :currentQuery="currentQuery"
+              :showStarredOnly="showStarredOnly"
+              @select-pr="selectedPr = $event" 
+            />
           </div>
+
+          <!-- Content Resizer -->
+          <div class="content-resizer" @mousedown="startContentResize"></div>
+
+          <!-- GitHub PR Detail Section -->
+          <div class="h-100 overflow-auto module-detail-pane flex-grow-1">
+            <GitHubPrDetail :pr="selectedPr" />
+          </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
@@ -122,10 +125,11 @@ const showQueriesDialog = ref(false);
 
 // Sidebar state
 const sidebarCollapsed = ref(localStorage.getItem('githubSidebarCollapsed') === 'true');
-const sidebarWidth = ref(parseInt(localStorage.getItem('githubSidebarWidth')) || 260);
+const sidebarWidth = ref(parseInt(localStorage.getItem('githubSidebarWidth')) || 230);
+const contentSplitWidth = ref(parseInt(localStorage.getItem('githubContentSplitWidth')) || 40);
 
 const sidebarStyle = computed(() => ({
-  width: sidebarCollapsed.value ? '60px' : `${sidebarWidth.value}px`
+  width: sidebarCollapsed.value ? '50px' : `${sidebarWidth.value}px`
 }));
 
 const selectedQueryName = computed(() => {
@@ -170,6 +174,33 @@ const startSidebarResize = (e) => {
 
   const onMouseUp = () => {
     localStorage.setItem('githubSidebarWidth', sidebarWidth.value);
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+// Content Resize logic
+const startContentResize = (e) => {
+  e.preventDefault();
+  const container = document.querySelector('.github-content-wrapper');
+  if (!container) return;
+  
+  const containerRect = container.getBoundingClientRect();
+  const startX = e.clientX;
+  const startPercent = contentSplitWidth.value;
+
+  const onMouseMove = (moveEvent) => {
+    const deltaX = moveEvent.clientX - startX;
+    const deltaPercent = (deltaX / containerRect.width) * 100;
+    const newPercent = Math.max(20, Math.min(80, startPercent + deltaPercent));
+    contentSplitWidth.value = newPercent;
+  };
+
+  const onMouseUp = () => {
+    localStorage.setItem('githubContentSplitWidth', contentSplitWidth.value);
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   };
@@ -289,6 +320,20 @@ onMounted(() => {
 }
 
 .sidebar-resizer:hover {
+  background: var(--accent-blue);
+}
+
+.content-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.2s;
+  z-index: 10;
+  border-left: 1px solid var(--border-primary);
+  border-right: 1px solid var(--border-primary);
+}
+
+.content-resizer:hover {
   background: var(--accent-blue);
 }
 

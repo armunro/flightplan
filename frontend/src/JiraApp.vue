@@ -65,26 +65,29 @@
             </div>
           </div>
 
-          <div class="jira-content-wrapper">
-            <div class="row g-0 h-100">
-              <!-- Jira Issues List Section -->
-              <div class="col-6 h-100 border-end border-secondary overflow-auto module-list-pane">
-                <JiraIssues 
-                  :selectedIssueKey="selectedIssue?.key" 
-                  :currentQuery="currentQuery"
-                  :showStarredOnly="showStarredOnly"
-                  :projects="projects"
-                  @select-issue="selectedIssue = $event" 
-                  @create-task="openCreateTaskDialog"
-                />
-              </div>
-
-              <!-- Jira Issue Detail Section -->
-              <div class="col-6 h-100 overflow-auto module-detail-pane">
-                <JiraIssueDetail :issue="selectedIssue" />
-              </div>
-            </div>
+      <div class="jira-content-wrapper">
+        <div class="d-flex h-100 overflow-hidden">
+          <!-- Jira Issues List Section -->
+          <div class="h-100 border-end border-secondary overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%' }">
+            <JiraIssues 
+              :selectedIssueKey="selectedIssue?.key" 
+              :currentQuery="currentQuery"
+              :showStarredOnly="showStarredOnly"
+              :projects="projects"
+              @select-issue="selectedIssue = $event" 
+              @create-task="openCreateTaskDialog"
+            />
           </div>
+
+          <!-- Content Resizer -->
+          <div class="content-resizer" @mousedown="startContentResize"></div>
+
+          <!-- Jira Issue Detail Section -->
+          <div class="h-100 overflow-auto module-detail-pane flex-grow-1">
+            <JiraIssueDetail :issue="selectedIssue" />
+          </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
@@ -127,10 +130,11 @@ const projects = ref([]);
 
 // Sidebar state
 const sidebarCollapsed = ref(localStorage.getItem('jiraSidebarCollapsed') === 'true');
-const sidebarWidth = ref(parseInt(localStorage.getItem('jiraSidebarWidth')) || 260);
+const sidebarWidth = ref(parseInt(localStorage.getItem('jiraSidebarWidth')) || 230);
+const contentSplitWidth = ref(parseInt(localStorage.getItem('jiraContentSplitWidth')) || 50);
 
 const sidebarStyle = computed(() => ({
-  width: sidebarCollapsed.value ? '60px' : `${sidebarWidth.value}px`
+  width: sidebarCollapsed.value ? '50px' : `${sidebarWidth.value}px`
 }));
 
 const selectedQueryName = computed(() => {
@@ -205,6 +209,33 @@ const startSidebarResize = (e) => {
 
   const onMouseUp = () => {
     localStorage.setItem('jiraSidebarWidth', sidebarWidth.value);
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+// Content Resize logic
+const startContentResize = (e) => {
+  e.preventDefault();
+  const container = document.querySelector('.jira-content-wrapper');
+  if (!container) return;
+  
+  const containerRect = container.getBoundingClientRect();
+  const startX = e.clientX;
+  const startPercent = contentSplitWidth.value;
+
+  const onMouseMove = (moveEvent) => {
+    const deltaX = moveEvent.clientX - startX;
+    const deltaPercent = (deltaX / containerRect.width) * 100;
+    const newPercent = Math.max(20, Math.min(80, startPercent + deltaPercent));
+    contentSplitWidth.value = newPercent;
+  };
+
+  const onMouseUp = () => {
+    localStorage.setItem('jiraContentSplitWidth', contentSplitWidth.value);
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   };
@@ -328,6 +359,20 @@ onMounted(() => {
 }
 
 .sidebar-resizer:hover {
+  background: var(--accent-blue);
+}
+
+.content-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.2s;
+  z-index: 10;
+  border-left: 1px solid var(--border-primary);
+  border-right: 1px solid var(--border-primary);
+}
+
+.content-resizer:hover {
   background: var(--accent-blue);
 }
 
