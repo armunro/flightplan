@@ -407,7 +407,7 @@ export default {
 
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
-      context.font = '14px "Noto Sans"'; // Match your app's font
+      context.font = '0.9rem "Segoe UI", Roboto, Helvetica, Arial, sans-serif'; // Match your app's font
 
       const getTextWidth = (text) => {
         if (!text) return 0;
@@ -415,6 +415,7 @@ export default {
       };
 
       const padding = 24; // Padding and extra space
+      const datePadding = 48; // Extra padding for date columns to accommodate clear button and icons
       const newWidths = [...columnWidths.value];
 
       // 0: Task Name
@@ -475,8 +476,8 @@ export default {
       selectedProject.value.lists.forEach(l => {
         if (l.tasks) checkDates(l.tasks);
       });
-      newWidths[4] = Math.ceil(maxDateWidth + padding);
-      newWidths[5] = Math.ceil(maxDateWidth + padding);
+      newWidths[4] = Math.ceil(maxDateWidth + datePadding);
+      newWidths[5] = Math.ceil(maxDateWidth + datePadding);
 
       // 6: Est
       let maxEstWidth = getTextWidth('Est');

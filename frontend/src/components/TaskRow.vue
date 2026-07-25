@@ -337,16 +337,14 @@ export default {
                 e.preventDefault();
                 e.stopPropagation();
                 onTitleTabKeyDown(e);
-            } else if (e.key === 'Delete') {
-                onDeleteTask(e);
-            } else if (e.key === 'Backspace') {
+            } else if (e.key === 'Delete' || e.key === 'Backspace') {
                 const text = e.target.textContent || '';
                 // Use a more aggressive regex to strip all whitespace including non-breaking spaces and zero-width characters
                 const currentTitle = text.replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
-                console.log('[DEBUG_LOG] Backspace pressed. text:', JSON.stringify(text), 'currentTitle after regex:', JSON.stringify(currentTitle));
+                console.log(`[DEBUG_LOG] ${e.key} pressed. text:`, JSON.stringify(text), 'currentTitle after regex:', JSON.stringify(currentTitle));
                 const isTitleEmpty = currentTitle === '';
                 if (isTitleEmpty) {
-                    console.log('[DEBUG_LOG] isTitleEmpty is true, calling onDeleteTask');
+                    console.log(`[DEBUG_LOG] isTitleEmpty is true, calling onDeleteTask from ${e.key}`);
                     e.preventDefault();
                     onDeleteTask(e);
                 }
@@ -584,7 +582,7 @@ export default {
 .status-badge, .priority-badge, .type-badge {
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: white;
     white-space: nowrap;

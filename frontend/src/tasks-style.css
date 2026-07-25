@@ -137,10 +137,10 @@
     flex-direction: column;
 }
 .list {
-    background: var(--bg-dark);
-    border: 1px solid var(--border-primary);
+    background: transparent;
+    border: none;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     display: flex;
     flex-direction: column;
 }
@@ -179,6 +179,8 @@
     display: flex; 
     align-items: center; 
     position: relative; /* Anchor for potential absolute children if needed, though dropdown is in .list-actions-dropdown */
+    padding: 10px 0;
+    margin-bottom: 5px;
 }
 .list h3 { font-size: 1.1em; color: var(--accent-blue); display: inline-block; margin: 0; padding-bottom: 2px; }
 
@@ -264,7 +266,7 @@
     display: flex; 
     flex-direction: column; 
     width: 100%; 
-    background-color: var(--bg-darker); 
+    background-color: transparent; 
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
     overflow: visible;
@@ -278,7 +280,7 @@
 .grid-header-row { 
     display: grid; 
     gap: 0; 
-    background-color: var(--bg-dark); 
+    background-color: transparent; 
     position: relative; 
     border-bottom: 1px solid var(--border-primary); 
     min-width: fit-content; 
@@ -394,13 +396,13 @@
 /* Actually, the defaults should handle this now. */
 
 .tasks-cell { 
-    padding: 6px 12px; 
+    padding: 8px 12px; 
     display: flex; 
     align-items: center; 
-    min-height: 32px; 
-    background-color: var(--bg-darker); 
+    min-height: 40px; 
+    background-color: transparent; 
     position: relative; 
-    border-right: 1px solid var(--border-primary); 
+    border-right: none; 
     box-sizing: border-box; 
     overflow: visible;
 }
@@ -411,17 +413,17 @@
 .tasks-header { 
     font-weight: 600; 
     color: var(--text-muted); 
-    font-size: 0.85em; 
+    font-size: 0.9em; 
     text-transform: uppercase; 
     padding: 8px 12px; 
-    border-right: 1px solid var(--border-primary); 
+    border-right: none; 
     box-sizing: border-box; 
     overflow: hidden;
     position: relative;
 }
 .tasks-header:first-child { border-left: none !important; }
 .grid-header { font-weight: 600; color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; padding: 8px 12px; }
-.date-cell { font-size: 0.85em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.date-cell { font-size: 0.9em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .link-cell { justify-content: center; }
 .task-link { color: var(--accent-blue); text-decoration: none; font-size: 0.9em; font-weight: 600; }
 .task-link:hover { text-decoration: underline; color: var(--text-primary); }
@@ -464,7 +466,7 @@
 .subtask-indent { color: var(--text-muted); font-size: 0.95em; position: relative; padding-left: var(--indent-padding, 20px); }
 .subtask-indent::before { content: '└'; position: absolute; left: calc(var(--indent-padding, 20px) - 15px); color: var(--border-primary); }
 
-.priority { font-weight: 700; font-size: 0.7em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
+.priority { font-weight: 700; font-size: 0.9em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
 .priority-Critical { background: #ff0000; color: #ffffff; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 .priority-Highest { background: #ff4500; color: #ffffff; }
 .priority-High { background: #ffa500; color: #000000; }
@@ -528,7 +530,7 @@
 .priority-select:focus { outline: 1px solid var(--accent-blue); }
 
 .priority-badge { cursor: pointer; }
-.status-badge { font-weight: 700; font-size: 0.7em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
+.status-badge { font-weight: 700; font-size: 0.9em; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
 
 .add-row { color: var(--text-muted); cursor: pointer; font-style: italic; font-size: 0.9em; }
 .add-row:hover { color: var(--text-primary); background-color: var(--bg-card); }
