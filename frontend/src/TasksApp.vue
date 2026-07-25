@@ -176,7 +176,7 @@
                     <button class="list-actions-btn" @click.stop="onAddTask(list.id, selectedProject)" title="Add Task">+</button>
                     <button class="list-actions-btn" @click.stop="onListMenu($event, list.id)" title="List Actions">...</button>
                     <div v-if="listMenu.visible && listMenu.listId === list.id" 
-                         class="dropdown-menu show dropdown-menu-end" 
+                         class="dropdown-menu show dropdown-menu-end active-list-menu" 
                          style="position: absolute; right: 0; top: 100%;"
                          @click.stop>
                       <div class="dropdown-item delete" @click="onDeleteListFromMenu">Delete List</div>
@@ -1359,7 +1359,12 @@ label, .form-label {
   min-width: 0;
 }
 
-.list:has(.show) .list-header {
+.list:has(.active-list-menu) .list-header {
+  z-index: 2000;
+}
+
+/* Ensure that when a row has an open dropdown, the header stays below it */
+.tasks-grid:has(.show) .list-header {
   z-index: 1;
 }
 
@@ -1425,6 +1430,10 @@ label, .form-label {
 
 .resizer:hover {
   background: var(--accent-blue);
+}
+
+.list:has(.active-list-menu) .tasks-header-row {
+  z-index: 1;
 }
 
 .tasks-header-row {
