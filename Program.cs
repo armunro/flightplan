@@ -188,4 +188,4 @@ using (var scope = app.Services.CreateScope())
     await scheduledTaskService.InitializeSchedulesAsync();
 }
 
-app.Run();
+app.Run("http://localhost:5155");
