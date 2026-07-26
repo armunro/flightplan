@@ -121,11 +121,11 @@ const allPages = [
 ];
 
 const categories = [
-  { id: 'jira', name: 'Jira', icon: 'bi bi-jira', color: '#0052CC' },
-  { id: 'github', name: 'GitHub', icon: 'bi bi-github', color: '#333' },
-  { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft', color: '#00a4ef' },
-  { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye', color: '#6f42c1' },
-  { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette', color: '#e83e8c' }
+  { id: 'jira', name: 'Jira', icon: 'bi bi-kanban text-white', color: '#0052CC' },
+  { id: 'github', name: 'GitHub', icon: 'bi bi-github text-white', color: '#333' },
+  { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft text-white', color: '#00a4ef' },
+  { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye text-white', color: '#6f42c1' },
+  { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette text-white', color: '#e83e8c' }
 ];
 
 const activeCategory = ref('jira');

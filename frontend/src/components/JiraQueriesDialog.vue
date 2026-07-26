@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content jira-queries-dialog">
       <div class="modal-header">
-        <h3><i class="bi bi-jira me-2"></i>Jira Queries</h3>
+        <h3><i class="bi bi-kanban me-2"></i>Jira Queries</h3>
         <button class="close-btn" @click="$emit('close')">&times;</button>
       </div>
       <div class="modal-body">

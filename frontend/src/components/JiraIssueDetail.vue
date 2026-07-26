@@ -2,7 +2,7 @@
   <div class="h-100 d-flex flex-column bg-dark text-light overflow-hidden">
     <div v-if="!issue" class="flex-grow-1 d-flex align-items-center justify-content-center text-muted fst-italic">
       <div class="text-center">
-        <i class="bi bi-jira display-1 mb-3 opacity-25"></i>
+        <i class="bi bi-kanban display-1 mb-3 opacity-25"></i>
         <p>Select an issue to view details</p>
       </div>
     </div>
