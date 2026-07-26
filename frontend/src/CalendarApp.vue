@@ -51,23 +51,11 @@
                     </div>
                   </div>
                 </div>
-                <div v-if="!sidebarCollapsed" class="dropdown color-selector">
-                  <button class="btn btn-sm btn-icon p-0 border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" @click.stop title="Set Color">
-                    <i class="bi bi-palette" :style="folder.color ? { color: folder.color } : {}"></i>
-                  </button>
-                  <div class="dropdown-menu p-2 color-grid" @click.stop>
-                    <div class="d-flex flex-wrap gap-2">
-                      <div v-for="color in availableColors" 
-                           :key="color" 
-                           class="color-option" 
-                           :style="{ backgroundColor: color || 'transparent' }"
-                           :class="{ 'border': !color, 'active': folder.color === color }"
-                           @click="setColor(folder.id, color)">
-                        <i v-if="!color" class="bi bi-x small text-danger"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ColorPicker v-if="!sidebarCollapsed" 
+                             :modelValue="folder.color" 
+                             @update:modelValue="setColor(folder.id, $event)"
+                             size="sm" 
+                             palette-placement="bottom-end" />
                 <template v-if="!sidebarCollapsed">
                   <button class="btn btn-sm btn-icon p-0 border-0" @click.stop="moveFolder(folder, -1)" :disabled="folderIndex === 0" title="Move Up">
                     <i class="bi bi-chevron-up"></i>
@@ -118,6 +106,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
+import ColorPicker from './components/ColorPicker.vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -405,13 +394,6 @@ const availableIcons = [
   'bi-person', 'bi-people', 'bi-briefcase', 'bi-house', 'bi-heart', 'bi-star', 'bi-flag'
 ];
 
-const availableColors = [
-  '', '#ff4d4d', '#ff944d', '#ffdb4d', '#94ff4d', '#4dff94', '#4dffff', '#4d94ff', '#944dff', '#ff4dff',
-  '#ffffff', '#b3b3b3', '#666666',
-  '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#1abc9c', '#3498db', '#9b59b6', '#34495e',
-  '#c0392b', '#d35400', '#f39c12', '#27ae60', '#16a085', '#2980b9', '#8e44ad', '#2c3e50'
-];
-
 const getFolderIcon = (folder) => {
   if (folder.customIcon) return folder.customIcon;
   return 'bi-calendar';
@@ -566,39 +548,8 @@ onMounted(() => {
   color: var(--accent-blue);
 }
 
-.icon-selector .dropdown-toggle::after,
-.color-selector .dropdown-toggle::after {
+.icon-selector .dropdown-toggle::after {
   display: none;
-}
-
-.color-grid {
-  min-width: 120px;
-}
-
-.color-option {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid transparent;
-  transition: transform 0.2s, border-color 0.2s;
-}
-
-.color-option:hover {
-  transform: scale(1.2);
-  border-color: var(--accent-blue);
-}
-
-.color-option.active {
-  border-color: white;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.color-option.border {
-  border: 1px dashed #666;
 }
 
 .folder-icon-wrapper {

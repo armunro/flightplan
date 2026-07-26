@@ -28,7 +28,7 @@
             <div class="card-body p-2">
               <div v-for="(color, colorIdx) in scheme.colors" :key="colorIdx" class="d-flex align-items-center mb-2">
                 <input v-model="color.name" type="text" class="form-control form-control-sm bg-dark text-light border-secondary me-2" style="flex: 2" placeholder="Color Name">
-                <input v-model="color.color" type="color" class="form-control form-control-sm form-control-color bg-dark border-secondary me-2" style="width: 40px; padding: 2px;">
+                <input v-model="color.color" type="color" class="form-control form-control-color form-control-sm bg-dark border-secondary me-2" style="width: 40px; height: 31px; padding: 2px;">
                 
                 <div class="dropdown me-2">
                   <button class="btn btn-sm btn-outline-info dropdown-toggle no-caret" type="button" data-bs-toggle="dropdown" title="Coordinate Colors">

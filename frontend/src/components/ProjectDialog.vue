@@ -32,10 +32,7 @@
 
           <div class="form-group mb-3">
             <label class="form-label">Project Color</label>
-            <div class="d-flex align-items-center gap-2">
-              <input v-model="form.color" type="color" class="form-color-input">
-              <input v-model="form.color" type="text" class="form-control" placeholder="#000000">
-            </div>
+            <ColorPicker v-model="form.color" show-text />
           </div>
 
           <div class="form-group mb-3">
@@ -47,7 +44,7 @@
         <div v-if="activeTab === 'statuses'" class="tab-content">
           <div v-for="(status, index) in form.statuses" :key="status.id || index" class="item-edit-row mb-2">
             <input v-model="status.name" type="text" class="form-control form-control-sm" placeholder="Status Name">
-            <input v-model="status.color" type="color" class="form-color-input-sm">
+            <ColorPicker v-model="status.color" size="sm" palette-placement="top-start" />
             <div class="form-check">
               <input class="form-check-input" type="checkbox" v-model="status.isCompletedState" :id="'completed-' + index">
               <label class="form-check-label text-nowrap" :for="'completed-' + index">Done</label>
@@ -65,7 +62,7 @@
           <div v-for="(type, index) in form.taskTypes" :key="type.id || index" class="item-edit-row mb-2">
             <input v-model="type.name" type="text" class="form-control form-control-sm" placeholder="Type Name">
             <input v-model="type.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-tag)">
-            <input v-model="type.color" type="color" class="form-color-input-sm">
+            <ColorPicker v-model="type.color" size="sm" palette-placement="top-start" />
             <button class="btn btn-sm btn-outline-danger" @click="removeTaskType(index)" title="Remove Type">
               <i class="bi bi-trash"></i>
             </button>
@@ -79,7 +76,7 @@
           <div v-for="(priority, index) in form.priorities" :key="priority.id || index" class="item-edit-row mb-2">
             <input v-model="priority.name" type="text" class="form-control form-control-sm" placeholder="Priority Name">
             <input v-model="priority.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-dash-lg)">
-            <input v-model="priority.color" type="color" class="form-color-input-sm">
+            <ColorPicker v-model="priority.color" size="sm" palette-placement="top-start" />
             <button class="btn btn-sm btn-outline-danger" @click="removePriority(index)" title="Remove Priority">
               <i class="bi bi-trash"></i>
             </button>
@@ -108,9 +105,13 @@
 
 <script>
 import { ref, reactive, onMounted, computed } from 'vue';
+import ColorPicker from './ColorPicker.vue';
 
 export default {
   name: 'ProjectDialog',
+  components: {
+    ColorPicker
+  },
   props: {
     project: {
       type: Object,

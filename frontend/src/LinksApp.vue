@@ -47,7 +47,7 @@
               <div class="controls-bar">
                 <div class="category-title-area d-flex align-items-center gap-3">
                   <template v-if="selectedCategory">
-                    <input type="color" v-model="selectedCategory.color" class="form-control form-control-color bg-transparent border-0 p-0" style="width: 24px; height: 24px;" />
+                    <ColorPicker v-model="selectedCategory.color" size="sm" />
                     <h2 class="mb-0 text-truncate" style="max-width: 300px;">{{ selectedCategory.name }}</h2>
                     <button class="btn btn-sm btn-link text-info p-0" @click="editCategory(selectedCategory)" title="Edit Category">
                       <i class="bi bi-pencil"></i>
@@ -185,10 +185,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label text-info small fw-bold">Color</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="color" v-model="tempCategory.color" class="form-control form-control-color bg-transparent border-0 p-0" style="width: 38px; height: 38px;" />
-                  <input v-model="tempCategory.color" class="form-control bg-darker border-secondary text-light" placeholder="#000000" />
-                </div>
+                <ColorPicker v-model="tempCategory.color" show-text size="lg" palette-placement="top-start" />
               </div>
             </div>
             <div class="modal-footer border-secondary justify-content-between">
@@ -210,6 +207,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
+import ColorPicker from './components/ColorPicker.vue';
 
 import CategoryTree from './components/CategoryTree.vue';
 
