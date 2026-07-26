@@ -44,5 +44,7 @@ icons/
 # Frontend node_modules and build artifacts
 node_modules/
 
-wwwroot/
+# Ignore wwwroot assets (build output) but keep favicon.ico
+wwwroot/assets/
+!wwwroot/favicon.ico
 /frontend/package.json.build-stamp
