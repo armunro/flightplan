@@ -29,11 +29,22 @@
  
 
 
-    <Target Name="BuildFrontend" BeforeTargets="BeforeBuild">
+    <Target Name="BuildFrontend" BeforeTargets="BeforeBuild" Inputs="$(SpaRoot)src\**;$(SpaRoot)package.json;$(SpaRoot)package-lock.json" Outputs="$(SpaRoot)package.json.build-stamp">
         <Message Importance="high" Text="--- Building Frontend (Configuration: $(Configuration)) ---" />
         <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
         <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+        <Touch Files="$(SpaRoot)package.json.build-stamp" AlwaysCreate="true" />
     </Target>
+
+    <ItemGroup>
+        <UpToDateCheckInput Include="$(SpaRoot)src\**" />
+        <UpToDateCheckInput Include="$(SpaRoot)package.json" />
+        <UpToDateCheckInput Include="$(SpaRoot)package-lock.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FileWrites Include="$(SpaRoot)package.json.build-stamp" />
+    </ItemGroup>
 
     <Target Name="PublishFrontend" BeforeTargets="ComputeFilesToPublish" Condition="'$(Configuration)' == 'Release'">
         <Message Importance="high" Text="--- Building Frontend (Release) ---" />

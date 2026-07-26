@@ -45,3 +45,4 @@ icons/
 node_modules/
 
 wwwroot/
+/frontend/package.json.build-stamp
