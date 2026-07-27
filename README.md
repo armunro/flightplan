@@ -56,7 +56,7 @@ Simply open `FlightPlan.sln` and run the project. The MSBuild targets are config
 dotnet build
 dotnet run
 ```
-The application will be available at `http://localhost:5000` (or the configured port). It automatically redirects to `/dashboard`.
+The application will be available at `http://localhost:5155` (or the configured port). It automatically redirects to `/dashboard`.
 
 ## Project Structure
 
