@@ -161,8 +161,8 @@
                 <div class="email-item-content">
                   <div class="email-item-top">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="email-sender" :title="email.fromAddress">{{ email.from }}</span>
-                      <span class="email-address text-light small opacity-75">&lt;{{ email.fromAddress }}&gt;</span>
+                      <span class="email-sender fs-base" :title="email.fromAddress">{{ email.from }}</span>
+                      <span class="email-address text-light fs-xs opacity-75">&lt;{{ email.fromAddress }}&gt;</span>
                       <div v-if="email.matchingRules && email.matchingRules.length > 0" class="email-item-tags d-flex gap-1 ms-1">
                         <span v-for="rule in email.matchingRules" 
                               :key="rule.name" 
@@ -1336,7 +1336,7 @@ label, .form-label {
 }
 
 .email-date {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   flex-shrink: 0;
   margin-left: 10px;
@@ -1344,7 +1344,7 @@ label, .form-label {
 }
 
 .email-item-details {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -1394,7 +1394,7 @@ label, .form-label {
 }
 
 .rule-tag {
-  font-size: 0.7rem;
+  font-size: var(--fs-xxs);
   padding: 1px 6px;
   background-color: var(--accent-blue);
   color: white;

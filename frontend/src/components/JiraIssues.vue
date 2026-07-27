@@ -23,14 +23,14 @@
           <div class="flex-grow-1">
             <div class="d-flex w-100 justify-content-between align-items-center">
               <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
-                <h6 class="mb-1 text-info me-2 fw-bold text-nowrap">{{ issue.key }}</h6>
-                <h7 class="mb-1 text-light text-truncate">{{ issue.summary }}</h7>
+                <h6 class="mb-1 text-info me-2 fw-bold text-nowrap fs-base">{{ issue.key }}</h6>
+                <h7 class="mb-1 text-light text-truncate fs-base">{{ issue.summary }}</h7>
               </div>
-              <small class="badge bg-secondary text-light fw-bold" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</small>
+              <small class="badge bg-secondary text-light fw-bold fs-xs" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</small>
             </div>
             <div class="d-flex w-100 justify-content-between align-items-center mt-1">
-              <small class="text-secondary">Priority: <span :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span></small>
-              <small class="text-secondary">
+              <small class="text-secondary fs-xs">Priority: <span :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span></small>
+              <small class="text-secondary fs-xs">
                 <i class="bi bi-person"></i> {{ issue.assignee || 'Unassigned' }}
               </small>
             </div>

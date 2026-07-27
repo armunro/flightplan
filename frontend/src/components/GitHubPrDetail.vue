@@ -13,7 +13,7 @@
             <ol class="breadcrumb mb-2">
               <li class="breadcrumb-item">
                 <a :href="pr.url" target="_blank" class="text-info text-decoration-none fw-bold">
-                  {{ pr.repository }} #{{ pr.url.split('/').pop() }}
+                  {{ pr.repository }} #{{ pr.number }}
                 </a>
               </li>
             </ol>

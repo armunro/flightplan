@@ -818,7 +818,7 @@ label, .form-label {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.2;
 }
 
@@ -828,10 +828,11 @@ label, .form-label {
   -webkit-box-orient: vertical;
   overflow: hidden;
   color: #aab2bb !important;
+  font-size: var(--fs-xs);
 }
 
 .tile-url {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--text-primary) !important;
   opacity: 0.7;
 }

@@ -332,7 +332,7 @@ onUnmounted(() => {
   border-left: 3px solid transparent;
   min-width: 0;
   overflow: hidden;
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
 }
 
 .file-sidebar.collapsed .file-item {

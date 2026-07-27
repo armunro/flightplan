@@ -1297,11 +1297,11 @@ label, .form-label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .project-task-count {
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   background-color: var(--bg-darker);
   padding: 2px 6px;
@@ -1407,7 +1407,7 @@ label, .form-label {
 
 .list-header h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   flex-grow: 1;
 }
@@ -1452,7 +1452,7 @@ label, .form-label {
 
 .tasks-header {
   padding: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;

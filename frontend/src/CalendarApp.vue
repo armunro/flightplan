@@ -28,7 +28,7 @@
                 <i class="bi" :class="getFolderIcon(folder)"></i>
               </div>
               <div v-if="!sidebarCollapsed" class="d-flex align-items-center flex-grow-1 min-w-0">
-                <span v-if="!isEditingFolders" class="folder-name">{{ folder.displayName }}</span>
+                <span v-if="!isEditingFolders" class="folder-name fs-base">{{ folder.displayName }}</span>
                 <input v-else-if="isEditingFolders" 
                        class="folder-name-input" 
                        :value="folder.displayName"

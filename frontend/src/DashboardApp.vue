@@ -5,7 +5,7 @@
       <div class="container-fluid">
         <header class="mb-3 mt-1">
           <h1 class="display-6 fw-bold text-light">Welcome back</h1>
-          <p class="text-muted lead fs-7" style="font-size: 0.85rem;">Here's what's happening across your projects today.</p>
+          <p class="text-muted fs-md">Here's what's happening across your projects today.</p>
         </header>
 
         <div class="row g-4 mb-5">
@@ -17,7 +17,7 @@
                     <i class="bi" :class="item.icon"></i>
                   </div>
                   <h3 class="card-title h6 mb-2 text-light">{{ item.name }}</h3>
-                  <p class="card-text mb-3" style="font-size: 0.8rem;">{{ item.description }}</p>
+                  <p class="card-text mb-3 fs-sm">{{ item.description }}</p>
                   <div class="mt-auto d-flex align-items-center text-primary-link">
                     <span class="small fw-bold">Open Module</span>
                     <i class="bi bi-arrow-right ms-2 transition-icon"></i>

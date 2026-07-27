@@ -20,16 +20,16 @@
           </div>
           <div class="flex-grow-1 overflow-hidden">
             <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-              <h6 class="mb-0 text-info text-truncate me-2">
+              <h6 class="mb-0 text-info text-truncate me-2 fs-base">
                 {{ pr.title }}
-                <span v-if="pr.isDraft" class="badge bg-secondary text-dark ms-1" style="font-size: 0.7em; vertical-align: middle; opacity: 0.8;">DRAFT</span>
+                <span v-if="pr.isDraft" class="badge bg-secondary text-dark ms-1 fs-xxs" style="vertical-align: middle; opacity: 0.8;">DRAFT</span>
               </h6>
-              <small class="fw-bold flex-shrink-0" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</small>
+              <small class="fw-bold flex-shrink-0 fs-xs" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</small>
             </div>
-            <p class="mb-1 small text-light">{{ pr.repository }}</p>
+            <p class="mb-1 fs-sm text-light">{{ pr.repository }}</p>
             <div class="d-flex justify-content-between align-items-center">
-              <small class="text-secondary">by {{ pr.author }} on {{ formatDate(pr.createdAt) }}</small>
-              <span class="badge rounded-pill bg-dark border border-secondary text-muted px-2" v-if="pr.number">#{{ pr.number }}</span>
+              <small class="text-secondary fs-xs">by {{ pr.author }} on {{ formatDate(pr.createdAt) }}</small>
+              <span class="badge rounded-pill bg-dark border border-secondary text-muted px-2 fs-xs" v-if="pr.number">#{{ pr.number }}</span>
             </div>
           </div>
         </div>

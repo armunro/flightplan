@@ -142,11 +142,11 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
 }
 
 .category-link-count {
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   background-color: var(--bg-darker);
   padding: 1px 6px;

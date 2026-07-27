@@ -27,7 +27,7 @@
             <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-calendar3 me-2 text-info"></i>
-                <h6 class="mb-0 text-primary">Today's Events</h6>
+                <h6 class="mb-0 text-primary fs-base">Today's Events</h6>
                 <span class="badge bg-secondary ms-auto text-light small">{{ data.todaysEvents.length }}</span>
               </div>
               <div class="card-body p-0 overflow-auto">
@@ -38,8 +38,8 @@
                   <div v-for="event in data.todaysEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-3">
                     <div class="d-flex justify-content-between align-items-start">
                       <div class="event-details">
-                        <div class="fw-bold small text-primary">{{ event.subject }}</div>
-                        <div class="text-muted extra-small mt-1">
+                        <div class="fw-bold fs-sm text-primary">{{ event.subject }}</div>
+                        <div class="text-muted fs-xs mt-1">
                           <i class="bi bi-clock me-1"></i>
                           {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
                           <span v-if="event.location" class="ms-2">
@@ -62,7 +62,7 @@
             <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-check2-square me-2 text-success"></i>
-                <h6 class="mb-0 text-primary">Tasks Due Today</h6>
+                <h6 class="mb-0 text-primary fs-base">Tasks Due Today</h6>
                 <span class="badge bg-secondary ms-auto text-light small">{{ data.tasksDueToday.length }}</span>
               </div>
               <div class="card-body p-0 overflow-auto">
@@ -74,8 +74,8 @@
                     <div class="d-flex align-items-center">
                       <input type="checkbox" class="form-check-input me-3" @change="completeTask(task)">
                       <div class="task-info overflow-hidden">
-                        <div class="text-truncate small text-primary" :title="task.title">{{ task.title }}</div>
-                        <div class="text-muted extra-small mt-1">
+                        <div class="text-truncate fs-sm text-primary" :title="task.title">{{ task.title }}</div>
+                        <div class="text-muted fs-xs mt-1">
                           <span v-if="task.estimateMinutes" class="me-2">
                             <i class="bi bi-hourglass-split me-1"></i>{{ formatEstimate(task.estimateMinutes) }}
                           </span>
@@ -99,7 +99,7 @@
             <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-envelope me-2 text-warning"></i>
-                <h6 class="mb-0 text-primary">Recent Emails</h6>
+                <h6 class="mb-0 text-primary fs-base">Recent Emails</h6>
                 <span class="badge bg-secondary ms-auto text-light small">{{ data.recentEmails.length }}</span>
               </div>
               <div class="card-body p-0 overflow-auto">
@@ -110,12 +110,12 @@
                   <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2">
                     <a :href="email.webLink" target="_blank" class="text-decoration-none text-reset">
                       <div class="d-flex align-items-baseline">
-                        <span class="fw-bold small text-truncate text-primary" style="max-width: 200px;">{{ email.from }}</span>
-                        <span class="mx-2 text-muted extra-small">—</span>
-                        <span class="small text-truncate text-accent-blue flex-grow-1">{{ email.subject }}</span>
-                        <span class="text-muted extra-small whitespace-nowrap ms-2">{{ formatRelativeTime(email.receivedDateTime) }}</span>
+                        <span class="fw-bold fs-sm text-truncate text-primary" style="max-width: 200px;">{{ email.from }}</span>
+                        <span class="mx-2 text-muted fs-xs">—</span>
+                        <span class="fs-sm text-truncate text-accent-blue flex-grow-1">{{ email.subject }}</span>
+                        <span class="text-muted fs-xs whitespace-nowrap ms-2">{{ formatRelativeTime(email.receivedDateTime) }}</span>
                       </div>
-                      <div class="extra-small text-muted text-truncate">{{ email.bodyPreview }}</div>
+                      <div class="fs-xs text-muted text-truncate">{{ email.bodyPreview }}</div>
                     </a>
                   </div>
                 </div>
@@ -256,7 +256,7 @@ onMounted(() => {
 }
 
 .priority-tag {
-  font-size: 0.7rem;
+  font-size: var(--fs-xxs);
   padding: 1px 4px;
   border-radius: 3px;
   text-transform: uppercase;

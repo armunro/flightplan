@@ -24,14 +24,14 @@
 
       <div class="row mb-4">
         <div class="col-md-6">
-          <div class="detail-label small text-uppercase fw-bold mb-1 opacity-75">Assignee</div>
+          <div class="detail-label fs-xxs text-uppercase fw-bold mb-1 opacity-75">Assignee</div>
           <div class="d-flex align-items-center">
             <i class="bi bi-person-circle me-2 fs-5 text-muted"></i>
             <span>{{ issue.assignee || 'Unassigned' }}</span>
           </div>
         </div>
         <div class="col-md-6">
-          <div class="detail-label small text-uppercase fw-bold mb-1 opacity-75">Status</div>
+          <div class="detail-label fs-xxs text-uppercase fw-bold mb-1 opacity-75">Status</div>
           <div class="d-flex align-items-center">
              <i class="bi bi-circle-fill me-2" :style="{ color: getStatusColor(issue.status) }"></i>
              <span>{{ issue.status }}</span>
@@ -40,7 +40,7 @@
       </div>
 
       <div class="mb-4">
-        <div class="detail-label small text-uppercase fw-bold mb-2 opacity-75">Description</div>
+        <div class="detail-label fs-xxs text-uppercase fw-bold mb-2 opacity-75">Description</div>
         <div class="description-content p-3 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
           <div v-if="issue.description" v-html="formatDescription(issue.description)" class="jira-description"></div>
           <div v-else class="text-muted fst-italic">No description provided.</div>
@@ -48,12 +48,12 @@
       </div>
 
       <div class="mb-4">
-        <div class="detail-label small text-uppercase fw-bold mb-3 opacity-75">Comments</div>
+        <div class="detail-label fs-xxs text-uppercase fw-bold mb-3 opacity-75">Comments</div>
         <div v-if="issue.comments && issue.comments.length > 0" class="comments-list">
           <div v-for="(comment, index) in issue.comments" :key="index" class="comment-item mb-3 p-3 rounded" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-bold text-info">{{ comment.author }}</span>
-              <span class="small text-muted fst-italic">{{ formatDate(comment.created) }}</span>
+              <span class="small text-muted fst-italic fs-xs">{{ formatDate(comment.created) }}</span>
             </div>
             <div v-html="formatDescription(comment.body)" class="jira-comment-body"></div>
           </div>

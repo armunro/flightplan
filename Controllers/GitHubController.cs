@@ -9,7 +9,7 @@ namespace FlightPlan.Controllers;
 public record JiraCommentResponseDto(string Author, string Body, DateTime Created);
 public record JiraIssueResponseDto(string Key, string Summary, string Status, string Priority, string Url, string? Assignee, DateTime? Created, DateTime? Updated, string? Description, List<JiraCommentResponseDto>? Comments = null);
 public record GitHubCommentResponseDto(string Author, string Body, DateTimeOffset CreatedAt);
-public record GitHubPrResponseDto(string Title, string Repository, string Author, string Status, string Url, DateTimeOffset CreatedAt, string? Body, List<GitHubCommentResponseDto>? Comments, bool IsDraft);
+public record GitHubPrResponseDto(string Title, string Repository, string Author, string Status, string Url, DateTimeOffset CreatedAt, string? Body, List<GitHubCommentResponseDto>? Comments, bool IsDraft, int Number);
 
 [ApiController]
 [Route("api/[controller]")]
@@ -48,7 +48,8 @@ public class GitHubController : ControllerBase
             p.CreatedAt, 
             p.Body, 
             p.Comments?.Select(c => new GitHubCommentResponseDto(c.Author, c.Body, c.CreatedAt)).ToList(),
-            p.IsDraft
+            p.IsDraft,
+            p.Number
         ));
         return Ok(result);
     }
