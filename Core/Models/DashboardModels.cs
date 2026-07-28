@@ -1,6 +1,7 @@
 ﻿namespace FlightPlan.Core.Models;
 
 public record JiraCommentDto(
+    string Id,
     string Author,
     string Body,
     DateTime Created);

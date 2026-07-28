@@ -12,6 +12,9 @@ public interface IDashboardService
     Task<IEnumerable<GitHubPullRequestDto>> GetMyGitHubPullRequestsAsync();
     Task<IEnumerable<GitHubPullRequestDto>> GetGitHubPullRequestsByQueryAsync(string query);
     Task<bool> UnassignJiraIssueAsync(string issueKey);
+    Task<JiraCommentDto?> AddJiraCommentAsync(string issueKey, string body);
+    Task<bool> DeleteJiraCommentAsync(string issueKey, string commentId);
+    Task<JiraUserDto?> GetCurrentJiraUserAsync();
 }
 
 public class DashboardService : IDashboardService
@@ -65,5 +68,20 @@ public class DashboardService : IDashboardService
     public Task<bool> UnassignJiraIssueAsync(string issueKey)
     {
         return CurrentJiraService.UnassignIssueAsync(issueKey);
+    }
+
+    public Task<JiraCommentDto?> AddJiraCommentAsync(string issueKey, string body)
+    {
+        return CurrentJiraService.AddCommentAsync(issueKey, body);
+    }
+
+    public Task<bool> DeleteJiraCommentAsync(string issueKey, string commentId)
+    {
+        return CurrentJiraService.DeleteCommentAsync(issueKey, commentId);
+    }
+
+    public Task<JiraUserDto?> GetCurrentJiraUserAsync()
+    {
+        return CurrentJiraService.GetCurrentUserAsync();
     }
 }

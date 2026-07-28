@@ -116,13 +116,14 @@ public class JiraAdapter : IJiraService
                     {
                         foreach (var cmt in commentsArray.EnumerateArray())
                         {
+                            var id = cmt.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
                             var author = cmt.TryGetProperty("author", out var auth) && auth.TryGetProperty("displayName", out var adn) ? adn.GetString() ?? "Unknown" : "Unknown";
                             var body = cmt.TryGetProperty("body", out var bdy) ? bdy.GetRawText() : "";
                             var cCreatedStr = cmt.TryGetProperty("created", out var cc) ? cc.GetString() : null;
                             var cCreated = DateTime.MinValue;
                             if (cCreatedStr != null && DateTime.TryParse(cCreatedStr, out var ccd)) cCreated = ccd;
                             
-                            comments.Add(new JiraCommentDto(author, body, cCreated));
+                            comments.Add(new JiraCommentDto(id, author, body, cCreated));
                         }
                     }
 
@@ -199,6 +200,120 @@ public class JiraAdapter : IJiraService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error unassigning Jira issue {IssueKey}", issueKey);
+            return false;
+        }
+    }
+
+    public async Task<JiraCommentDto?> AddCommentAsync(string issueKey, string body)
+    {
+        var jiraUrl = _config.Jira.Url?.TrimEnd('/');
+        var username = _config.Jira.Username;
+        var apiToken = _config.Jira.ApiToken;
+
+        if (string.IsNullOrEmpty(apiToken) || string.IsNullOrEmpty(jiraUrl))
+        {
+            _logger.LogWarning("Jira configuration is missing.");
+            return null;
+        }
+
+        try
+        {
+            using var client = new HttpClient();
+            var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{apiToken}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var requestUrl = $"{jiraUrl}/rest/api/3/issue/{issueKey}/comment";
+            
+            // Jira API v3 expects Atlassian Document Format (ADF) for the comment body
+            var adfBody = new
+            {
+                body = new
+                {
+                    type = "doc",
+                    version = 1,
+                    content = new[]
+                    {
+                        new
+                        {
+                            type = "paragraph",
+                            content = new[]
+                            {
+                                new
+                                {
+                                    type = "text",
+                                    text = body
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            var json = JsonSerializer.Serialize(adfBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(requestUrl, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Jira API (AddComment) returned {StatusCode}: {Error}", response.StatusCode, errorContent);
+                return null;
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseContent);
+            var root = doc.RootElement;
+            
+            var id = root.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
+            var author = root.TryGetProperty("author", out var auth) && auth.TryGetProperty("displayName", out var adn) ? adn.GetString() ?? "Unknown" : "Unknown";
+            var bodyAdf = root.TryGetProperty("body", out var bdy) ? bdy.GetRawText() : "";
+            var createdStr = root.TryGetProperty("created", out var cc) ? cc.GetString() : null;
+            var created = DateTime.MinValue;
+            if (createdStr != null && DateTime.TryParse(createdStr, out var ccd)) created = ccd;
+
+            return new JiraCommentDto(id, author, bodyAdf, created);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding comment to Jira issue {IssueKey}", issueKey);
+            return null;
+        }
+    }
+
+    public async Task<bool> DeleteCommentAsync(string issueKey, string commentId)
+    {
+        var jiraUrl = _config.Jira.Url?.TrimEnd('/');
+        var username = _config.Jira.Username;
+        var apiToken = _config.Jira.ApiToken;
+
+        if (string.IsNullOrEmpty(apiToken) || string.IsNullOrEmpty(jiraUrl))
+        {
+            _logger.LogWarning("Jira configuration is missing.");
+            return false;
+        }
+
+        try
+        {
+            using var client = new HttpClient();
+            var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{apiToken}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+
+            var requestUrl = $"{jiraUrl}/rest/api/3/issue/{issueKey}/comment/{commentId}";
+            var response = await client.DeleteAsync(requestUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Jira API (DeleteComment) returned {StatusCode}: {Error}", response.StatusCode, errorContent);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting comment {CommentId} from Jira issue {IssueKey}", commentId, issueKey);
             return false;
         }
     }
@@ -290,5 +405,45 @@ public class JiraAdapter : IJiraService
                 }
             }
         }
+    }
+    public async Task<JiraUserDto?> GetCurrentUserAsync()
+    {
+        var jiraUrl = _config.Jira.Url?.TrimEnd('/');
+        var username = _config.Jira.Username;
+        var apiToken = _config.Jira.ApiToken;
+
+        if (string.IsNullOrEmpty(apiToken) || string.IsNullOrEmpty(jiraUrl))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var client = new HttpClient();
+            var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{apiToken}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+
+            var requestUrl = $"{jiraUrl}/rest/api/3/myself";
+            var response = await client.GetAsync(requestUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+                
+                return new JiraUserDto(
+                    root.GetProperty("accountId").GetString() ?? "",
+                    root.GetProperty("displayName").GetString() ?? "",
+                    root.TryGetProperty("emailAddress", out var email) ? email.GetString() ?? "" : ""
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching current Jira user");
+        }
+
+        return null;
     }
 }

@@ -54,10 +54,22 @@
       <div class="mb-4">
         <div class="detail-label fs-xxs text-uppercase fw-bold mb-3 opacity-75">Comments</div>
         <div v-if="issue.comments && issue.comments.length > 0" class="comments-list">
-          <div v-for="(comment, index) in issue.comments" :key="index" class="comment-item mb-3 p-3 rounded w-100" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
+          <div v-for="(comment, index) in issue.comments" :key="comment.id || index" class="comment-item mb-3 p-3 rounded w-100" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-bold text-info">{{ comment.author }}</span>
-              <span class="small text-muted fst-italic fs-xs">{{ formatDate(comment.created) }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted fst-italic fs-xs">{{ formatDate(comment.created) }}</span>
+                <button 
+                  v-if="canDelete(comment)" 
+                  @click="deleteComment(comment)" 
+                  class="btn btn-link p-0 text-danger opacity-50 hover-opacity-100" 
+                  title="Delete comment"
+                  :disabled="deletingId === comment.id"
+                >
+                  <span v-if="deletingId === comment.id" class="spinner-border spinner-border-sm" role="status"></span>
+                  <i v-else class="bi bi-trash fs-xs"></i>
+                </button>
+              </div>
             </div>
             <div v-html="formatDescription(comment.body)" class="jira-comment-body w-100"></div>
           </div>
@@ -66,18 +78,143 @@
           No comments yet.
         </div>
       </div>
+
+      <div v-if="issue.comments !== undefined" class="mb-4">
+        <div class="detail-label fs-xxs text-uppercase fw-bold mb-3 opacity-75">Add Comment</div>
+        <div class="p-3 rounded add-comment-container" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+          <textarea 
+            v-model="newComment" 
+            class="form-control bg-dark text-light border-secondary mb-2" 
+            rows="3" 
+            placeholder="Type your comment here..."
+            :disabled="isSubmitting"
+          ></textarea>
+          <div class="d-flex justify-content-end">
+            <button 
+              @click="submitComment" 
+              class="btn btn-sm btn-primary px-3" 
+              :disabled="!newComment.trim() || isSubmitting"
+            >
+              <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              <i v-else class="bi bi-chat-left-text me-1"></i>
+              Add Comment
+            </button>
+          </div>
+          <div v-if="submitError" class="text-danger small mt-2">
+            {{ submitError }}
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+
 const props = defineProps({
   issue: {
     type: Object,
     default: null
   }
 });
+
+const newComment = ref('');
+const isSubmitting = ref(false);
+const submitError = ref(null);
+const deletingId = ref(null);
+const currentUser = ref(null);
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/jira/myself');
+    if (response.ok) {
+      currentUser.value = await response.json();
+    }
+  } catch (e) {
+    console.error('Failed to fetch current user', e);
+  }
+});
+
+const canDelete = (comment) => {
+  if (!comment || !comment.id) return false;
+  
+  const author = comment.author?.toLowerCase() || '';
+  
+  // Demo Mode check
+  if (author === 'you' || author.includes('(demo)')) return true;
+  
+  // Check against current user from API
+  if (currentUser.value) {
+    const currentName = currentUser.value.displayName?.toLowerCase() || '';
+    if (author === currentName) return true;
+  }
+  
+  return false;
+};
+
+const deleteComment = async (comment) => {
+  if (!comment || !comment.id || !props.issue) return;
+  if (!confirm('Are you sure you want to delete this comment?')) return;
+  
+  deletingId.value = comment.id;
+  
+  try {
+    const response = await fetch(`/api/jira/comment?key=${props.issue.key}&id=${comment.id}`, {
+      method: 'DELETE'
+    });
+    
+    if (response.ok) {
+      // Remove from local list
+      props.issue.comments = props.issue.comments.filter(c => c.id !== comment.id);
+    } else {
+      const errorText = await response.text();
+      alert(`Failed to delete comment: ${errorText || response.statusText}`);
+    }
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  } finally {
+    deletingId.value = null;
+  }
+};
+
+const submitComment = async () => {
+  if (!newComment.value.trim() || !props.issue) return;
+  
+  isSubmitting.value = true;
+  submitError.value = null;
+  
+  try {
+    const response = await fetch(`/api/jira/comment?key=${props.issue.key}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ body: newComment.value })
+    });
+    
+    if (response.ok) {
+      const createdComment = await response.json();
+      
+      // Add the comment locally for immediate feedback
+      if (!props.issue.comments) {
+        props.issue.comments = [];
+      }
+      
+      props.issue.comments.push(createdComment);
+      
+      newComment.value = '';
+    } else {
+      const errorText = await response.text();
+      submitError.value = `Failed to add comment: ${errorText || response.statusText}`;
+    }
+  } catch (e) {
+    submitError.value = `Error: ${e.message}`;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
 
 const getStatusColor = (status) => {
   if (!status) return '#aab2bb';
@@ -242,5 +379,18 @@ const formatDate = (dateStr) => {
   white-space: nowrap;
   display: inline-block;
   font-weight: 600;
+}
+
+.add-comment-container:focus-within {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 1px var(--accent-blue);
+}
+
+.hover-opacity-100:hover {
+  opacity: 1 !important;
+}
+
+.fs-xs {
+  font-size: 0.75rem !important;
 }
 </style>

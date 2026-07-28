@@ -26,7 +26,8 @@ public class MockJiraService : IJiraService
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"The dashboard layout is broken on mobile devices. We need to fix the CSS grid.\"}]}]}",
                 "Bug",
                 new List<JiraCommentDto> {
-                    new JiraCommentDto("Manager", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Please prioritize this for the next release.\"}]}]}", DateTime.Now.AddDays(-1))
+                    new JiraCommentDto("1001", "Manager", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Please prioritize this for the next release.\"}]}]}", DateTime.Now.AddDays(-1)),
+                    new JiraCommentDto("1002", "You (Demo)", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"I am working on this right now.\"}]}]}", DateTime.Now.AddMinutes(-30))
                 }
             ),
             new JiraIssueDto(
@@ -89,5 +90,42 @@ public class MockJiraService : IJiraService
             return Task.FromResult(true);
         }
         return Task.FromResult(false);
+    }
+
+    public Task<JiraCommentDto?> AddCommentAsync(string issueKey, string body)
+    {
+        var issue = _mockIssues.FirstOrDefault(i => i.Key == issueKey);
+        if (issue != null && issue.Comments != null)
+        {
+            var comment = new JiraCommentDto(
+                Guid.NewGuid().ToString(),
+                "You (Demo)",
+                $"{{\"type\":\"doc\",\"version\":1,\"content\":[{{\"type\":\"paragraph\",\"content\":[{{\"type\":\"text\",\"text\":\"{body}\"}}]}}]}}",
+                DateTime.Now
+            );
+            issue.Comments.Add(comment);
+            return Task.FromResult<JiraCommentDto?>(comment);
+        }
+        return Task.FromResult<JiraCommentDto?>(null);
+    }
+
+    public Task<bool> DeleteCommentAsync(string issueKey, string commentId)
+    {
+        var issue = _mockIssues.FirstOrDefault(i => i.Key == issueKey);
+        if (issue != null && issue.Comments != null)
+        {
+            var comment = issue.Comments.FirstOrDefault(c => c.Id == commentId || (commentId.StartsWith("temp-") && c.Author == "You (Demo)"));
+            if (comment != null)
+            {
+                issue.Comments.Remove(comment);
+                return Task.FromResult(true);
+            }
+        }
+        return Task.FromResult(false);
+    }
+
+    public Task<JiraUserDto?> GetCurrentUserAsync()
+    {
+        return Task.FromResult<JiraUserDto?>(new JiraUserDto("demo-user", "You (Demo)", "demo@example.com"));
     }
 }

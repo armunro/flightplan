@@ -45,7 +45,7 @@ public class JiraController : ControllerBase
             i.Updated, 
             i.Description,
             i.IssueType,
-            i.Comments?.Select(c => new JiraCommentResponseDto(c.Author, c.Body, c.Created)).ToList()
+            i.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList()
         ));
         return Ok(result);
     }
@@ -71,7 +71,7 @@ public class JiraController : ControllerBase
             issue.Updated, 
             issue.Description,
             issue.IssueType,
-            issue.Comments?.Select(c => new JiraCommentResponseDto(c.Author, c.Body, c.Created)).ToList()
+            issue.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList()
         );
         
         return Ok(result);
@@ -104,5 +104,40 @@ public class JiraController : ControllerBase
         var success = await _dashboardService.UnassignJiraIssueAsync(key);
         if (success) return Ok();
         return BadRequest("Failed to unassign issue");
+    }
+
+    [HttpPost("comment")]
+    public async Task<IActionResult> AddComment([FromQuery] string key, [FromBody] JiraCommentRequest request)
+    {
+        if (string.IsNullOrEmpty(key)) return BadRequest("Key is required");
+        if (string.IsNullOrEmpty(request.Body)) return BadRequest("Comment body is required");
+
+        var comment = await _dashboardService.AddJiraCommentAsync(key, request.Body);
+        if (comment != null) return Ok(new JiraCommentResponseDto(comment.Id, comment.Author, comment.Body, comment.Created));
+        return BadRequest("Failed to add comment");
+    }
+
+    [HttpGet("myself")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var user = await _dashboardService.GetCurrentJiraUserAsync();
+        if (user != null) return Ok(user);
+        return NotFound("User not found or Jira not configured");
+    }
+
+    [HttpDelete("comment")]
+    public async Task<IActionResult> DeleteComment([FromQuery] string key, [FromQuery] string id)
+    {
+        if (string.IsNullOrEmpty(key)) return BadRequest("Key is required");
+        if (string.IsNullOrEmpty(id)) return BadRequest("Comment ID is required");
+
+        var success = await _dashboardService.DeleteJiraCommentAsync(key, id);
+        if (success) return Ok();
+        return BadRequest("Failed to delete comment");
+    }
+
+    public class JiraCommentRequest
+    {
+        public string Body { get; set; } = string.Empty;
     }
 }
