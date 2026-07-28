@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FlightPlan.Services;
+using FlightPlan.Core.Interfaces;
+using FlightPlan.Models.Config;
+using FlightPlan.Infrastructure.Services;
 
 namespace FlightPlan.Controllers;
 
@@ -7,70 +10,50 @@ namespace FlightPlan.Controllers;
 [Route("api/[controller]")]
 public class NotepadController : ControllerBase
 {
-    private readonly string _notesDirectory;
-    private readonly IStorageService _storageService;
+    private readonly INotepadService _notepadService;
+    private readonly MockNotepadService _mockNotepadService;
+    private readonly DashConfig _config;
 
-    public NotepadController(IStorageService storageService)
+    public NotepadController(INotepadService notepadService, MockNotepadService mockNotepadService, DashConfig config)
     {
-        _storageService = storageService;
-        _notesDirectory = _storageService.GetNotesDirectory();
-        MigrateNotes();
+        _notepadService = notepadService;
+        _mockNotepadService = mockNotepadService;
+        _config = config;
     }
 
-    private void MigrateNotes()
-    {
-        var oldNotesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Notes");
-        if (Directory.Exists(oldNotesDir) && oldNotesDir != _notesDirectory)
-        {
-            foreach (var file in Directory.GetFiles(oldNotesDir, "*.md"))
-            {
-                var destFile = Path.Combine(_notesDirectory, Path.GetFileName(file));
-                if (!System.IO.File.Exists(destFile))
-                {
-                    try { System.IO.File.Copy(file, destFile); } catch { }
-                }
-            }
-        }
-    }
+    private INotepadService CurrentService => _config.Debug.DemoMode ? _mockNotepadService : _notepadService;
 
     [HttpGet("files")]
     public IActionResult GetFiles()
     {
-        var files = Directory.GetFiles(_notesDirectory, "*.md")
-            .Select(Path.GetFileName)
-            .ToList();
-        return Ok(files);
+        return Ok(CurrentService.GetFiles());
     }
 
     [HttpGet("{filename}")]
     public async Task<IActionResult> GetNote(string filename)
     {
-        var filePath = Path.Combine(_notesDirectory, filename);
-        if (!System.IO.File.Exists(filePath))
+        try
+        {
+            var content = await CurrentService.GetNoteContentAsync(filename);
+            return Ok(new { content });
+        }
+        catch (FileNotFoundException)
         {
             return NotFound();
         }
-
-        var content = await System.IO.File.ReadAllTextAsync(filePath);
-        return Ok(new { content });
     }
 
     [HttpPost("{filename}")]
     public async Task<IActionResult> SaveNote(string filename, [FromBody] NoteUpdate update)
     {
-        var filePath = Path.Combine(_notesDirectory, filename);
-        await System.IO.File.WriteAllTextAsync(filePath, update.Content ?? "");
+        await CurrentService.SaveNoteAsync(filename, update.Content ?? "");
         return Ok();
     }
 
     [HttpDelete("{filename}")]
     public IActionResult DeleteNote(string filename)
     {
-        var filePath = Path.Combine(_notesDirectory, filename);
-        if (System.IO.File.Exists(filePath))
-        {
-            System.IO.File.Delete(filePath);
-        }
+        CurrentService.DeleteNote(filename);
         return Ok();
     }
 }

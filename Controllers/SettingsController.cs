@@ -35,6 +35,8 @@ public class SettingsController : ControllerBase
         _config.GitHub = newConfig.GitHub;
         _config.MicrosoftGraph = newConfig.MicrosoftGraph;
         _config.PageVisibilities = newConfig.PageVisibilities;
+        _config.ColorSchemes = newConfig.ColorSchemes;
+        _config.Debug = newConfig.Debug;
 
         try
         {

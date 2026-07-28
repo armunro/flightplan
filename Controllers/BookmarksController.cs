@@ -1,5 +1,7 @@
 ﻿using FlightPlan.Models;
 using FlightPlan.Services;
+using FlightPlan.Models.Config;
+using FlightPlan.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlan.Controllers;
@@ -9,20 +11,30 @@ namespace FlightPlan.Controllers;
 public class BookmarksController : ControllerBase
 {
     private readonly IBookmarksService _bookmarksService;
+    private readonly MockBookmarksService _mockBookmarksService;
+    private readonly DashConfig _config;
     private readonly ILogger<BookmarksController> _logger;
 
-    public BookmarksController(IBookmarksService bookmarksService, ILogger<BookmarksController> logger)
+    public BookmarksController(
+        IBookmarksService bookmarksService, 
+        MockBookmarksService mockBookmarksService,
+        DashConfig config,
+        ILogger<BookmarksController> logger)
     {
         _bookmarksService = bookmarksService;
+        _mockBookmarksService = mockBookmarksService;
+        _config = config;
         _logger = logger;
     }
+
+    private IBookmarksService CurrentService => _config.Debug.DemoMode ? _mockBookmarksService : _bookmarksService;
 
     [HttpGet]
     public async Task<IActionResult> GetBookmarks()
     {
         try
         {
-            var bookmarks = await _bookmarksService.GetBookmarksAsync();
+            var bookmarks = await CurrentService.GetBookmarksAsync();
             return Ok(bookmarks);
         }
         catch (Exception ex)
@@ -42,7 +54,7 @@ public class BookmarksController : ControllerBase
 
         try
         {
-            await _bookmarksService.SaveBookmarksAsync(bookmarks);
+            await CurrentService.SaveBookmarksAsync(bookmarks);
             return Ok();
         }
         catch (Exception ex)

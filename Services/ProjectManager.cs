@@ -1,4 +1,5 @@
 ﻿using FlightPlan.Models;
+using FlightPlan.Models.Config;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using TaskStatus = FlightPlan.Models.TaskStatus;
@@ -7,8 +8,85 @@ namespace FlightPlan.Services;
 
 public class ProjectManager
 {
+    private readonly DashConfig _config;
     private readonly List<Project> _projects = new();
+    private List<Project>? _mockProjects = null;
     private readonly object _fileLock = new();
+
+    public ProjectManager(DashConfig config)
+    {
+        _config = config;
+    }
+
+    private List<Project> ActiveProjects
+    {
+        get
+        {
+            if (_config.Debug.DemoMode)
+            {
+                if (_mockProjects == null)
+                {
+                    _mockProjects = CreateMockProjects();
+                }
+                return _mockProjects;
+            }
+            return _projects;
+        }
+    }
+
+    private List<Project> CreateMockProjects()
+    {
+        var projects = new List<Project>();
+        var p1 = new Project
+        {
+            Name = "Demo: Website Redesign",
+            Description = "Simulated project for demonstration purposes",
+            Icon = "bi-globe",
+            Color = "#f1c40f"
+        };
+        p1.Statuses.AddRange(GetDefaultStatuses());
+        p1.TaskTypes.AddRange(GetDefaultTaskTypes());
+        p1.Priorities.AddRange(GetDefaultPriorities());
+
+        var list1 = new TaskList { Name = "Sprint 1" };
+        var t1 = new TaskItem { Title = "Design Homepage", Description = "Create a new modern design for the landing page.", Priority = TaskPriority.High };
+        t1.StatusId = p1.Statuses.First(s => s.Name == "In Progress").Id;
+        t1.TaskTypeId = p1.TaskTypes.First(t => t.Name == "Work").Id;
+        t1.PriorityId = p1.Priorities.First(p => p.Name == "High").Id;
+        list1.Tasks.Add(t1);
+
+        var t2 = new TaskItem { Title = "Implement Header", Description = "Code the responsive header component.", Priority = TaskPriority.Medium };
+        t2.StatusId = p1.Statuses.First(s => s.Name == "To Do").Id;
+        t2.TaskTypeId = p1.TaskTypes.First(t => t.Name == "Work").Id;
+        t2.PriorityId = p1.Priorities.First(p => p.Name == "Medium").Id;
+        list1.Tasks.Add(t2);
+
+        p1.Lists.Add(list1);
+        projects.Add(p1);
+
+        var p2 = new Project
+        {
+            Name = "Demo: Personal Goals",
+            Description = "Keep track of personal growth",
+            Icon = "bi-person-heart",
+            Color = "#e74c3c"
+        };
+        p2.Statuses.AddRange(GetDefaultStatuses());
+        p2.TaskTypes.AddRange(GetDefaultTaskTypes());
+        p2.Priorities.AddRange(GetDefaultPriorities());
+
+        var list2 = new TaskList { Name = "Reading List" };
+        var t3 = new TaskItem { Title = "Read 'Clean Code'", Description = "Improve coding standards and practices.", Priority = TaskPriority.Medium };
+        t3.StatusId = p2.Statuses.First(s => s.Name == "To Do").Id;
+        t3.TaskTypeId = p2.TaskTypes.First(t => t.Name == "Work").Id;
+        t3.PriorityId = p2.Priorities.First(p => p.Name == "Medium").Id;
+        list2.Tasks.Add(t3);
+        
+        p2.Lists.Add(list2);
+        projects.Add(p2);
+
+        return projects;
+    }
 
     public Project CreateProject(string name, string? description = null, string? icon = null, string? color = null, List<TaskStatus>? statuses = null, List<TaskType>? taskTypes = null, List<ProjectPriority>? priorities = null)
     {
@@ -386,7 +464,7 @@ public class ProjectManager
         }
     }
 
-    public IEnumerable<Project> GetAllProjects() => _projects;
+    public IEnumerable<Project> GetAllProjects() => ActiveProjects;
     
     public enum MovePosition { Before, After, Inside }
 

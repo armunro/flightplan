@@ -5,13 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using FlightPlan.Models;
 using FlightPlan.Services;
+using FlightPlan.Core.Interfaces;
 using Quartz;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace FlightPlan.Infrastructure.Services;
 
-public class ScheduledTaskService
+public class ScheduledTaskService : IScheduledTaskService
 {
     private readonly IStorageService _storageService;
     private readonly ISchedulerFactory _schedulerFactory;

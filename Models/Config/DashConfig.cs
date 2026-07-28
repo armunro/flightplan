@@ -7,6 +7,12 @@ public class DashConfig
     public MicrosoftGraphConfig MicrosoftGraph { get; set; } = new();
     public List<PageVisibility> PageVisibilities { get; set; } = new();
     public List<ColorScheme> ColorSchemes { get; set; } = new();
+    public DebugConfig Debug { get; set; } = new();
+}
+
+public class DebugConfig
+{
+    public bool DemoMode { get; set; } = false;
 }
 
 public class ColorScheme

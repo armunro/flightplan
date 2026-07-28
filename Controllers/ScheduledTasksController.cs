@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FlightPlan.Infrastructure.Services;
+using FlightPlan.Core.Interfaces;
 using FlightPlan.Models;
+using FlightPlan.Models.Config;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlan.Controllers;
@@ -11,23 +13,32 @@ namespace FlightPlan.Controllers;
 [Route("api/[controller]")]
 public class ScheduledTasksController : ControllerBase
 {
-    private readonly ScheduledTaskService _scheduledTaskService;
+    private readonly IScheduledTaskService _scheduledTaskService;
+    private readonly MockScheduledTaskService _mockScheduledTaskService;
+    private readonly DashConfig _config;
 
-    public ScheduledTasksController(ScheduledTaskService scheduledTaskService)
+    public ScheduledTasksController(
+        IScheduledTaskService scheduledTaskService, 
+        MockScheduledTaskService mockScheduledTaskService,
+        DashConfig config)
     {
         _scheduledTaskService = scheduledTaskService;
+        _mockScheduledTaskService = mockScheduledTaskService;
+        _config = config;
     }
+
+    private IScheduledTaskService CurrentService => _config.Debug.DemoMode ? _mockScheduledTaskService : _scheduledTaskService;
 
     [HttpGet]
     public IActionResult GetAll()
     {
-        return Ok(_scheduledTaskService.GetAllTasks());
+        return Ok(CurrentService.GetAllTasks());
     }
 
     [HttpGet("{id}")]
     public IActionResult GetById(Guid id)
     {
-        var task = _scheduledTaskService.GetTaskById(id);
+        var task = CurrentService.GetTaskById(id);
         if (task == null) return NotFound();
         return Ok(task);
     }
@@ -35,7 +46,7 @@ public class ScheduledTasksController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ScheduledTask task)
     {
-        await _scheduledTaskService.AddTaskAsync(task);
+        await CurrentService.AddTaskAsync(task);
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
     }
 
@@ -43,14 +54,14 @@ public class ScheduledTasksController : ControllerBase
     public async Task<IActionResult> Update(Guid id, [FromBody] ScheduledTask task)
     {
         if (id != task.Id) return BadRequest();
-        await _scheduledTaskService.UpdateTaskAsync(task);
+        await CurrentService.UpdateTaskAsync(task);
         return Ok(task);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _scheduledTaskService.DeleteTaskAsync(id);
+        await CurrentService.DeleteTaskAsync(id);
         return NoContent();
     }
 }

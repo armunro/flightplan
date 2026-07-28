@@ -126,11 +126,22 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     // Application Services
     containerBuilder.RegisterType<DashboardService>().As<IDashboardService>().InstancePerLifetimeScope();
     containerBuilder.RegisterType<GraphService>().As<IGraphService>().InstancePerLifetimeScope();
+    
+    // Mock Services
+    containerBuilder.RegisterType<MockJiraService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockGitHubService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockEmailService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockCalendarService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockNotepadService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockBookmarksService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockScheduledTaskService>().AsSelf().InstancePerLifetimeScope();
+    
     containerBuilder.RegisterType<RuleService>().As<IRuleService>().SingleInstance();
     containerBuilder.RegisterType<BookmarksService>().As<IBookmarksService>().SingleInstance();
+    containerBuilder.RegisterType<NotepadService>().As<INotepadService>().SingleInstance();
     containerBuilder.RegisterType<JiraStarredService>().AsSelf().SingleInstance();
     containerBuilder.RegisterType<GitHubStarredService>().AsSelf().SingleInstance();
-    containerBuilder.RegisterType<ScheduledTaskService>().AsSelf().SingleInstance();
+    containerBuilder.RegisterType<ScheduledTaskService>().As<IScheduledTaskService>().SingleInstance();
 
     // Migration for projects.yaml
     var projectsPath = storageService.GetProjectsPath();
@@ -139,7 +150,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
         File.Copy("projects.yaml", projectsPath);
     }
 
-    var projectManager = new ProjectManager();
+    var projectManager = new ProjectManager(dashConfig);
     projectManager.LoadProjectsFromYaml(projectsPath);
     containerBuilder.RegisterInstance(projectManager).AsSelf().SingleInstance();
 });
@@ -184,7 +195,7 @@ app.MapGet("/", () => Results.Redirect("/dashboard"));
 
 using (var scope = app.Services.CreateScope())
 {
-    var scheduledTaskService = scope.ServiceProvider.GetRequiredService<ScheduledTaskService>();
+    var scheduledTaskService = scope.ServiceProvider.GetRequiredService<IScheduledTaskService>();
     await scheduledTaskService.InitializeSchedulesAsync();
 }
 

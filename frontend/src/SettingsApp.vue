@@ -69,6 +69,8 @@
                                         :allPages="allPages" />
                 <SettingsColorSchemes v-if="activeCategory === 'colorschemes'" 
                                      :colorSchemes="config.colorSchemes" />
+                <SettingsDebug v-if="activeCategory === 'debug'" 
+                               :debug="config.debug" />
               </div>
             </div>
           </div>
@@ -86,6 +88,7 @@ import SettingsGitHub from './components/SettingsGitHub.vue';
 import SettingsMicrosoftGraph from './components/SettingsMicrosoftGraph.vue';
 import SettingsPageVisibility from './components/SettingsPageVisibility.vue';
 import SettingsColorSchemes from './components/SettingsColorSchemes.vue';
+import SettingsDebug from './components/SettingsDebug.vue';
 import { fetchSettings, updateSettings } from './js/dashboard-api';
 import { showToast } from './components/Toast.vue';
 
@@ -104,7 +107,8 @@ const config = ref({
   gitHub: { organization: '', username: '', accessToken: '' },
   microsoftGraph: { tenantId: '', clientId: '' },
   pageVisibilities: [],
-  colorSchemes: []
+  colorSchemes: [],
+  debug: { demoMode: false }
 });
 
 const allPages = [
@@ -125,7 +129,8 @@ const categories = [
   { id: 'github', name: 'GitHub', icon: 'bi bi-github text-white', color: '#333' },
   { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft text-white', color: '#00a4ef' },
   { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye text-white', color: '#6f42c1' },
-  { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette text-white', color: '#e83e8c' }
+  { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette text-white', color: '#e83e8c' },
+  { id: 'debug', name: 'Debug', icon: 'bi bi-bug text-white', color: '#ffc107' }
 ];
 
 const activeCategory = ref('jira');
