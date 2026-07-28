@@ -50,6 +50,9 @@ public class ProjectManager
         p1.TaskTypes.AddRange(GetDefaultTaskTypes());
         p1.Priorities.AddRange(GetDefaultPriorities());
 
+        var now = DateTime.UtcNow;
+        var today = now.Date;
+
         // List 1: Planning & Design
         var list1_1 = new TaskList { Name = "Planning & Design" };
         
@@ -61,7 +64,8 @@ public class ProjectManager
             StatusId = p1.Statuses.First(s => s.Name == "In Progress").Id,
             TaskTypeId = p1.TaskTypes.First(t => t.Name == "Work").Id,
             PriorityId = p1.Priorities.First(p => p.Name == "High").Id,
-            EstimateMinutes = 960
+            EstimateMinutes = 960,
+            End = today.AddDays(2).AddHours(17)
         };
         
         var subT1_1 = new TaskItem { Title = "Mobile View", StatusId = p1.Statuses.First(s => s.Name == "Done").Id, IsCompleted = true };
@@ -69,28 +73,28 @@ public class ProjectManager
         subT1_1.Subtasks.Add(new TaskItem { Title = "Footer links", IsCompleted = true, StatusId = p1.Statuses.Last().Id });
         
         t1.Subtasks.Add(subT1_1);
-        t1.Subtasks.Add(new TaskItem { Title = "Desktop View", StatusId = p1.Statuses.First(s => s.Name == "In Progress").Id });
-        t1.Subtasks.Add(new TaskItem { Title = "Accessibility Audit", StatusId = p1.Statuses.First(s => s.Name == "To Do").Id });
+        t1.Subtasks.Add(new TaskItem { Title = "Desktop View", StatusId = p1.Statuses.First(s => s.Name == "In Progress").Id, End = today.AddDays(1).AddHours(12) });
+        t1.Subtasks.Add(new TaskItem { Title = "Accessibility Audit", StatusId = p1.Statuses.First(s => s.Name == "To Do").Id, End = today.AddDays(3) });
         
         list1_1.Tasks.Add(t1);
-        list1_1.Tasks.Add(new TaskItem { Title = "User Interviews", Priority = TaskPriority.Medium, StatusId = p1.Statuses.First(s => s.Name == "Done").Id, IsCompleted = true });
-        list1_1.Tasks.Add(new TaskItem { Title = "Site Map Definition", StatusId = p1.Statuses.First(s => s.Name == "Done").Id, IsCompleted = true });
+        list1_1.Tasks.Add(new TaskItem { Title = "User Interviews", Priority = TaskPriority.Medium, StatusId = p1.Statuses.First(s => s.Name == "Done").Id, IsCompleted = true, End = today.AddDays(-2) });
+        list1_1.Tasks.Add(new TaskItem { Title = "Site Map Definition", StatusId = p1.Statuses.First(s => s.Name == "Done").Id, IsCompleted = true, End = today.AddDays(-1) });
         
         p1.Lists.Add(list1_1);
 
         // List 2: Frontend Development
         var list1_2 = new TaskList { Name = "Frontend Development" };
-        list1_2.Tasks.Add(new TaskItem { Title = "Setup Vue.js Project", StatusId = p1.Statuses.Last().Id, IsCompleted = true });
-        list1_2.Tasks.Add(new TaskItem { Title = "Implement Header Component", StatusId = p1.Statuses[1].Id });
-        list1_2.Tasks.Add(new TaskItem { Title = "Landing Page Layout", StatusId = p1.Statuses[0].Id });
-        list1_2.Tasks.Add(new TaskItem { Title = "Responsive Design Fixes", Priority = TaskPriority.High, StatusId = p1.Statuses[0].Id });
+        list1_2.Tasks.Add(new TaskItem { Title = "Setup Vue.js Project", StatusId = p1.Statuses.Last().Id, IsCompleted = true, End = today.AddDays(-5) });
+        list1_2.Tasks.Add(new TaskItem { Title = "Implement Header Component", StatusId = p1.Statuses[1].Id, End = today.AddDays(4) });
+        list1_2.Tasks.Add(new TaskItem { Title = "Landing Page Layout", StatusId = p1.Statuses[0].Id, End = today.AddDays(5) });
+        list1_2.Tasks.Add(new TaskItem { Title = "Responsive Design Fixes", Priority = TaskPriority.High, StatusId = p1.Statuses[0].Id, End = today.AddDays(1) });
         p1.Lists.Add(list1_2);
 
         // List 3: Backend & API
         var list1_3 = new TaskList { Name = "Backend & API" };
-        list1_3.Tasks.Add(new TaskItem { Title = "Database Schema Design", StatusId = p1.Statuses.Last().Id, IsCompleted = true });
-        list1_3.Tasks.Add(new TaskItem { Title = "Auth System Implementation", StatusId = p1.Statuses[1].Id });
-        list1_3.Tasks.Add(new TaskItem { Title = "API Documentation", StatusId = p1.Statuses[0].Id });
+        list1_3.Tasks.Add(new TaskItem { Title = "Database Schema Design", StatusId = p1.Statuses.Last().Id, IsCompleted = true, End = today.AddDays(-3) });
+        list1_3.Tasks.Add(new TaskItem { Title = "Auth System Implementation", StatusId = p1.Statuses[1].Id, End = today.AddDays(7) });
+        list1_3.Tasks.Add(new TaskItem { Title = "API Documentation", StatusId = p1.Statuses[0].Id, End = today.AddDays(10) });
         p1.Lists.Add(list1_3);
 
         projects.Add(p1);
@@ -124,29 +128,30 @@ public class ProjectManager
             Description = "Users reporting 401 Unauthorized after latest update.", 
             Priority = TaskPriority.Critical,
             StatusId = p2.Statuses.First(s => s.Name == "Escalated").Id,
-            TaskTypeId = p2.TaskTypes.First(t => t.Name == "Bug Report").Id
+            TaskTypeId = p2.TaskTypes.First(t => t.Name == "Bug Report").Id,
+            End = now.AddHours(4)
         };
-        tBug.Subtasks.Add(new TaskItem { Title = "Reproduce in dev", StatusId = p2.Statuses[4].Id, IsCompleted = true });
-        tBug.Subtasks.Add(new TaskItem { Title = "Identify root cause", StatusId = p2.Statuses[1].Id });
+        tBug.Subtasks.Add(new TaskItem { Title = "Reproduce in dev", StatusId = p2.Statuses[4].Id, IsCompleted = true, End = now.AddHours(-2) });
+        tBug.Subtasks.Add(new TaskItem { Title = "Identify root cause", StatusId = p2.Statuses[1].Id, End = now.AddHours(2) });
         list2_1.Tasks.Add(tBug);
         
-        list2_1.Tasks.Add(new TaskItem { Title = "Server latency in EU region", Priority = TaskPriority.High, StatusId = p2.Statuses[1].Id });
-        list2_1.Tasks.Add(new TaskItem { Title = "Payment gateway timeout", Priority = TaskPriority.Critical, StatusId = p2.Statuses[0].Id });
+        list2_1.Tasks.Add(new TaskItem { Title = "Server latency in EU region", Priority = TaskPriority.High, StatusId = p2.Statuses[1].Id, End = now.AddHours(8) });
+        list2_1.Tasks.Add(new TaskItem { Title = "Payment gateway timeout", Priority = TaskPriority.Critical, StatusId = p2.Statuses[0].Id, End = now.AddHours(1) });
         p2.Lists.Add(list2_1);
 
         // List 2: General Support
         var list2_2 = new TaskList { Name = "General Support" };
-        list2_2.Tasks.Add(new TaskItem { Title = "Password reset help", StatusId = p2.Statuses[4].Id, IsCompleted = true });
-        list2_2.Tasks.Add(new TaskItem { Title = "Data export request", StatusId = p2.Statuses[2].Id });
-        list2_2.Tasks.Add(new TaskItem { Title = "Inquiry about API limits", StatusId = p2.Statuses[2].Id });
-        list2_2.Tasks.Add(new TaskItem { Title = "Update billing info", StatusId = p2.Statuses[4].Id, IsCompleted = true });
+        list2_2.Tasks.Add(new TaskItem { Title = "Password reset help", StatusId = p2.Statuses[4].Id, IsCompleted = true, End = now.AddDays(-1) });
+        list2_2.Tasks.Add(new TaskItem { Title = "Data export request", StatusId = p2.Statuses[2].Id, End = now.AddDays(2) });
+        list2_2.Tasks.Add(new TaskItem { Title = "Inquiry about API limits", StatusId = p2.Statuses[2].Id, End = now.AddDays(1) });
+        list2_2.Tasks.Add(new TaskItem { Title = "Update billing info", StatusId = p2.Statuses[4].Id, IsCompleted = true, End = now.AddDays(-2) });
         p2.Lists.Add(list2_2);
 
         // List 3: Feature Requests
         var list2_3 = new TaskList { Name = "Feature Requests" };
-        list2_3.Tasks.Add(new TaskItem { Title = "Dark mode support", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[1].Id });
-        list2_3.Tasks.Add(new TaskItem { Title = "Export to PDF", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[0].Id });
-        list2_3.Tasks.Add(new TaskItem { Title = "Bulk delete options", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[0].Id });
+        list2_3.Tasks.Add(new TaskItem { Title = "Dark mode support", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[1].Id, End = today.AddDays(14) });
+        list2_3.Tasks.Add(new TaskItem { Title = "Export to PDF", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[0].Id, End = today.AddDays(21) });
+        list2_3.Tasks.Add(new TaskItem { Title = "Bulk delete options", TaskTypeId = p2.TaskTypes[1].Id, StatusId = p2.Statuses[0].Id, End = today.AddDays(30) });
         p2.Lists.Add(list2_3);
 
         projects.Add(p2);
@@ -165,27 +170,27 @@ public class ProjectManager
         
         // List 1: Content Creation
         var list3_1 = new TaskList { Name = "Content Creation" };
-        var tBlog = new TaskItem { Title = "Launch Blog Post", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id };
-        tBlog.Subtasks.Add(new TaskItem { Title = "Draft", StatusId = p3.Statuses[2].Id, IsCompleted = true });
-        tBlog.Subtasks.Add(new TaskItem { Title = "Review", StatusId = p3.Statuses[1].Id });
-        tBlog.Subtasks.Add(new TaskItem { Title = "Social graphics", StatusId = p3.Statuses[0].Id });
+        var tBlog = new TaskItem { Title = "Launch Blog Post", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id, End = today.AddDays(3) };
+        tBlog.Subtasks.Add(new TaskItem { Title = "Draft", StatusId = p3.Statuses[2].Id, IsCompleted = true, End = today.AddDays(-1) });
+        tBlog.Subtasks.Add(new TaskItem { Title = "Review", StatusId = p3.Statuses[1].Id, End = today.AddDays(1) });
+        tBlog.Subtasks.Add(new TaskItem { Title = "Social graphics", StatusId = p3.Statuses[0].Id, End = today.AddDays(2) });
         list3_1.Tasks.Add(tBlog);
-        list3_1.Tasks.Add(new TaskItem { Title = "Product Demo Video", Priority = TaskPriority.Medium, StatusId = p3.Statuses[0].Id });
-        list3_1.Tasks.Add(new TaskItem { Title = "Newsletter Template", StatusId = p3.Statuses[2].Id, IsCompleted = true });
+        list3_1.Tasks.Add(new TaskItem { Title = "Product Demo Video", Priority = TaskPriority.Medium, StatusId = p3.Statuses[0].Id, End = today.AddDays(7) });
+        list3_1.Tasks.Add(new TaskItem { Title = "Newsletter Template", StatusId = p3.Statuses[2].Id, IsCompleted = true, End = today.AddDays(-5) });
         p3.Lists.Add(list3_1);
 
         // List 2: Paid Ads
         var list3_2 = new TaskList { Name = "Paid Ads" };
-        list3_2.Tasks.Add(new TaskItem { Title = "Google Ads Setup", StatusId = p3.Statuses[1].Id });
-        list3_2.Tasks.Add(new TaskItem { Title = "LinkedIn Campaign", StatusId = p3.Statuses[0].Id });
-        list3_2.Tasks.Add(new TaskItem { Title = "Twitter Re-marketing", StatusId = p3.Statuses[0].Id });
+        list3_2.Tasks.Add(new TaskItem { Title = "Google Ads Setup", StatusId = p3.Statuses[1].Id, End = today.AddDays(2) });
+        list3_2.Tasks.Add(new TaskItem { Title = "LinkedIn Campaign", StatusId = p3.Statuses[0].Id, End = today.AddDays(5) });
+        list3_2.Tasks.Add(new TaskItem { Title = "Twitter Re-marketing", StatusId = p3.Statuses[0].Id, End = today.AddDays(5) });
         p3.Lists.Add(list3_2);
 
         // List 3: PR & Media
         var list3_3 = new TaskList { Name = "PR & Media" };
-        list3_3.Tasks.Add(new TaskItem { Title = "Press Release Draft", StatusId = p3.Statuses[2].Id, IsCompleted = true });
-        list3_3.Tasks.Add(new TaskItem { Title = "Outreach to Tech Blogs", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id });
-        list3_3.Tasks.Add(new TaskItem { Title = "Schedule Interviews", StatusId = p3.Statuses[0].Id });
+        list3_3.Tasks.Add(new TaskItem { Title = "Press Release Draft", StatusId = p3.Statuses[2].Id, IsCompleted = true, End = today.AddDays(-2) });
+        list3_3.Tasks.Add(new TaskItem { Title = "Outreach to Tech Blogs", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id, End = today.AddDays(4) });
+        list3_3.Tasks.Add(new TaskItem { Title = "Schedule Interviews", StatusId = p3.Statuses[0].Id, End = today.AddDays(6) });
         p3.Lists.Add(list3_3);
 
         projects.Add(p3);
@@ -203,27 +208,27 @@ public class ProjectManager
         p4.Priorities.AddRange(GetDefaultPriorities());
         
         var list4_1 = new TaskList { Name = "AI Integration" };
-        var tAI = new TaskItem { Title = "LLM Evaluation", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id };
+        var tAI = new TaskItem { Title = "LLM Evaluation", Priority = TaskPriority.High, StatusId = p3.Statuses[1].Id, End = today.AddDays(10) };
         
-        var tOpenAI = new TaskItem { Title = "OpenAI GPT-4", StatusId = p3.Statuses[2].Id, IsCompleted = true };
-        tOpenAI.Subtasks.Add(new TaskItem { Title = "Token costs analysis", IsCompleted = true, StatusId = p3.Statuses[2].Id });
-        tOpenAI.Subtasks.Add(new TaskItem { Title = "Latency tests", IsCompleted = true, StatusId = p3.Statuses[2].Id });
+        var tOpenAI = new TaskItem { Title = "OpenAI GPT-4", StatusId = p3.Statuses[2].Id, IsCompleted = true, End = today.AddDays(-7) };
+        tOpenAI.Subtasks.Add(new TaskItem { Title = "Token costs analysis", IsCompleted = true, StatusId = p3.Statuses[2].Id, End = today.AddDays(-10) });
+        tOpenAI.Subtasks.Add(new TaskItem { Title = "Latency tests", IsCompleted = true, StatusId = p3.Statuses[2].Id, End = today.AddDays(-8) });
         
-        var tAnthropic = new TaskItem { Title = "Anthropic Claude", StatusId = p3.Statuses[1].Id };
-        tAnthropic.Subtasks.Add(new TaskItem { Title = "Context window verification", StatusId = p3.Statuses[1].Id });
-        tAnthropic.Subtasks.Add(new TaskItem { Title = "Prompt engineering", StatusId = p3.Statuses[0].Id });
+        var tAnthropic = new TaskItem { Title = "Anthropic Claude", StatusId = p3.Statuses[1].Id, End = today.AddDays(5) };
+        tAnthropic.Subtasks.Add(new TaskItem { Title = "Context window verification", StatusId = p3.Statuses[1].Id, End = today.AddDays(2) });
+        tAnthropic.Subtasks.Add(new TaskItem { Title = "Prompt engineering", StatusId = p3.Statuses[0].Id, End = today.AddDays(4) });
         
         tAI.Subtasks.Add(tOpenAI);
         tAI.Subtasks.Add(tAnthropic);
-        tAI.Subtasks.Add(new TaskItem { Title = "Llama 3 (Self-hosted)", StatusId = p3.Statuses[0].Id });
+        tAI.Subtasks.Add(new TaskItem { Title = "Llama 3 (Self-hosted)", StatusId = p3.Statuses[0].Id, End = today.AddDays(9) });
         
         list4_1.Tasks.Add(tAI);
-        list4_1.Tasks.Add(new TaskItem { Title = "Vector Database POC", Description = "Testing Pinecone vs Milvus.", StatusId = p3.Statuses[1].Id });
+        list4_1.Tasks.Add(new TaskItem { Title = "Vector Database POC", Description = "Testing Pinecone vs Milvus.", StatusId = p3.Statuses[1].Id, End = today.AddDays(6) });
         p4.Lists.Add(list4_1);
 
         var list4_2 = new TaskList { Name = "Infrastructure" };
-        list4_2.Tasks.Add(new TaskItem { Title = "Kubernetes Cluster Upgrade", Priority = TaskPriority.High, StatusId = p3.Statuses[0].Id });
-        list4_2.Tasks.Add(new TaskItem { Title = "Terraform Refactor", StatusId = p3.Statuses[2].Id, IsCompleted = true });
+        list4_2.Tasks.Add(new TaskItem { Title = "Kubernetes Cluster Upgrade", Priority = TaskPriority.High, StatusId = p3.Statuses[0].Id, End = today.AddDays(1) });
+        list4_2.Tasks.Add(new TaskItem { Title = "Terraform Refactor", StatusId = p3.Statuses[2].Id, IsCompleted = true, End = today.AddDays(-4) });
         p4.Lists.Add(list4_2);
 
         projects.Add(p4);

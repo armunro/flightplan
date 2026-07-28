@@ -12,6 +12,7 @@ public class MockGitHubService : IGitHubService
     public MockGitHubService(DashConfig config)
     {
         _config = config;
+        var now = DateTime.Now;
         _mockPrs = new List<GitHubPullRequestDto>
         {
             new GitHubPullRequestDto(
@@ -20,12 +21,12 @@ public class MockGitHubService : IGitHubService
                 "Feature: Add support for themes",
                 "AndrewM",
                 "open",
-                DateTime.Now.AddDays(-1),
+                now.AddDays(-1),
                 "https://github.com/ARmunro/flightplan/pull/42",
                 false,
                 "This PR adds a new theme engine that supports custom CSS variables.",
                 new List<GitHubCommentDto> {
-                    new GitHubCommentDto("Junie", "Looks great! I'll review it shortly.", DateTime.Now.AddMinutes(-30))
+                    new GitHubCommentDto("Junie", "Looks great! I'll review it shortly.", now.AddMinutes(-30))
                 }
             ),
             new GitHubPullRequestDto(
@@ -34,7 +35,7 @@ public class MockGitHubService : IGitHubService
                 "Bugfix: Fix memory leak in background worker",
                 "Junie",
                 "open",
-                DateTime.Now.AddDays(-3),
+                now.AddDays(-3),
                 "https://github.com/ARmunro/flightplan/pull/41",
                 true,
                 "Fixes a potential memory leak when the worker is restarted multiple times.",
@@ -42,11 +43,11 @@ public class MockGitHubService : IGitHubService
             ),
             new GitHubPullRequestDto(
                 "ARmunro/dashboard-ui",
-                12,
+                45,
                 "Update dependencies to latest versions",
                 "Dependabot",
                 "open",
-                DateTime.Now.AddDays(-7),
+                now.AddDays(-7),
                 "https://github.com/ARmunro/dashboard-ui/pull/12",
                 false,
                 "Updates various NPM packages to their latest secure versions.",
@@ -58,7 +59,7 @@ public class MockGitHubService : IGitHubService
                 "Refactor: Extract common utility functions",
                 "AndrewM",
                 "open",
-                DateTime.Now.AddDays(-2),
+                now.AddDays(-2),
                 "https://github.com/ARmunro/flightplan/pull/43",
                 false,
                 "Extracting repeated logic into a shared Utilities class to improve code reuse.",
@@ -70,7 +71,7 @@ public class MockGitHubService : IGitHubService
                 "Docs: Update README with deployment instructions",
                 "Junie",
                 "open",
-                DateTime.Now.AddDays(-4),
+                now.AddDays(-4),
                 "https://github.com/ARmunro/flightplan/pull/44",
                 false,
                 "Added a section on how to deploy the application using Docker and Kubernetes.",
@@ -78,11 +79,11 @@ public class MockGitHubService : IGitHubService
             ),
             new GitHubPullRequestDto(
                 "ARmunro/dashboard-ui",
-                13,
+                81,
                 "Feature: Implement dark mode support",
                 "AndrewM",
                 "open",
-                DateTime.Now.AddDays(-5),
+                now.AddDays(-5),
                 "https://github.com/ARmunro/dashboard-ui/pull/13",
                 false,
                 "Adding a toggle to switch between light and dark modes in the UI.",
@@ -94,7 +95,7 @@ public class MockGitHubService : IGitHubService
                 "Test: Add integration tests for API",
                 "QA-Bot",
                 "open",
-                DateTime.Now.AddDays(-6),
+                now.AddDays(-6),
                 "https://github.com/ARmunro/flightplan/pull/45",
                 true,
                 "Adding new integration tests to cover the recently added authentication features.",
@@ -106,7 +107,7 @@ public class MockGitHubService : IGitHubService
                 "Fix: Resolve race condition in task scheduler",
                 "AndrewM",
                 "open",
-                DateTime.Now.AddDays(-8),
+                now.AddDays(-8),
                 "https://github.com/ARmunro/core-lib/pull/105",
                 false,
                 "Critical fix for a race condition that was causing occasional application crashes.",
@@ -118,7 +119,7 @@ public class MockGitHubService : IGitHubService
                 "Chore: Update project to .NET 9.0",
                 "AndrewM",
                 "closed",
-                DateTime.Now.AddDays(-10),
+                now.AddDays(-10),
                 "https://github.com/ARmunro/flightplan/pull/46",
                 false,
                 "Upgrading the entire solution to the latest LTS version of .NET.",
@@ -130,7 +131,7 @@ public class MockGitHubService : IGitHubService
                 "Perf: Optimize component rendering in large lists",
                 "Junie",
                 "open",
-                DateTime.Now.AddDays(-1),
+                now.AddDays(-1),
                 "https://github.com/ARmunro/dashboard-ui/pull/14",
                 false,
                 "Using memoization to prevent unnecessary re-renders in the project list view.",
@@ -142,7 +143,7 @@ public class MockGitHubService : IGitHubService
                 "Security: Patch CVE-2026-XXXX in dependency",
                 "Security-Team",
                 "open",
-                DateTime.Now.AddDays(-2),
+                now.AddDays(-2),
                 "https://github.com/ARmunro/flightplan/pull/47",
                 false,
                 "Urgent patch for a newly discovered security vulnerability in the JSON parser.",
@@ -154,7 +155,7 @@ public class MockGitHubService : IGitHubService
                 "I18n: Add German translation files",
                 "AndrewM",
                 "open",
-                DateTime.Now.AddDays(-3),
+                now.AddDays(-3),
                 "https://github.com/ARmunro/flightplan/pull/48",
                 false,
                 "Translating the UI strings into German for the European market expansion.",

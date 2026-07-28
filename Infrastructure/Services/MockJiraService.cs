@@ -12,6 +12,7 @@ public class MockJiraService : IJiraService
     public MockJiraService(DashConfig config)
     {
         _config = config;
+        var now = DateTime.UtcNow;
         _mockIssues = new List<JiraIssueDto>
         {
             new JiraIssueDto(
@@ -20,14 +21,14 @@ public class MockJiraService : IJiraService
                 "In Progress",
                 "High",
                 "Junie",
-                DateTime.Now.AddDays(-2),
-                DateTime.Now.AddHours(-3),
+                now.AddDays(-2),
+                now.AddHours(-3),
                 "https://example.atlassian.net/browse/DEMO-101",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"The dashboard layout is broken on mobile devices. We need to fix the CSS grid.\"}]}]}",
                 "Bug",
                 new List<JiraCommentDto> {
-                    new JiraCommentDto("1001", "Manager", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Please prioritize this for the next release.\"}]}]}", DateTime.Now.AddDays(-1)),
-                    new JiraCommentDto("1002", "You (Demo)", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"I am working on this right now.\"}]}]}", DateTime.Now.AddMinutes(-30))
+                    new JiraCommentDto("1001", "Manager", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Please prioritize this for the next release.\"}]}]}", now.AddDays(-1)),
+                    new JiraCommentDto("1002", "You (Demo)", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"I am working on this right now.\"}]}]}", now.AddMinutes(-30))
                 },
                 "Andrew"
             ),
@@ -37,8 +38,8 @@ public class MockJiraService : IJiraService
                 "To Do",
                 "Medium",
                 "Andrew",
-                DateTime.Now.AddDays(-5),
-                DateTime.Now.AddDays(-5),
+                now.AddDays(-5),
+                now.AddDays(-5),
                 "https://example.atlassian.net/browse/DEMO-102",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Add support for OAuth2 authentication.\"}]}]}",
                 "Story",
@@ -51,8 +52,8 @@ public class MockJiraService : IJiraService
                 "Done",
                 "Low",
                 "Junie",
-                DateTime.Now.AddDays(-10),
-                DateTime.Now.AddDays(-1),
+                now.AddDays(-10),
+                now.AddDays(-1),
                 "https://example.atlassian.net/browse/DEMO-103",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Documentation needs to be updated to reflect the changes in API v2.\"}]}]}",
                 "Task",
@@ -65,8 +66,8 @@ public class MockJiraService : IJiraService
                 "In Progress",
                 "High",
                 "Andrew",
-                DateTime.Now.AddDays(-3),
-                DateTime.Now.AddHours(-5),
+                now.AddDays(-3),
+                now.AddHours(-5),
                 "https://example.atlassian.net/browse/DEMO-104",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Data tables are slow when loading more than 100 rows. We need to implement virtualization.\"}]}]}",
                 "Bug",
@@ -79,8 +80,8 @@ public class MockJiraService : IJiraService
                 "To Do",
                 "Medium",
                 "Junie",
-                DateTime.Now.AddDays(-7),
-                DateTime.Now.AddDays(-7),
+                now.AddDays(-7),
+                now.AddDays(-7),
                 "https://example.atlassian.net/browse/DEMO-105",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"We need to start tracking user engagement using the new analytics API.\"}]}]}",
                 "Story",
@@ -93,8 +94,8 @@ public class MockJiraService : IJiraService
                 "In Progress",
                 "Highest",
                 "Andrew",
-                DateTime.Now.AddDays(-1),
-                DateTime.Now.AddHours(-1),
+                now.AddDays(-1),
+                now.AddHours(-1),
                 "https://example.atlassian.net/browse/DEMO-106",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Address the vulnerabilities found during the last security audit.\"}]}]}",
                 "Bug",
@@ -107,8 +108,8 @@ public class MockJiraService : IJiraService
                 "To Do",
                 "Low",
                 "Junie",
-                DateTime.Now.AddDays(-14),
-                DateTime.Now.AddDays(-2),
+                now.AddDays(-14),
+                now.AddDays(-2),
                 "https://example.atlassian.net/browse/DEMO-107",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Switch from local state to a centralized store for better maintainability.\"}]}]}",
                 "Task",
