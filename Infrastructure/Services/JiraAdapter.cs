@@ -109,7 +109,7 @@ public class JiraAdapter : IJiraService
 
                     var createdStr = fields.TryGetProperty("created", out var c) ? c.GetString() : null;
                     var updatedStr = fields.TryGetProperty("updated", out var u) ? u.GetString() : null;
-                    var description = fields.TryGetProperty("description", out var desc) ? ExtractTextFromAdf(desc) : null;
+                    var description = fields.TryGetProperty("description", out var desc) ? desc.GetRawText() : null;
                     
                     var comments = new List<JiraCommentDto>();
                     if (fields.TryGetProperty("comment", out var commentElement) && commentElement.TryGetProperty("comments", out var commentsArray))
@@ -117,7 +117,7 @@ public class JiraAdapter : IJiraService
                         foreach (var cmt in commentsArray.EnumerateArray())
                         {
                             var author = cmt.TryGetProperty("author", out var auth) && auth.TryGetProperty("displayName", out var adn) ? adn.GetString() ?? "Unknown" : "Unknown";
-                            var body = cmt.TryGetProperty("body", out var bdy) ? ExtractTextFromAdf(bdy) : "";
+                            var body = cmt.TryGetProperty("body", out var bdy) ? bdy.GetRawText() : "";
                             var cCreatedStr = cmt.TryGetProperty("created", out var cc) ? cc.GetString() : null;
                             var cCreated = DateTime.MinValue;
                             if (cCreatedStr != null && DateTime.TryParse(cCreatedStr, out var ccd)) cCreated = ccd;

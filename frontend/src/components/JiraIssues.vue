@@ -43,7 +43,7 @@
             <div class="col-summary">
               <span class="text-light truncate-summary fw-bold mb-1">{{ issue.summary }}</span>
               <div class="col-description">
-                <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ issue.description }}</span>
+                <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ formatPlainTextDescription(issue.description) }}</span>
                 <span v-else class="text-muted fs-xs italic">No description</span>
               </div>
             </div>
@@ -395,6 +395,44 @@ const getPriorityColor = (priority) => {
   if (p.includes('medium')) return '#ffa500';
   if (p.includes('low')) return '#3fb950';
   return '#aab2bb';
+};
+
+const formatPriorityColor = (priority) => {
+  return getPriorityColor(priority);
+};
+
+const formatPlainTextDescription = (description) => {
+  if (!description) return '';
+  
+  if (typeof description === 'string' && description.startsWith('{')) {
+    try {
+      const adf = JSON.parse(description);
+      return extractTextFromADF(adf);
+    } catch (e) {
+      return description;
+    }
+  }
+  return description;
+};
+
+const extractTextFromADF = (node) => {
+  if (!node) return '';
+  
+  if (node.type === 'text') {
+    return node.text || '';
+  }
+  
+  let text = '';
+  if (node.content) {
+    node.content.forEach(child => {
+      text += extractTextFromADF(child);
+      if (['paragraph', 'heading', 'listItem'].includes(child.type)) {
+        text += ' ';
+      }
+    });
+  }
+  
+  return text.trim();
 };
 
 onMounted(() => {
