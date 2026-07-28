@@ -120,13 +120,22 @@
                 </div>
                 <button class="btn-close btn-close-white" @click="onSelectNone"></button>
               </div>
-              <div class="btn-group" role="group">
-                <button class="btn btn-outline-info btn-sm" @click.prevent="autosizeColumns">
-                  <i class="bi bi-arrows-expand-vertical me-1" style="transform: rotate(90deg); display: inline-block;"></i>Autosize
+              <div class="dropdown">
+                <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-layout-three-columns me-1"></i>View
                 </button>
-                <button class="btn btn-sm" :class="showClosed ? 'btn-info' : 'btn-outline-info'" @click.prevent="showClosed = !showClosed">
-                  <i class="bi me-1" :class="showClosed ? 'bi-eye-slash' : 'bi-eye'"></i>{{ showClosed ? 'Hide Closed' : 'Show Closed' }}
-                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                  <li>
+                    <a class="dropdown-item" href="#" @click.prevent="autosizeColumns">
+                      <i class="bi bi-arrows-expand-vertical me-2" style="transform: rotate(90deg); display: inline-block;"></i>Autosize Columns
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#" @click.prevent="showClosed = !showClosed">
+                      <i class="bi me-2" :class="showClosed ? 'bi-eye-slash' : 'bi-eye'"></i>{{ showClosed ? 'Hide Closed Tasks' : 'Show Closed Tasks' }}
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
 
@@ -1623,5 +1632,33 @@ label, .form-label {
   justify-content: center;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.btn-subtle {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.btn-subtle:hover, .btn-subtle[aria-expanded="true"] {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.btn-subtle::after {
+  margin-left: 0.5em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
 }
 </style>

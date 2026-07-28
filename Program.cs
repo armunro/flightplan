@@ -135,8 +135,17 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
     containerBuilder.RegisterType<MockNotepadService>().AsSelf().InstancePerLifetimeScope();
     containerBuilder.RegisterType<MockBookmarksService>().AsSelf().InstancePerLifetimeScope();
     containerBuilder.RegisterType<MockScheduledTaskService>().AsSelf().InstancePerLifetimeScope();
+    containerBuilder.RegisterType<MockRuleService>().AsSelf().InstancePerLifetimeScope();
     
-    containerBuilder.RegisterType<RuleService>().As<IRuleService>().SingleInstance();
+    if (dashConfig.Debug.DemoMode)
+    {
+        containerBuilder.RegisterType<MockRuleService>().As<IRuleService>().SingleInstance();
+    }
+    else
+    {
+        containerBuilder.RegisterType<RuleService>().As<IRuleService>().SingleInstance();
+    }
+    
     containerBuilder.RegisterType<BookmarksService>().As<IBookmarksService>().SingleInstance();
     containerBuilder.RegisterType<NotepadService>().As<INotepadService>().SingleInstance();
     containerBuilder.RegisterType<JiraStarredService>().AsSelf().SingleInstance();

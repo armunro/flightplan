@@ -76,7 +76,7 @@ public class MockEmailService : IEmailService
                 "msg-5",
                 "Azure Alerts",
                 "alerts@azure.com",
-                "High CPU usage on Production-Web-01",
+                "Azure Alerts: High CPU usage on Production-Web-01",
                 "Production-Web-01 has exceeded 90% CPU usage for the last 15 minutes. Please investigate potential traffic spikes.",
                 DateTimeOffset.UtcNow.AddMinutes(-45),
                 "https://outlook.office.com/mail/inbox/id/msg-5",
