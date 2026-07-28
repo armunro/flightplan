@@ -17,9 +17,9 @@
       <div v-else class="jira-issues-list">
         <div class="jira-list-header">
           <div class="col-key">Key / Status</div>
-          <div class="col-priority">Priority / Type</div>
           <div class="col-summary">Summary</div>
-          <div class="col-assignee">Assignee</div>
+          <div class="col-status">Type / Priority</div>
+          <div class="col-assignee">Assignee / Date</div>
           <div class="issue-actions-spacer"></div>
         </div>
         <div v-for="issue in filteredIssues" :key="issue.key" 
@@ -29,42 +29,43 @@
              @click="selectIssue(issue)">
           <div class="jira-issue-main-row">
             <div class="col-key">
-              <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center mb-1">
                 <div class="star-container me-2" @click.stop="toggleStar(issue)">
                   <i :class="starredKeys.has(issue.key) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
                 </div>
-                <span class="text-info fw-bold">{{ issue.key }}</span>
+                <span class="text-info fw-bold fs-xs">{{ issue.key }}</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 ps-4 ms-1">
+                <span class="status-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
               </div>
             </div>
-            <div class="col-priority">
-              <span :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
-            </div>
+            
             <div class="col-summary">
-              <span class="text-light truncate-summary fw-bold">{{ issue.summary }}</span>
+              <span class="text-light truncate-summary fw-bold mb-1">{{ issue.summary }}</span>
+              <div class="col-description">
+                <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ issue.description }}</span>
+                <span v-else class="text-muted fs-xs italic">No description</span>
+              </div>
             </div>
+
+            <div class="col-status">
+              <div class="d-flex flex-column gap-1 align-items-end">
+                <span v-if="issue.issueType" class="type-badge">{{ issue.issueType }}</span>
+                <span :style="{ color: getPriorityColor(issue.priority) }" class="fs-xxs fw-bold uppercase-text">{{ issue.priority }}</span>
+              </div>
+            </div>
+
             <div class="col-assignee">
-              <span class="text-secondary"><i class="bi bi-person me-1"></i> {{ issue.assignee || 'Unassigned' }}</span>
+              <div class="d-flex flex-column align-items-end text-end">
+                <span class="text-secondary fs-xs text-nowrap mb-1"><i class="bi bi-person me-1"></i> {{ issue.assignee || 'Unassigned' }}</span>
+                <span v-if="issue.updated" class="text-muted fs-xxs">Upd. {{ formatFriendlyDate(issue.updated, false, true) }}</span>
+                <span v-else-if="issue.created" class="text-muted fs-xxs">Cre. {{ formatFriendlyDate(issue.created, false, true) }}</span>
+              </div>
             </div>
+
             <div class="issue-actions">
               <button class="issue-actions-btn" @click.stop="onMenu($event, issue)">...</button>
             </div>
-          </div>
-          <div class="jira-issue-sub-row">
-            <div class="col-key">
-              <span class="status-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
-            </div>
-            <div class="col-priority">
-              <span v-if="issue.issueType" class="type-badge">{{ issue.issueType }}</span>
-            </div>
-            <div class="col-description">
-              <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ issue.description }}</span>
-              <span v-else class="text-muted fs-xs italic">No description</span>
-            </div>
-            <div class="col-dates text-muted fs-xxs">
-              <span v-if="issue.updated">Updated {{ formatFriendlyDate(issue.updated, false, true) }}</span>
-              <span v-else-if="issue.created">Created {{ formatFriendlyDate(issue.created, false, true) }}</span>
-            </div>
-            <div class="col-dates-spacer"></div>
           </div>
         </div>
       </div>
@@ -437,10 +438,10 @@ onUnmounted(() => {
 }
 
 /* Column Widths */
-.col-key { width: 110px; flex-shrink: 0; padding-right: 8px; }
-.col-priority { width: 90px; flex-shrink: 0; padding-right: 8px; }
-.col-summary { flex-grow: 1; min-width: 150px; padding-right: 12px; overflow: hidden; }
-.col-assignee { width: 130px; flex-shrink: 0; }
+.col-key { width: 120px; flex-shrink: 0; padding-right: 12px; }
+.col-summary { flex-grow: 1; min-width: 200px; padding-right: 12px; overflow: hidden; }
+.col-status { width: 60px; flex-shrink: 0; padding-right: 4px; text-align: right; }
+.col-assignee { width: 140px; flex-shrink: 0; text-align: right; }
 .issue-actions-spacer { width: 38px; flex-shrink: 0; }
 
 .jira-issue-row {
@@ -450,51 +451,18 @@ onUnmounted(() => {
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: var(--fs-sm);
-  min-height: 64px;
-}
-
-.jira-issue-main-row, .jira-issue-sub-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 8px 12px;
+  min-height: 60px;
 }
 
 .jira-issue-main-row {
-  padding-bottom: 4px;
-}
-
-.jira-issue-sub-row {
-  padding-top: 0;
-  margin-top: -4px;
-}
-
-.jira-issue-sub-row .col-key {
-  padding-left: 28px; /* Offset to align with Key (under star container) */
-}
-
-.jira-issue-sub-row .col-priority {
   display: flex;
   align-items: center;
+  width: 100%;
+  padding: 10px 12px;
 }
 
 .col-description {
-  flex-grow: 1;
-  min-width: 150px;
-  padding-right: 12px;
   overflow: hidden;
-}
-
-.col-dates {
-  width: 200px; /* Status + Priority roughly */
-  flex-shrink: 0;
-  text-align: right;
-  padding-right: 0;
-}
-
-.col-dates-spacer {
-  width: 38px;
-  flex-shrink: 0;
 }
 
 .truncate-summary {
@@ -502,6 +470,10 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.uppercase-text {
+  text-transform: uppercase;
 }
 
 .truncate-description {

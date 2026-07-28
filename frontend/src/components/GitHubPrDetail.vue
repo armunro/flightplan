@@ -122,6 +122,13 @@ const formatDate = (dateStr) => {
 .github-body, .github-comment-body {
   line-height: 1.6;
   word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.github-body :deep(pre), .github-comment-body :deep(pre),
+.github-body :deep(code), .github-comment-body :deep(code) {
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .github-body h1, .github-body h2, .github-body h3, .github-body h4, .github-body h5, .github-body h6,

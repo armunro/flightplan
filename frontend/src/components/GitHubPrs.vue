@@ -15,11 +15,9 @@
       </div>
       <div v-else class="github-prs-list">
         <div class="github-list-header">
-          <div class="col-title">Title</div>
-          <div class="col-repo">Repository</div>
-          <div class="col-status">Status</div>
-          <div class="col-author">Author</div>
-          <div class="col-number">#</div>
+          <div class="col-main">Pull Request / Description</div>
+          <div class="col-repo">Repo / Status</div>
+          <div class="col-author">Author / Date</div>
         </div>
         <div v-for="pr in filteredPrs" :key="pr.url" 
              @click="$emit('select-pr', pr)"
@@ -27,38 +25,39 @@
              :class="{ selected: selectedPrUrl === pr.url }"
              style="cursor: pointer;">
           <div class="github-pr-main-row">
-            <div class="col-title">
+            <div class="col-main">
               <div class="d-flex align-items-center">
                 <div class="star-container me-2" @click.stop="toggleStar(pr)">
                   <i :class="starredUrls.has(pr.url) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
                 </div>
-                <span class="text-info fw-bold truncate-text">
-                  {{ pr.title }}
-                  <span v-if="pr.isDraft" class="draft-badge ms-1">DRAFT</span>
-                </span>
+                <div class="d-flex flex-column overflow-hidden">
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="text-info fw-bold truncate-text">
+                      {{ pr.title }}
+                      <span v-if="pr.isDraft" class="draft-badge ms-1">DRAFT</span>
+                    </span>
+                  </div>
+                  <div class="col-description">
+                    <span v-if="pr.body" class="text-muted fs-xs truncate-text">{{ pr.body }}</span>
+                    <span v-else class="text-muted fs-xs italic">No description</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-repo">
-              <span class="text-light truncate-text">{{ pr.repository }}</span>
-            </div>
-            <div class="col-status">
-              <span class="status-text fw-bold" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</span>
+              <div class="d-flex flex-column align-items-end text-end">
+                <span class="status-text fw-bold fs-xs mb-1" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</span>
+                <span class="text-light fs-xxs truncate-text">{{ pr.repository }}</span>
+              </div>
             </div>
             <div class="col-author">
-              <span class="text-secondary truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
-            </div>
-            <div class="col-number">
-              <span class="badge rounded-pill bg-dark border border-secondary text-muted px-2 fs-xs">#{{ pr.number }}</span>
-            </div>
-          </div>
-          <div class="github-pr-sub-row">
-            <div class="col-spacer"></div>
-            <div class="col-description">
-              <span v-if="pr.body" class="text-muted fs-xs truncate-text">{{ pr.body }}</span>
-              <span v-else class="text-muted fs-xs italic">No description</span>
-            </div>
-            <div class="col-dates text-muted fs-xxs">
-              <span>Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
+              <div class="d-flex flex-column align-items-end text-end">
+                <div class="d-flex align-items-center gap-1 mb-1">
+                  <span class="text-secondary fs-xs truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
+                  <span class="badge rounded-pill bg-dark border border-secondary text-muted px-1 fs-xxs">#{{ pr.number }}</span>
+                </div>
+                <span class="text-muted fs-xxs">Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -199,7 +198,7 @@ onMounted(() => {
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: var(--fs-sm);
-  min-height: 64px;
+  min-height: 60px;
 }
 
 .github-pr-row:hover {
@@ -211,45 +210,20 @@ onMounted(() => {
   border-left: 3px solid var(--accent-blue) !important;
 }
 
-.github-pr-main-row, .github-pr-sub-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 8px 12px;
-}
-
-.github-pr-main-row {
-  padding-bottom: 4px;
-}
-
-.github-pr-sub-row {
-  padding-top: 0;
-  margin-top: -4px;
-}
-
 /* Column Widths */
-.col-title { flex-grow: 1; min-width: 200px; padding-right: 12px; overflow: hidden; }
-.col-repo { width: 150px; flex-shrink: 0; padding-right: 12px; overflow: hidden; }
-.col-status { width: 100px; flex-shrink: 0; padding-right: 8px; }
-.col-author { width: 120px; flex-shrink: 0; padding-right: 8px; }
-.col-number { width: 60px; flex-shrink: 0; text-align: right; }
-
-.col-spacer {
-  width: 40px; 
-  flex-shrink: 0;
-}
+.col-main { flex-grow: 1; min-width: 200px; padding-right: 12px; overflow: hidden; }
+.col-repo { width: 150px; flex-shrink: 0; padding-right: 12px; text-align: right; overflow: hidden; }
+.col-author { width: 140px; flex-shrink: 0; text-align: right; }
 
 .col-description {
-  flex-grow: 1;
-  min-width: 200px;
-  padding-right: 12px;
   overflow: hidden;
 }
 
-.col-dates {
-  width: 200px;
-  flex-shrink: 0;
-  text-align: right;
+.github-pr-main-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
 }
 
 .truncate-text {

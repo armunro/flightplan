@@ -6,22 +6,25 @@
         <p>Select an issue to view details</p>
       </div>
     </div>
-    <div v-else class="flex-grow-1 overflow-auto p-4 custom-scrollbar">
-      <div class="d-flex justify-content-between align-items-start mb-4 border-bottom border-secondary pb-3">
-        <div class="overflow-hidden">
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-2">
-              <li class="breadcrumb-item"><a :href="issue.url" target="_blank" class="text-info text-decoration-none fw-bold small text-uppercase">{{ issue.key }}</a></li>
-            </ol>
-          </nav>
-          <h2 class="h3 mb-0 text-light">{{ issue.summary }}</h2>
+    <div v-else class="flex-grow-1 overflow-auto custom-scrollbar">
+      <div class="p-4">
+        <div class="mb-4 border-bottom border-secondary pb-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="flex-grow-1 overflow-hidden">
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                  <li class="breadcrumb-item"><a :href="issue.url" target="_blank" class="text-info text-decoration-none fw-bold small text-uppercase">{{ issue.key }}</a></li>
+                </ol>
+              </nav>
+            </div>
+            <div class="d-flex gap-2 ms-3 flex-shrink-0 align-items-center">
+              <span v-if="issue.issueType" class="detail-badge opacity-75">{{ issue.issueType }}</span>
+              <span class="detail-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
+              <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
+            </div>
+          </div>
+          <h2 class="h3 mb-0 text-light w-100">{{ issue.summary }}</h2>
         </div>
-        <div class="d-flex gap-2 ms-3 flex-shrink-0 align-items-center">
-          <span v-if="issue.issueType" class="detail-badge opacity-75">{{ issue.issueType }}</span>
-          <span class="detail-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
-          <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
-        </div>
-      </div>
 
       <div class="row mb-4">
         <div class="col-md-6">
@@ -42,8 +45,8 @@
 
       <div class="mb-4">
         <div class="detail-label fs-xxs text-uppercase fw-bold mb-2 opacity-75">Description</div>
-        <div class="description-content p-3 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
-          <div v-if="issue.description" v-html="formatDescription(issue.description)" class="jira-description"></div>
+        <div class="description-content p-3 rounded w-100" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+          <div v-if="issue.description" v-html="formatDescription(issue.description)" class="jira-description w-100"></div>
           <div v-else class="text-muted fst-italic">No description provided.</div>
         </div>
       </div>
@@ -51,17 +54,18 @@
       <div class="mb-4">
         <div class="detail-label fs-xxs text-uppercase fw-bold mb-3 opacity-75">Comments</div>
         <div v-if="issue.comments && issue.comments.length > 0" class="comments-list">
-          <div v-for="(comment, index) in issue.comments" :key="index" class="comment-item mb-3 p-3 rounded" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
+          <div v-for="(comment, index) in issue.comments" :key="index" class="comment-item mb-3 p-3 rounded w-100" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-bold text-info">{{ comment.author }}</span>
               <span class="small text-muted fst-italic fs-xs">{{ formatDate(comment.created) }}</span>
             </div>
-            <div v-html="formatDescription(comment.body)" class="jira-comment-body"></div>
+            <div v-html="formatDescription(comment.body)" class="jira-comment-body w-100"></div>
           </div>
         </div>
         <div v-else class="p-3 rounded text-muted fst-italic" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
           No comments yet.
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -193,6 +197,16 @@ const formatDate = (dateStr) => {
   line-height: 1.6 !important;
   word-break: break-word !important;
   color: #c9d1d9 !important;
+  overflow-wrap: anywhere !important;
+  width: 100% !important;
+}
+
+.jira-description pre, .jira-comment-body pre {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+  background-color: var(--bg-darker);
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .jira-description h1, .jira-description h2, .jira-description h3, .jira-description h4, .jira-description h5, .jira-description h6,
@@ -207,7 +221,12 @@ const formatDate = (dateStr) => {
 .jira-description h3, .jira-comment-body h3 { font-size: 1.25rem !important; }
 .jira-description h4, .jira-comment-body h4 { font-size: 1.1rem !important; }
 .jira-description h5, .jira-comment-body h5 { font-size: 1rem !important; }
-.jira-description h6, .jira-comment-body h6 { font-size: 0.9rem !important; }
+.jira-description p, .jira-comment-body p {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 1rem !important;
+  overflow-wrap: anywhere !important;
+}
 
 .breadcrumb-item + .breadcrumb-item::before {
     color: #8b949e !important;

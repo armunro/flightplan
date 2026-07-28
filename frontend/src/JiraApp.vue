@@ -91,7 +91,7 @@
       <div class="jira-content-wrapper">
         <div class="d-flex h-100 overflow-hidden">
           <!-- Jira Issues List Section -->
-          <div class="h-100 overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%' }">
+          <div class="h-100 overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%', flex: '0 0 ' + contentSplitWidth + '%' }">
             <JiraIssues 
               :selectedIssueKey="selectedIssue?.key" 
               :currentQuery="currentQuery"
@@ -108,7 +108,7 @@
           <div class="content-resizer" @mousedown="startContentResize"></div>
 
           <!-- Jira Issue Detail Section -->
-          <div class="h-100 overflow-auto module-detail-pane flex-grow-1">
+          <div class="h-100 overflow-auto module-detail-pane flex-grow-1" style="flex: 1 1 0; min-width: 0;">
             <JiraIssueDetail :issue="selectedIssue" />
           </div>
         </div>
@@ -396,10 +396,12 @@ onMounted(() => {
 
 .module-list-pane {
   background-color: var(--bg-dark);
+  min-width: 0;
 }
 
 .module-detail-pane {
   background-color: var(--bg-darker);
+  min-width: 0;
 }
 
 

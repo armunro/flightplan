@@ -91,7 +91,7 @@
       <div class="github-content-wrapper">
         <div class="d-flex h-100 overflow-hidden">
           <!-- GitHub PRs List Section -->
-          <div class="h-100 overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%' }">
+          <div class="h-100 overflow-auto module-list-pane" :style="{ width: contentSplitWidth + '%', flex: '0 0 ' + contentSplitWidth + '%' }">
             <GitHubPrs 
               :selectedPrUrl="selectedPr?.url" 
               :currentQuery="currentQuery"
@@ -105,7 +105,7 @@
           <div class="content-resizer" @mousedown="startContentResize"></div>
 
           <!-- GitHub PR Detail Section -->
-          <div class="h-100 overflow-auto module-detail-pane flex-grow-1">
+          <div class="h-100 overflow-auto module-detail-pane flex-grow-1" style="flex: 1 1 0; min-width: 0;">
             <GitHubPrDetail :pr="selectedPr" />
           </div>
         </div>
@@ -344,10 +344,12 @@ onMounted(() => {
 
 .module-list-pane {
   background-color: var(--bg-dark);
+  min-width: 0;
 }
 
 .module-detail-pane {
   background-color: var(--bg-darker);
+  min-width: 0;
 }
 
 
