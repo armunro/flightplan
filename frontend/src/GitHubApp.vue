@@ -350,32 +350,6 @@ onMounted(() => {
   background-color: var(--bg-darker);
 }
 
-/* Single separator for GitHub PRs list and details */
-:deep(.content-resizer) {
-  width: 4px;
-  background-color: transparent;
-  border: none;
-  margin-left: -2px;
-  margin-right: -2px;
-  position: relative;
-}
-
-:deep(.content-resizer::after) {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: var(--border-primary);
-  transform: translateX(-50%);
-  transition: background-color 0.2s;
-}
-
-:deep(.content-resizer:hover::after), :deep(.content-resizer:active::after) {
-  background-color: var(--accent-blue);
-  width: 2px;
-}
 
 .sidebar-loading {
   display: flex;

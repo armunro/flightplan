@@ -13,27 +13,52 @@
         <i class="bi bi-search display-4 mb-3 opacity-25"></i>
         <p>No pull requests match your search "{{ searchQuery }}".</p>
       </div>
-      <div v-else class="list-group list-group-flush">
+      <div v-else class="github-prs-list">
+        <div class="github-list-header">
+          <div class="col-title">Title</div>
+          <div class="col-repo">Repository</div>
+          <div class="col-status">Status</div>
+          <div class="col-author">Author</div>
+          <div class="col-number">#</div>
+        </div>
         <div v-for="pr in filteredPrs" :key="pr.url" 
              @click="$emit('select-pr', pr)"
-             class="list-group-item list-group-item-action bg-dark text-light border-secondary d-flex align-items-center"
-             :class="{ 'active-pr': selectedPrUrl === pr.url }"
+             class="github-pr-row"
+             :class="{ selected: selectedPrUrl === pr.url }"
              style="cursor: pointer;">
-          <div class="me-2 star-container" @click.stop="toggleStar(pr)">
-            <i :class="starredUrls.has(pr.url) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
-          </div>
-          <div class="flex-grow-1 overflow-hidden">
-            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-              <h6 class="mb-0 text-info text-truncate me-2 fs-base">
-                {{ pr.title }}
-                <span v-if="pr.isDraft" class="badge bg-secondary text-dark ms-1 fs-xxs" style="vertical-align: middle; opacity: 0.8;">DRAFT</span>
-              </h6>
-              <small class="fw-bold flex-shrink-0 fs-xs" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</small>
+          <div class="github-pr-main-row">
+            <div class="col-title">
+              <div class="d-flex align-items-center">
+                <div class="star-container me-2" @click.stop="toggleStar(pr)">
+                  <i :class="starredUrls.has(pr.url) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
+                </div>
+                <span class="text-info fw-bold truncate-text">
+                  {{ pr.title }}
+                  <span v-if="pr.isDraft" class="draft-badge ms-1">DRAFT</span>
+                </span>
+              </div>
             </div>
-            <p class="mb-1 fs-sm text-light">{{ pr.repository }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-secondary fs-xs">by {{ pr.author }} on {{ formatDate(pr.createdAt) }}</small>
-              <span class="badge rounded-pill bg-dark border border-secondary text-muted px-2 fs-xs" v-if="pr.number">#{{ pr.number }}</span>
+            <div class="col-repo">
+              <span class="text-light truncate-text">{{ pr.repository }}</span>
+            </div>
+            <div class="col-status">
+              <span class="status-text fw-bold" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</span>
+            </div>
+            <div class="col-author">
+              <span class="text-secondary truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
+            </div>
+            <div class="col-number">
+              <span class="badge rounded-pill bg-dark border border-secondary text-muted px-2 fs-xs">#{{ pr.number }}</span>
+            </div>
+          </div>
+          <div class="github-pr-sub-row">
+            <div class="col-spacer"></div>
+            <div class="col-description">
+              <span v-if="pr.body" class="text-muted fs-xs truncate-text">{{ pr.body }}</span>
+              <span v-else class="text-muted fs-xs italic">No description</span>
+            </div>
+            <div class="col-dates text-muted fs-xxs">
+              <span>Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
             </div>
           </div>
         </div>
@@ -45,6 +70,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { fetchGitHubPrs, fetchGitHubStarred, toggleGitHubStar } from '../js/dashboard-api';
+import { formatFriendlyDate } from '../js/utils';
 
 const props = defineProps({
   selectedPrUrl: String,
@@ -144,30 +170,118 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.active-pr {
-  background-color: var(--bg-card) !important;
+.github-prs-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-dark);
+}
+
+.github-list-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-dark);
+  border-bottom: 1px solid var(--border-primary);
+  font-size: var(--fs-xxs);
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.github-pr-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: var(--fs-sm);
+  min-height: 64px;
+}
+
+.github-pr-row:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.github-pr-row.selected {
+  background-color: rgba(88, 166, 255, 0.1);
   border-left: 3px solid var(--accent-blue) !important;
 }
 
+.github-pr-main-row, .github-pr-sub-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.github-pr-main-row {
+  padding-bottom: 4px;
+}
+
+.github-pr-sub-row {
+  padding-top: 0;
+  margin-top: -4px;
+}
+
+/* Column Widths */
+.col-title { flex-grow: 1; min-width: 200px; padding-right: 12px; overflow: hidden; }
+.col-repo { width: 150px; flex-shrink: 0; padding-right: 12px; overflow: hidden; }
+.col-status { width: 100px; flex-shrink: 0; padding-right: 8px; }
+.col-author { width: 120px; flex-shrink: 0; padding-right: 8px; }
+.col-number { width: 60px; flex-shrink: 0; text-align: right; }
+
+.col-spacer {
+  width: 40px; 
+  flex-shrink: 0;
+}
+
+.col-description {
+  flex-grow: 1;
+  min-width: 200px;
+  padding-right: 12px;
+  overflow: hidden;
+}
+
+.col-dates {
+  width: 200px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.truncate-text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 4px;
+  background-color: #2c313a;
+  color: var(--text-primary);
+  border-radius: 3px;
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
 .star-container {
-  padding: 0 5px;
   cursor: pointer;
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   font-size: 1.1rem;
 }
 
 .star-container:hover .bi-star {
   color: var(--accent-yellow) !important;
-}
-
-.list-group-item {
-  border-left: 3px solid transparent;
-  padding: 0.75rem 1rem;
-  transition: all 0.2s ease;
-}
-
-.list-group-item:hover:not(.active-pr) {
-  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 .spinner-border {

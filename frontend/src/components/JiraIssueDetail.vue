@@ -16,10 +16,10 @@
           </nav>
           <h2 class="h3 mb-0 text-light">{{ issue.summary }}</h2>
         </div>
-        <div class="d-flex gap-2 ms-3 flex-shrink-0">
-          <span v-if="issue.issueType" class="badge bg-dark border border-secondary d-flex align-items-center opacity-75">{{ issue.issueType }}</span>
-          <span class="badge d-flex align-items-center" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</span>
-          <span class="badge bg-dark border border-secondary d-flex align-items-center" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
+        <div class="d-flex gap-2 ms-3 flex-shrink-0 align-items-center">
+          <span v-if="issue.issueType" class="detail-badge opacity-75">{{ issue.issueType }}</span>
+          <span class="detail-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
+          <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
         </div>
       </div>
 
@@ -99,13 +99,15 @@ const formatDescription = (description) => {
   
   // If it's a string, it might be raw JSON (ADF) from the API or a simple string
   if (typeof description === 'string') {
-    try {
-      const parsed = JSON.parse(description);
-      return formatADF(parsed);
-    } catch (e) {
-      // Not JSON, treat as plain text
-      return description.replace(/\n/g, '<br>');
+    if (description.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(description);
+        return formatADF(parsed);
+      } catch (e) {
+        // Not valid JSON after all, treat as plain text
+      }
     }
+    return description.replace(/\n/g, '<br>');
   }
   
   return formatADF(description);
@@ -211,4 +213,15 @@ const formatDate = (dateStr) => {
     color: #8b949e !important;
 }
 
+.detail-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+  display: inline-block;
+  font-weight: 600;
+}
 </style>

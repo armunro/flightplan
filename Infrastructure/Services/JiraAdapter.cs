@@ -109,7 +109,7 @@ public class JiraAdapter : IJiraService
 
                     var createdStr = fields.TryGetProperty("created", out var c) ? c.GetString() : null;
                     var updatedStr = fields.TryGetProperty("updated", out var u) ? u.GetString() : null;
-                    var description = fields.TryGetProperty("description", out var desc) ? desc.GetRawText() : null;
+                    var description = fields.TryGetProperty("description", out var desc) ? ExtractTextFromAdf(desc) : null;
                     
                     var comments = new List<JiraCommentDto>();
                     if (fields.TryGetProperty("comment", out var commentElement) && commentElement.TryGetProperty("comments", out var commentsArray))
@@ -117,7 +117,7 @@ public class JiraAdapter : IJiraService
                         foreach (var cmt in commentsArray.EnumerateArray())
                         {
                             var author = cmt.TryGetProperty("author", out var auth) && auth.TryGetProperty("displayName", out var adn) ? adn.GetString() ?? "Unknown" : "Unknown";
-                            var body = cmt.TryGetProperty("body", out var bdy) ? bdy.GetRawText() : "";
+                            var body = cmt.TryGetProperty("body", out var bdy) ? ExtractTextFromAdf(bdy) : "";
                             var cCreatedStr = cmt.TryGetProperty("created", out var cc) ? cc.GetString() : null;
                             var cCreated = DateTime.MinValue;
                             if (cCreatedStr != null && DateTime.TryParse(cCreatedStr, out var ccd)) cCreated = ccd;
@@ -231,5 +231,64 @@ public class JiraAdapter : IJiraService
             catch {}
         }
         return username;
+    }
+
+    private string ExtractTextFromAdf(JsonElement element)
+    {
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            var str = element.GetString() ?? "";
+            // Check if it's a string that contains ADF JSON
+            if (str.TrimStart().StartsWith("{"))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(str);
+                    return ExtractTextFromAdf(doc.RootElement);
+                }
+                catch
+                {
+                    // If parsing fails, just use the string as is
+                }
+            }
+            return str;
+        }
+
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            return "";
+        }
+
+        var sb = new StringBuilder();
+        ProcessAdfNode(element, sb);
+        return sb.ToString().Trim();
+    }
+
+    private void ProcessAdfNode(JsonElement node, StringBuilder sb)
+    {
+        if (node.ValueKind != JsonValueKind.Object) return;
+
+        if (node.TryGetProperty("text", out var textProp))
+        {
+            sb.Append(textProp.GetString());
+        }
+
+        if (node.TryGetProperty("content", out var contentProp) && contentProp.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var child in contentProp.EnumerateArray())
+            {
+                ProcessAdfNode(child, sb);
+
+                // Add newlines for certain block types to maintain some readability
+                if (child.TryGetProperty("type", out var typeProp))
+                {
+                    var type = typeProp.GetString();
+                    if (type == "paragraph" || type == "heading" || type == "bulletList" || type == "orderedList" || type == "listItem")
+                    {
+                        sb.AppendLine();
+                    }
+                }
+            }
+        }
     }
 }

@@ -185,20 +185,32 @@ body {
 }
 
 .content-resizer {
-  width: 4px;
+  width: 8px;
   cursor: col-resize;
   background: transparent;
   transition: background 0.2s;
   z-index: 10;
-  border-left: 1px solid var(--border-primary);
-  border-right: 1px solid var(--border-primary);
-  margin-left: -2px;
-  margin-right: -2px;
+  margin-left: -4px;
+  margin-right: -4px;
+  position: relative;
   flex-shrink: 0;
 }
 
-.content-resizer:hover, .content-resizer:active {
-  background: var(--accent-blue);
+.content-resizer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--border-primary);
+  transform: translateX(-50%);
+  transition: background-color 0.2s;
+}
+
+.content-resizer:hover::after, .content-resizer:active::after {
+  background-color: var(--accent-blue);
+  width: 2px;
 }
 
 .btn-icon {

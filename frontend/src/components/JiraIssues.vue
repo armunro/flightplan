@@ -14,35 +14,57 @@
         <i class="bi bi-search display-4 mb-3 opacity-25"></i>
         <p>No issues match your search "{{ searchQuery }}".</p>
       </div>
-      <div v-else class="list-group list-group-flush">
+      <div v-else class="jira-issues-list">
+        <div class="jira-list-header">
+          <div class="col-key">Key / Status</div>
+          <div class="col-priority">Priority / Type</div>
+          <div class="col-summary">Summary</div>
+          <div class="col-assignee">Assignee</div>
+          <div class="issue-actions-spacer"></div>
+        </div>
         <div v-for="issue in filteredIssues" :key="issue.key" 
-             class="list-group-item list-group-item-action bg-dark text-light border-secondary d-flex justify-content-between align-items-center jira-issue-item"
+             class="jira-issue-row"
              :class="{ selected: selectedIssueKey === issue.key }"
              @contextmenu.prevent="onMenu($event, issue)"
-             @click="selectIssue(issue)"
-             style="cursor: pointer;">
-          <div class="me-2 star-container" @click.stop="toggleStar(issue)">
-            <i :class="starredKeys.has(issue.key) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex w-100 justify-content-between align-items-center">
-              <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
-                <h6 class="mb-1 text-info me-2 fw-bold text-nowrap fs-base">{{ issue.key }}</h6>
-                <div v-if="issue.issueType" class="me-2 text-secondary fs-xs text-nowrap border border-secondary rounded px-1" style="font-size: 0.65rem; line-height: 1;">{{ issue.issueType }}</div>
-                <h7 class="mb-1 text-light text-truncate fs-base">{{ issue.summary }}</h7>
+             @click="selectIssue(issue)">
+          <div class="jira-issue-main-row">
+            <div class="col-key">
+              <div class="d-flex align-items-center">
+                <div class="star-container me-2" @click.stop="toggleStar(issue)">
+                  <i :class="starredKeys.has(issue.key) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></i>
+                </div>
+                <span class="text-info fw-bold">{{ issue.key }}</span>
               </div>
-              <small class="badge bg-secondary text-light fw-bold fs-xs" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</small>
             </div>
-            <div class="d-flex w-100 justify-content-between align-items-center mt-1">
-              <small class="text-secondary fs-xs">Priority: <span :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span></small>
-              <small class="text-secondary fs-xs">
-                <i class="bi bi-person"></i> {{ issue.assignee || 'Unassigned' }}
-              </small>
+            <div class="col-priority">
+              <span :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
+            </div>
+            <div class="col-summary">
+              <span class="text-light truncate-summary fw-bold">{{ issue.summary }}</span>
+            </div>
+            <div class="col-assignee">
+              <span class="text-secondary"><i class="bi bi-person me-1"></i> {{ issue.assignee || 'Unassigned' }}</span>
+            </div>
+            <div class="issue-actions">
+              <button class="issue-actions-btn" @click.stop="onMenu($event, issue)">...</button>
             </div>
           </div>
-          
-          <div class="issue-actions-dropdown">
-            <button class="issue-actions-btn" @click.stop="onMenu($event, issue)" title="Issue Actions">...</button>
+          <div class="jira-issue-sub-row">
+            <div class="col-key">
+              <span class="status-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
+            </div>
+            <div class="col-priority">
+              <span v-if="issue.issueType" class="type-badge">{{ issue.issueType }}</span>
+            </div>
+            <div class="col-description">
+              <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ issue.description }}</span>
+              <span v-else class="text-muted fs-xs italic">No description</span>
+            </div>
+            <div class="col-dates text-muted fs-xxs">
+              <span v-if="issue.updated">Updated {{ formatFriendlyDate(issue.updated, false, true) }}</span>
+              <span v-else-if="issue.created">Created {{ formatFriendlyDate(issue.created, false, true) }}</span>
+            </div>
+            <div class="col-dates-spacer"></div>
           </div>
         </div>
       </div>
@@ -76,6 +98,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { showToast } from './Toast.vue';
 import { fetchJiraIssues, fetchJiraQueries, fetchJiraStarred, toggleJiraStar, fetchJiraIssue } from '../js/dashboard-api';
 import { unassignJiraIssue } from '../js/tasks-api';
+
+import { formatFriendlyDate } from '../js/utils';
 
 const props = defineProps({
   selectedIssueKey: {
@@ -382,66 +406,176 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.jira-issue-item {
-  padding: 12px 16px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--border-primary);
-  transition: background-color 0.15s ease;
+.jira-issues-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background-color: var(--bg-dark);
-  color: var(--text-primary);
 }
 
-.jira-issue-item.selected {
-    background-color: rgba(88, 166, 255, 0.1);
-    border-left: 4px solid var(--accent-blue);
+.jira-list-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-dark);
+  border-bottom: 1px solid var(--border-primary);
+  font-size: var(--fs-xxs);
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.jira-issue-item:hover {
-  background-color: var(--bg-card);
+.jira-issue-row:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
-.star-container {
-    cursor: pointer;
-    z-index: 10;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.jira-issue-row.selected {
+  background-color: rgba(88, 166, 255, 0.1);
 }
 
-.star-container:hover .bi-star {
-    color: var(--text-primary);
+/* Column Widths */
+.col-key { width: 110px; flex-shrink: 0; padding-right: 8px; }
+.col-priority { width: 90px; flex-shrink: 0; padding-right: 8px; }
+.col-summary { flex-grow: 1; min-width: 150px; padding-right: 12px; overflow: hidden; }
+.col-assignee { width: 130px; flex-shrink: 0; }
+.issue-actions-spacer { width: 38px; flex-shrink: 0; }
+
+.jira-issue-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: var(--fs-sm);
+  min-height: 64px;
 }
 
-.issue-actions-dropdown {
-    position: relative;
-    margin-left: 10px;
+.jira-issue-main-row, .jira-issue-sub-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.jira-issue-main-row {
+  padding-bottom: 4px;
+}
+
+.jira-issue-sub-row {
+  padding-top: 0;
+  margin-top: -4px;
+}
+
+.jira-issue-sub-row .col-key {
+  padding-left: 28px; /* Offset to align with Key (under star container) */
+}
+
+.jira-issue-sub-row .col-priority {
+  display: flex;
+  align-items: center;
+}
+
+.col-description {
+  flex-grow: 1;
+  min-width: 150px;
+  padding-right: 12px;
+  overflow: hidden;
+}
+
+.col-dates {
+  width: 200px; /* Status + Priority roughly */
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 0;
+}
+
+.col-dates-spacer {
+  width: 38px;
+  flex-shrink: 0;
+}
+
+.truncate-summary {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-description {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.type-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  color: var(--text-muted);
+  background-color: rgba(255, 255, 255, 0.05);
+  display: inline-block;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.status-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.issue-actions {
+  width: 38px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.jira-issue-row:hover .issue-actions {
+  opacity: 1;
 }
 
 .issue-actions-btn {
-    background: var(--bg-card);
-    border: 1px solid var(--border-primary);
-    border-radius: 4px;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 2px 8px;
-    font-size: 1.2rem;
-    line-height: 1;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    width: 32px;
-    font-weight: bold;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 5px;
+  border-radius: 4px;
 }
 
 .issue-actions-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--border-primary);
-    border-color: var(--text-muted);
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
+.star-container {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+/* Context Menu */
 .context-menu {
     position: fixed;
     background: var(--bg-card);
