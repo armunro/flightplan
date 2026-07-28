@@ -149,6 +149,18 @@ export async function moveList(projectId, listId, targetListId, position = 'Afte
     }
 }
 
+export async function updateList(projectId, listId, name) {
+    try {
+        await fetch(`/api/projects/${projectId}/lists/${listId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+    } catch (error) {
+        console.error('Error updating list:', error);
+    }
+}
+
 export async function deleteList(projectId, listId) {
     try {
         await fetch(`/api/projects/${projectId}/lists/${listId}`, {

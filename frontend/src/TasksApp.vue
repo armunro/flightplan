@@ -203,15 +203,29 @@
                      draggable="true" @dragstart="onListDragStart($event, list.id)">
                   <span class="collapse-toggle" :class="{ collapsed: collapsedLists.has(list.id) }" @click="toggleListCollapse(list.id)">
                   </span>
-                  <h3>{{ list.name }}</h3>
+                  <input v-if="editingListId === list.id" 
+                         ref="listNameInput"
+                         v-model="editingListName" 
+                         class="list-name-input"
+                         @blur="saveListName(list)"
+                         @keyup.enter="saveListName(list)"
+                         @keyup.esc="cancelEditingList"
+                         @click.stop>
+                  <h3 v-else @dblclick="startEditingList(list)">
+                    {{ list.name }}
+                    <button class="btn btn-sm btn-link text-info p-0 ms-2 edit-list-inline-btn" @click.stop="startEditingList(list)" title="Rename List">
+                      <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
+                    </button>
+                  </h3>
                   <div class="list-actions-dropdown">
                     <button class="list-actions-btn" @click.stop="onAddTask(list.id, selectedProject)" title="Add Task">+</button>
                     <button class="list-actions-btn" @click.stop="onListMenu($event, list.id)" title="List Actions">...</button>
                     <div v-if="listMenu.visible && listMenu.listId === list.id" 
                          class="dropdown-menu show dropdown-menu-end active-list-menu" 
-                         style="position: absolute; right: 0; top: 100%;"
+                         style="position: absolute; right: 0; top: 100%; z-index: 10000; display: block !important; background: #2d2d2d; border: 1px solid var(--border-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
                          @click.stop>
-                      <div class="dropdown-item delete" @click="onDeleteListFromMenu">Delete List</div>
+                      <div class="dropdown-item" @click="onRenameListFromMenu"><i class="bi bi-pencil me-2"></i>Rename List</div>
+                      <div class="dropdown-item delete" @click="onDeleteListFromMenu"><i class="bi bi-trash me-2"></i>Delete List</div>
                     </div>
                   </div>
                 </div>
@@ -289,7 +303,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import TaskRow from './components/TaskRow.vue';
@@ -298,7 +312,7 @@ import MoveTaskDialog from './components/MoveTaskDialog.vue';
 import BulkDateDialog from './components/BulkDateDialog.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
 import ColorPicker from './components/ColorPicker.vue';
-import { addTask, moveTask, bulkMoveTasks, addList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
+import { addTask, moveTask, bulkMoveTasks, addList, updateList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
 import { findTaskInProjects, formatFriendlyDate, formatEstimate } from './js/utils';
 
 export default {
@@ -344,6 +358,9 @@ export default {
     const moveDialogTargetTaskIds = ref(null);
     const showProjectDialog = ref(false);
     const sidebarCollapsed = ref(false);
+    const editingListId = ref(null);
+    const editingListName = ref('');
+    const listNameInput = ref(null);
     const sidebarWidth = ref(loadSetting('tasksSidebarWidth', 260));
     const isResizingSidebar = ref(false);
     let sidebarStartX = 0;
@@ -1122,6 +1139,47 @@ export default {
       fetchProjects();
     };
 
+    const startEditingList = (list) => {
+      editingListId.value = list.id;
+      editingListName.value = list.name;
+      nextTick(() => {
+        if (listNameInput.value) {
+          if (Array.isArray(listNameInput.value)) {
+             listNameInput.value[0]?.focus();
+             listNameInput.value[0]?.select();
+          } else {
+             listNameInput.value.focus();
+             listNameInput.value.select();
+          }
+        }
+      });
+    };
+
+    const cancelEditingList = () => {
+      editingListId.value = null;
+      editingListName.value = '';
+    };
+
+    const saveListName = async (list) => {
+      if (!editingListId.value) return;
+      
+      const newName = editingListName.value.trim();
+      if (newName && newName !== list.name) {
+        await updateList(selectedProject.value.id, list.id, newName);
+        fetchProjects();
+      }
+      cancelEditingList();
+    };
+
+    const onRenameListFromMenu = () => {
+      const listId = listMenu.value.listId;
+      const list = selectedProject.value.lists.find(l => l.id === listId);
+      if (list) {
+        startEditingList(list);
+      }
+      closeListMenu();
+    };
+
     const onListMenu = (e, listId) => {
       if (listMenu.value.visible && listMenu.value.listId === listId) {
         closeListMenu();
@@ -1304,6 +1362,13 @@ export default {
       listMenu,
       onListMenu,
       onDeleteListFromMenu,
+      startEditingList,
+      cancelEditingList,
+      saveListName,
+      onRenameListFromMenu,
+      editingListId,
+      editingListName,
+      listNameInput,
       onEditProject,
       sidebarCollapsed,
       sidebarWidth,
@@ -1572,6 +1637,32 @@ label, .form-label {
   font-size: var(--fs-base);
   font-weight: 600;
   flex-grow: 1;
+}
+
+.list-name-input {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-blue);
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-grow: 1;
+  margin-right: 8px;
+  outline: none;
+}
+
+.edit-list-inline-btn {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.list-header:hover .edit-list-inline-btn {
+  opacity: 0.7;
+}
+
+.edit-list-inline-btn:hover {
+  opacity: 1 !important;
 }
 
 .tasks-grid {

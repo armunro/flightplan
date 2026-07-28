@@ -732,6 +732,18 @@ public class ProjectManager
         return list;
     }
 
+    public TaskList? UpdateList(Guid projectId, Guid listId, string name)
+    {
+        var project = FindProjectById(projectId);
+        if (project == null) return null;
+
+        var list = project.Lists.FirstOrDefault(l => l.Id == listId);
+        if (list == null) return null;
+
+        list.Name = name;
+        return list;
+    }
+
     public Project? MoveProject(Guid projectId, Guid? targetProjectId, MovePosition position = MovePosition.After)
     {
         var project = FindProjectById(projectId);

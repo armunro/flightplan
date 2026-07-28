@@ -15,7 +15,6 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        dashboard: resolve(__dirname, 'dashboard.html'),
         settings: resolve(__dirname, 'settings.html'),
         tasks: resolve(__dirname, 'tasks.html'),
         email: resolve(__dirname, 'email.html'),
