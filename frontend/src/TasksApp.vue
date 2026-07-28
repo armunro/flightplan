@@ -1177,7 +1177,9 @@ export default {
       const countTasks = (tasks) => {
         let internalCount = 0;
         tasks.forEach(task => {
-          internalCount++;
+          if (!task.isCompleted) {
+            internalCount++;
+          }
           if (includeSubtasks && task.subtasks && task.subtasks.length > 0) {
             internalCount += countTasks(task.subtasks);
           }
