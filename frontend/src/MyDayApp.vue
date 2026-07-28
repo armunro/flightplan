@@ -58,23 +58,26 @@
           </div>
 
           <!-- Tasks Section -->
-          <div v-if="data.tasksDueToday" class="section-container mb-4 d-flex flex-column">
+          <div v-if="data.upcomingTasks" class="section-container mb-4 d-flex flex-column">
             <div class="card d-flex flex-column shadow-sm">
               <div class="card-header d-flex align-items-center flex-shrink-0">
                 <i class="bi bi-check2-square me-2 text-success"></i>
-                <h6 class="mb-0 text-primary fs-base">Tasks Due Today</h6>
-                <span class="badge bg-secondary ms-auto text-light small">{{ data.tasksDueToday.length }}</span>
+                <h6 class="mb-0 text-primary fs-base">Upcoming Deadlines</h6>
+                <span class="badge bg-secondary ms-auto text-light small">{{ data.upcomingTasks.length }}</span>
               </div>
               <div class="card-body p-0 overflow-auto">
-                <div v-if="data.tasksDueToday.length === 0" class="py-3 px-4 text-center text-muted small">
-                  No tasks due today.
+                <div v-if="data.upcomingTasks.length === 0" class="py-3 px-4 text-center text-muted small">
+                  No upcoming deadlines.
                 </div>
                 <div v-else class="list-group list-group-flush">
-                  <div v-for="task in data.tasksDueToday" :key="task.id" class="list-group-item bg-transparent border-secondary task-item py-3">
+                  <div v-for="task in data.upcomingTasks" :key="task.id" class="list-group-item bg-transparent border-secondary task-item py-3">
                     <div class="d-flex align-items-center">
                       <input type="checkbox" class="form-check-input me-3" @change="completeTask(task)">
-                      <div class="task-info overflow-hidden">
-                        <div class="text-truncate fs-sm text-primary" :title="task.title">{{ task.title }}</div>
+                      <div class="task-info overflow-hidden flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                          <div class="text-truncate fs-sm text-primary" :title="task.title">{{ task.title }}</div>
+                          <div class="text-muted fs-xs ms-2 whitespace-nowrap">{{ formatTaskDate(task.end) }}</div>
+                        </div>
                         <div class="text-muted fs-xs mt-1">
                           <span v-if="task.estimateMinutes" class="me-2">
                             <i class="bi bi-hourglass-split me-1"></i>{{ formatEstimate(task.estimateMinutes) }}
@@ -173,6 +176,10 @@ const formatRelativeTime = (dateStr) => {
   return formatFriendlyDate(dateStr, false, true);
 };
 
+const formatTaskDate = (dateStr) => {
+  return formatFriendlyDate(dateStr, true, false);
+};
+
 const getPriorityClass = (priority) => {
   return `priority-${priority}`;
 };
@@ -182,7 +189,7 @@ const completeTask = async (task) => {
   try {
     await updateTask(task.id, { isCompleted: true });
     // Remove from local list
-    data.value.tasksDueToday = data.value.tasksDueToday.filter(t => t.id !== task.id);
+    data.value.upcomingTasks = data.value.upcomingTasks.filter(t => t.id !== task.id);
   } catch (e) {
     console.error('Failed to complete task:', e);
   }

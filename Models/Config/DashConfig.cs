@@ -13,6 +13,7 @@ public class DashConfig
 public class DebugConfig
 {
     public bool DemoMode { get; set; } = false;
+    public int UpcomingTasksCount { get; set; } = 10;
 }
 
 public class ColorScheme

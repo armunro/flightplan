@@ -8,7 +8,7 @@ using FlightPlan.Core.Interfaces;
 namespace FlightPlan.Controllers;
 
 public record MyDayDto(
-    List<TaskItem> TasksDueToday,
+    List<TaskItem> UpcomingTasks,
     List<EmailWithRulesDto> RecentEmails,
     List<CalendarEventResponseDto> TodaysEvents,
     bool EmailVisible,
@@ -41,16 +41,22 @@ public class MyDayController : ControllerBase
         var emailVisible = _config.PageVisibilities.FirstOrDefault(v => v.Id == "email")?.Visible ?? true;
         var calendarVisible = _config.PageVisibilities.FirstOrDefault(v => v.Id == "calendar")?.Visible ?? true;
 
-        // 1. Tasks due today
+        // 1. Upcoming tasks
         var allProjects = _projectManager.GetAllProjects();
-        var tasksDueToday = new List<TaskItem>();
+        var allTasks = new List<TaskItem>();
         foreach (var project in allProjects)
         {
             foreach (var list in project.Lists)
             {
-                tasksDueToday.AddRange(FindTasksDueToday(list.Tasks, today, tomorrow));
+                allTasks.AddRange(FindAllIncompleteTasks(list.Tasks));
             }
         }
+
+        var upcomingTasks = allTasks
+            .Where(t => t.End.HasValue)
+            .OrderBy(t => t.End.Value)
+            .Take(_config.Debug.UpcomingTasksCount)
+            .ToList();
 
         // 2. Recent emails (Inbox)
         var recentEmails = new List<EmailWithRulesDto>();
@@ -95,15 +101,15 @@ public class MyDayController : ControllerBase
             }
         }
 
-        return Ok(new MyDayDto(tasksDueToday, recentEmails, todaysEvents, emailVisible, calendarVisible));
+        return Ok(new MyDayDto(upcomingTasks, recentEmails, todaysEvents, emailVisible, calendarVisible));
     }
 
-    private List<TaskItem> FindTasksDueToday(List<TaskItem> tasks, DateTime today, DateTime tomorrow)
+    private List<TaskItem> FindAllIncompleteTasks(List<TaskItem> tasks)
     {
         var result = new List<TaskItem>();
         foreach (var task in tasks)
         {
-            if (!task.IsCompleted && task.End.HasValue && task.End.Value >= today && task.End.Value < tomorrow)
+            if (!task.IsCompleted)
             {
                 result.Add(task);
             }
@@ -111,7 +117,7 @@ public class MyDayController : ControllerBase
             // Recurse into subtasks
             if (task.Subtasks.Any())
             {
-                result.AddRange(FindTasksDueToday(task.Subtasks, today, tomorrow));
+                result.AddRange(FindAllIncompleteTasks(task.Subtasks));
             }
         }
         return result;
