@@ -33,6 +33,7 @@
                 <div class="d-flex flex-column overflow-hidden">
                   <div class="d-flex align-items-center gap-2 mb-1">
                     <span class="text-info fw-bold truncate-text">
+                      <span class="badge rounded-pill bg-dark border border-secondary text-muted px-1 fs-xxs me-1">#{{ pr.number }}</span>
                       {{ pr.title }}
                       <span v-if="pr.isDraft" class="draft-badge ms-1">DRAFT</span>
                     </span>
@@ -54,7 +55,6 @@
               <div class="d-flex flex-column align-items-end text-end">
                 <div class="d-flex align-items-center gap-1 mb-1">
                   <span class="text-secondary fs-xs truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
-                  <span class="badge rounded-pill bg-dark border border-secondary text-muted px-1 fs-xxs">#{{ pr.number }}</span>
                 </div>
                 <span class="text-muted fs-xxs">Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
               </div>
