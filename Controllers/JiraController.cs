@@ -45,7 +45,8 @@ public class JiraController : ControllerBase
             i.Updated, 
             i.Description,
             i.IssueType,
-            i.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList()
+            i.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList(),
+            i.Reporter
         ));
         return Ok(result);
     }
@@ -71,7 +72,8 @@ public class JiraController : ControllerBase
             issue.Updated, 
             issue.Description,
             issue.IssueType,
-            issue.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList()
+            issue.Comments?.Select(c => new JiraCommentResponseDto(c.Id, c.Author, c.Body, c.Created)).ToList(),
+            issue.Reporter
         );
         
         return Ok(result);

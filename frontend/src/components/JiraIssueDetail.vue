@@ -27,14 +27,21 @@
         </div>
 
       <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
+          <div class="detail-label fs-xxs text-uppercase fw-bold mb-1 opacity-75">Reporter</div>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-badge me-2 fs-5 text-muted"></i>
+            <span>{{ issue.reporter || 'Unknown' }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
           <div class="detail-label fs-xxs text-uppercase fw-bold mb-1 opacity-75">Assignee</div>
           <div class="d-flex align-items-center">
             <i class="bi bi-person-circle me-2 fs-5 text-muted"></i>
             <span>{{ issue.assignee || 'Unassigned' }}</span>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="detail-label fs-xxs text-uppercase fw-bold mb-1 opacity-75">Status</div>
           <div class="d-flex align-items-center">
              <i class="bi bi-circle-fill me-2" :style="{ color: getStatusColor(issue.status) }"></i>

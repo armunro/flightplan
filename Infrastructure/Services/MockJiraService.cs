@@ -28,7 +28,8 @@ public class MockJiraService : IJiraService
                 new List<JiraCommentDto> {
                     new JiraCommentDto("1001", "Manager", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Please prioritize this for the next release.\"}]}]}", DateTime.Now.AddDays(-1)),
                     new JiraCommentDto("1002", "You (Demo)", "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"I am working on this right now.\"}]}]}", DateTime.Now.AddMinutes(-30))
-                }
+                },
+                "Andrew"
             ),
             new JiraIssueDto(
                 "DEMO-102",
@@ -41,7 +42,8 @@ public class MockJiraService : IJiraService
                 "https://example.atlassian.net/browse/DEMO-102",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Add support for OAuth2 authentication.\"}]}]}",
                 "Story",
-                new List<JiraCommentDto>()
+                new List<JiraCommentDto>(),
+                "Manager"
             ),
             new JiraIssueDto(
                 "DEMO-103",
@@ -54,7 +56,8 @@ public class MockJiraService : IJiraService
                 "https://example.atlassian.net/browse/DEMO-103",
                 "{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Documentation needs to be updated to reflect the changes in API v2.\"}]}]}",
                 "Task",
-                new List<JiraCommentDto>()
+                new List<JiraCommentDto>(),
+                "Andrew"
             )
         };
     }

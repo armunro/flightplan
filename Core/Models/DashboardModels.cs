@@ -17,7 +17,8 @@ public record JiraIssueDto(
     string Url,
     string? Description,
     string? IssueType = null,
-    List<JiraCommentDto>? Comments = null);
+    List<JiraCommentDto>? Comments = null,
+    string? Reporter = null);
 
 public record GitHubCommentDto(
     string Author,

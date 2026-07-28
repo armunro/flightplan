@@ -52,7 +52,7 @@ public class JiraAdapter : IJiraService
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var requestUrl = $"{jiraUrl}/rest/api/3/search/jql?jql={Uri.EscapeDataString(jql)}&fields=summary,status,priority,key,assignee,created,updated,description,comment,issuetype&maxResults=10";
+            var requestUrl = $"{jiraUrl}/rest/api/3/search/jql?jql={Uri.EscapeDataString(jql)}&fields=summary,status,priority,key,assignee,created,updated,description,comment,issuetype,reporter&maxResults=10";
 
             var response = await client.GetAsync(requestUrl);
             if (!response.IsSuccessStatusCode)
@@ -94,17 +94,18 @@ public class JiraAdapter : IJiraService
                     var assignee = fields.TryGetProperty("assignee", out var a) && a.ValueKind == JsonValueKind.Object
                         ? (a.TryGetProperty("displayName", out var dn) ? dn.GetString() : 
                            a.TryGetProperty("name", out var n) ? n.GetString() : 
-                           a.TryGetProperty("emailAddress", out var ea) ? ea.GetString() : null)
+                           a.TryGetProperty("emailAddress", out var ea) ? ea.GetString() : "Unknown")
                         : null;
 
-                    if (assignee == null && fields.TryGetProperty("assignee", out var a2) && a2.ValueKind == JsonValueKind.Object)
-                    {
-                        _logger.LogInformation("[DEBUG_LOG] Assignee object found for {Key} but no known name field: {AssigneeJson}", key, a2.GetRawText());
-                    }
+                    var reporter = fields.TryGetProperty("reporter", out var rep) && rep.ValueKind == JsonValueKind.Object
+                        ? (rep.TryGetProperty("displayName", out var rdn) ? rdn.GetString() : 
+                           rep.TryGetProperty("name", out var rn) ? rn.GetString() : 
+                           rep.TryGetProperty("emailAddress", out var rea) ? rea.GetString() : "Unknown")
+                        : null;
 
                     if (assignee == null)
                     {
-                        _logger.LogInformation("[DEBUG_LOG] Assignee is null for issue {Key}. Fields: {Fields}", key, fields.GetRawText());
+                        _logger.LogInformation("[DEBUG_LOG] Assignee is null for issue {Key}.", key);
                     }
 
                     var createdStr = fields.TryGetProperty("created", out var c) ? c.GetString() : null;
@@ -144,7 +145,8 @@ public class JiraAdapter : IJiraService
                         $"{jiraUrl}/browse/{key}",
                         description,
                         issueType,
-                        comments
+                        comments,
+                        reporter
                     ));
                 }
                 catch (Exception ex)
