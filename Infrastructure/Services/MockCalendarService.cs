@@ -16,7 +16,13 @@ public class MockCalendarService : ICalendarService
         _mockCalendars = new List<MailFolderDto>
         {
             new MailFolderDto("cal-1", "Calendar", 0, 0, null, 0),
-            new MailFolderDto("cal-2", "Project X", 0, 0, null, 0)
+            new MailFolderDto("cal-2", "Project X", 0, 0, null, 0),
+            new MailFolderDto("cal-3", "Personal", 0, 0, null, 0),
+            new MailFolderDto("cal-4", "Holiday", 0, 0, null, 0),
+            new MailFolderDto("cal-5", "Recruitment", 0, 0, null, 0),
+            new MailFolderDto("cal-6", "Training", 0, 0, null, 0),
+            new MailFolderDto("cal-7", "Birthdays", 0, 0, null, 0),
+            new MailFolderDto("cal-8", "Tasks", 0, 0, null, 0)
         };
 
         var today = DateTime.UtcNow.Date;
@@ -57,6 +63,114 @@ public class MockCalendarService : ICalendarService
                 "Remote",
                 "https://example.com/zoom/meeting3",
                 "cal-2"
+            ),
+            new CalendarEventDto(
+                "ev-5",
+                "Dentist Appointment",
+                new DateTimeOffset(today.AddDays(3).AddHours(8), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(3).AddHours(9), TimeSpan.Zero),
+                "Smile Clinic",
+                null,
+                "cal-3"
+            ),
+            new CalendarEventDto(
+                "ev-6",
+                "Product Review Meeting",
+                new DateTimeOffset(today.AddHours(11), TimeSpan.Zero),
+                new DateTimeOffset(today.AddHours(12), TimeSpan.Zero),
+                "Meeting Room 4",
+                "https://example.com/teams/meeting-review",
+                "cal-1"
+            ),
+            new CalendarEventDto(
+                "ev-7",
+                "Gym Session",
+                new DateTimeOffset(today.AddDays(1).AddHours(17), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(1).AddHours(18), TimeSpan.Zero),
+                "City Gym",
+                null,
+                "cal-3"
+            ),
+            new CalendarEventDto(
+                "ev-8",
+                "Team Lunch",
+                new DateTimeOffset(today.AddDays(4).AddHours(12), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(4).AddHours(13).AddMinutes(30), TimeSpan.Zero),
+                "The Italian Place",
+                null,
+                "cal-1"
+            ),
+            new CalendarEventDto(
+                "ev-9",
+                "JavaScript Workshop",
+                new DateTimeOffset(today.AddDays(5).AddHours(13), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(5).AddHours(16), TimeSpan.Zero),
+                "Online",
+                "https://example.com/training/js",
+                "cal-6"
+            ),
+            new CalendarEventDto(
+                "ev-10",
+                "Sarah's Birthday",
+                new DateTimeOffset(today.AddDays(6), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(6).AddHours(23).AddMinutes(59), TimeSpan.Zero),
+                "All Day",
+                null,
+                "cal-7"
+            ),
+            new CalendarEventDto(
+                "ev-11",
+                "Candidate Interview - Senior Dev",
+                new DateTimeOffset(today.AddDays(2).AddHours(14), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(2).AddHours(15), TimeSpan.Zero),
+                "Teams",
+                "https://example.com/interview/123",
+                "cal-5"
+            ),
+            new CalendarEventDto(
+                "ev-12",
+                "Weekly Sync - Project Y",
+                new DateTimeOffset(today.AddDays(1).AddHours(10), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(1).AddHours(10).AddMinutes(30), TimeSpan.Zero),
+                "Room 2",
+                null,
+                "cal-1"
+            ),
+            new CalendarEventDto(
+                "ev-13",
+                "Architecture Review",
+                new DateTimeOffset(today.AddDays(3).AddHours(15), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(3).AddHours(17), TimeSpan.Zero),
+                "Boardroom",
+                null,
+                "cal-1"
+            ),
+            new CalendarEventDto(
+                "ev-14",
+                "Car Service",
+                new DateTimeOffset(today.AddDays(2).AddHours(8), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(2).AddHours(9), TimeSpan.Zero),
+                "Local Garage",
+                null,
+                "cal-3"
+            ),
+            new CalendarEventDto(
+                "ev-15",
+                "Quarterly Planning",
+                new DateTimeOffset(today.AddDays(7).AddHours(9), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(7).AddHours(17), TimeSpan.Zero),
+                "Offsite Location",
+                null,
+                "cal-1"
+            ),
+            new CalendarEventDto(
+                "ev-16",
+                "Deployment Window",
+                new DateTimeOffset(today.AddDays(3).AddHours(20), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(3).AddHours(22), TimeSpan.Zero),
+                "Production Environment",
+                null,
+                "cal-1"
             )
         };
     }
