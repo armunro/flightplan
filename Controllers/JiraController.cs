@@ -44,8 +44,36 @@ public class JiraController : ControllerBase
             i.Created, 
             i.Updated, 
             i.Description,
+            i.IssueType,
             i.Comments?.Select(c => new JiraCommentResponseDto(c.Author, c.Body, c.Created)).ToList()
         ));
+        return Ok(result);
+    }
+
+    [HttpGet("issue/{key}")]
+    public async Task<IActionResult> GetIssue(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return BadRequest("Key is required");
+        
+        var issues = await _dashboardService.GetJiraIssuesByJqlAsync($"key = \"{key}\"");
+        var issue = issues.FirstOrDefault();
+        
+        if (issue == null) return NotFound();
+
+        var result = new JiraIssueResponseDto(
+            issue.Key, 
+            issue.Summary, 
+            issue.Status, 
+            issue.Priority, 
+            issue.Url, 
+            issue.Assignee, 
+            issue.Created, 
+            issue.Updated, 
+            issue.Description,
+            issue.IssueType,
+            issue.Comments?.Select(c => new JiraCommentResponseDto(c.Author, c.Body, c.Created)).ToList()
+        );
+        
         return Ok(result);
     }
 

@@ -70,6 +70,18 @@
               <div class="text-muted small" v-if="selectedQueryName">
                 Filter: <span class="text-info fw-bold">{{ selectedQueryName }}</span>
               </div>
+
+              <!-- Search Box -->
+              <div class="d-flex align-items-center gap-3 bg-darker rounded-pill px-3 py-1 border border-secondary">
+                <div class="search-box position-relative" style="width: 200px;">
+                  <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-info opacity-75 x-small"></i>
+                  <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 text-light ps-4 search-input" placeholder="Search..." />
+                  <button v-if="searchQuery" class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y me-0 p-0 text-muted" @click="searchQuery = ''">
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                </div>
+              </div>
+
               <button class="btn btn-sm btn-outline-secondary" @click="showQueriesDialog = true" title="Edit Queries">
                 <i class="bi bi-pencil-square me-1"></i> Edit Queries
               </button>
@@ -83,6 +95,7 @@
             <GitHubPrs 
               :selectedPrUrl="selectedPr?.url" 
               :currentQuery="currentQuery"
+              :searchQuery="searchQuery"
               :showStarredOnly="showStarredOnly"
               @select-pr="selectedPr = $event" 
             />
@@ -119,6 +132,7 @@ import { fetchGitHubQueries } from './js/dashboard-api';
 const selectedPr = ref(null);
 const queries = ref([]);
 const currentQuery = ref(null);
+const searchQuery = ref('');
 const showStarredOnly = ref(false);
 const loadingFilters = ref(false);
 const showQueriesDialog = ref(false);
@@ -142,10 +156,12 @@ const selectedQueryName = computed(() => {
 const selectQuery = (query) => {
   currentQuery.value = query;
   showStarredOnly.value = false;
+  searchQuery.value = '';
 };
 
 const selectStarred = () => {
   showStarredOnly.value = true;
+  searchQuery.value = '';
 };
 
 const loadFilters = async () => {
@@ -220,6 +236,20 @@ onMounted(() => {
 
 .main-wrapper {
   background-color: var(--bg-darker);
+}
+
+.search-input::placeholder {
+  color: #aab2bb;
+  opacity: 0.8;
+  font-size: 0.85rem;
+}
+
+.x-small {
+  font-size: 0.75rem;
+}
+
+.bg-darker {
+  background-color: var(--bg-darker) !important;
 }
 
 .github-app-container {

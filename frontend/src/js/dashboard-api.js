@@ -8,6 +8,15 @@
   return response.json();
 }
 
+export async function fetchJiraIssue(key) {
+  const response = await fetch(`/api/jira/issue/${encodeURIComponent(key)}`);
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error('Failed to fetch Jira issue');
+  }
+  return response.json();
+}
+
 export async function fetchJiraQueries() {
   const response = await fetch('/api/jira/queries');
   if (!response.ok) throw new Error('Failed to fetch Jira queries');

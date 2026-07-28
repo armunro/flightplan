@@ -52,7 +52,7 @@ public class JiraAdapter : IJiraService
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var requestUrl = $"{jiraUrl}/rest/api/3/search/jql?jql={Uri.EscapeDataString(jql)}&fields=summary,status,priority,key,assignee,created,updated,description,comment&maxResults=10";
+            var requestUrl = $"{jiraUrl}/rest/api/3/search/jql?jql={Uri.EscapeDataString(jql)}&fields=summary,status,priority,key,assignee,created,updated,description,comment,issuetype&maxResults=10";
 
             var response = await client.GetAsync(requestUrl);
             if (!response.IsSuccessStatusCode)
@@ -87,6 +87,9 @@ public class JiraAdapter : IJiraService
 
                     var priority = fields.TryGetProperty("priority", out var p) && p.TryGetProperty("name", out var pn) 
                         ? pn.GetString() ?? "Medium" : "Medium";
+
+                    var issueType = fields.TryGetProperty("issuetype", out var it) && it.TryGetProperty("name", out var itn)
+                        ? itn.GetString() : null;
 
                     var assignee = fields.TryGetProperty("assignee", out var a) && a.ValueKind == JsonValueKind.Object
                         ? (a.TryGetProperty("displayName", out var dn) ? dn.GetString() : 
@@ -139,6 +142,7 @@ public class JiraAdapter : IJiraService
                         updated,
                         $"{jiraUrl}/browse/{key}",
                         description,
+                        issueType,
                         comments
                     ));
                 }

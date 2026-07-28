@@ -17,6 +17,7 @@
           <h2 class="h3 mb-0 text-light">{{ issue.summary }}</h2>
         </div>
         <div class="d-flex gap-2 ms-3 flex-shrink-0">
+          <span v-if="issue.issueType" class="badge bg-dark border border-secondary d-flex align-items-center opacity-75">{{ issue.issueType }}</span>
           <span class="badge d-flex align-items-center" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</span>
           <span class="badge bg-dark border border-secondary d-flex align-items-center" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
         </div>

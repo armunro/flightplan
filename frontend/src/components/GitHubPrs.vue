@@ -9,8 +9,12 @@
         <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
         <p>No open pull requests found or access token not configured.</p>
       </div>
+      <div v-else-if="filteredPrs.length === 0" class="p-5 text-center text-muted">
+        <i class="bi bi-search display-4 mb-3 opacity-25"></i>
+        <p>No pull requests match your search "{{ searchQuery }}".</p>
+      </div>
       <div v-else class="list-group list-group-flush">
-        <div v-for="pr in prs" :key="pr.url" 
+        <div v-for="pr in filteredPrs" :key="pr.url" 
              @click="$emit('select-pr', pr)"
              class="list-group-item list-group-item-action bg-dark text-light border-secondary d-flex align-items-center"
              :class="{ 'active-pr': selectedPrUrl === pr.url }"
@@ -39,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { fetchGitHubPrs, fetchGitHubStarred, toggleGitHubStar } from '../js/dashboard-api';
 
 const props = defineProps({
@@ -47,6 +51,10 @@ const props = defineProps({
   currentQuery: {
     type: String,
     default: null
+  },
+  searchQuery: {
+    type: String,
+    default: ''
   },
   showStarredOnly: {
     type: Boolean,
@@ -59,6 +67,21 @@ defineEmits(['select-pr']);
 const prs = ref([]);
 const starredUrls = ref(new Set());
 const loading = ref(true);
+
+const filteredPrs = computed(() => {
+  if (!props.searchQuery) return prs.value;
+  
+  const query = props.searchQuery.toLowerCase();
+  return prs.value.filter(pr => {
+    return (
+      (pr.title && pr.title.toLowerCase().includes(query)) ||
+      (pr.author && pr.author.toLowerCase().includes(query)) ||
+      (pr.repository && pr.repository.toLowerCase().includes(query)) ||
+      (pr.status && pr.status.toLowerCase().includes(query)) ||
+      (pr.number && pr.number.toString().includes(query))
+    );
+  });
+});
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);

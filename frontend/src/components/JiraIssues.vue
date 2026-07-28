@@ -10,8 +10,12 @@
         <p v-if="showStarredOnly">No starred issues found. Star issues to see them here.</p>
         <p v-else>No active issues found or API token not configured.</p>
       </div>
+      <div v-else-if="filteredIssues.length === 0" class="p-5 text-center text-muted">
+        <i class="bi bi-search display-4 mb-3 opacity-25"></i>
+        <p>No issues match your search "{{ searchQuery }}".</p>
+      </div>
       <div v-else class="list-group list-group-flush">
-        <div v-for="issue in issues" :key="issue.key" 
+        <div v-for="issue in filteredIssues" :key="issue.key" 
              class="list-group-item list-group-item-action bg-dark text-light border-secondary d-flex justify-content-between align-items-center jira-issue-item"
              :class="{ selected: selectedIssueKey === issue.key }"
              @contextmenu.prevent="onMenu($event, issue)"
@@ -24,6 +28,7 @@
             <div class="d-flex w-100 justify-content-between align-items-center">
               <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
                 <h6 class="mb-1 text-info me-2 fw-bold text-nowrap fs-base">{{ issue.key }}</h6>
+                <div v-if="issue.issueType" class="me-2 text-secondary fs-xs text-nowrap border border-secondary rounded px-1" style="font-size: 0.65rem; line-height: 1;">{{ issue.issueType }}</div>
                 <h7 class="mb-1 text-light text-truncate fs-base">{{ issue.summary }}</h7>
               </div>
               <small class="badge bg-secondary text-light fw-bold fs-xs" :style="{ backgroundColor: getStatusColor(issue.status) + ' !important' }">{{ issue.status }}</small>
@@ -67,9 +72,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { showToast } from './Toast.vue';
-import { fetchJiraIssues, fetchJiraQueries, fetchJiraStarred, toggleJiraStar } from '../js/dashboard-api';
+import { fetchJiraIssues, fetchJiraQueries, fetchJiraStarred, toggleJiraStar, fetchJiraIssue } from '../js/dashboard-api';
 import { unassignJiraIssue } from '../js/tasks-api';
 
 const props = defineProps({
@@ -78,6 +83,10 @@ const props = defineProps({
     default: null
   },
   currentQuery: {
+    type: String,
+    default: ''
+  },
+  searchQuery: {
     type: String,
     default: ''
   },
@@ -91,11 +100,33 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['select-issue', 'create-task']);
+const emit = defineEmits(['select-issue', 'create-task', 'fetched-issue']);
 
 const issues = ref([]);
+const fetchedIssue = ref(null);
 const starredKeys = ref(new Set());
 const loading = ref(true);
+
+const filteredIssues = computed(() => {
+  const allIssues = [...issues.value];
+  
+  if (fetchedIssue.value && !issues.value.some(i => i.key === fetchedIssue.value.key)) {
+    allIssues.push(fetchedIssue.value);
+  }
+
+  if (!props.searchQuery) return allIssues;
+  
+  const query = props.searchQuery.toLowerCase();
+  return allIssues.filter(issue => {
+    return (
+      (issue.key && issue.key.toLowerCase().includes(query)) ||
+      (issue.summary && issue.summary.toLowerCase().includes(query)) ||
+      (issue.assignee && issue.assignee.toLowerCase().includes(query)) ||
+      (issue.status && issue.status.toLowerCase().includes(query)) ||
+      (issue.priority && issue.priority.toLowerCase().includes(query))
+    );
+  });
+});
 
 const menu = ref({
   visible: false,
@@ -256,6 +287,44 @@ watch(() => props.currentQuery, () => {
 
 watch(() => props.showStarredOnly, () => {
   loadIssues();
+});
+
+watch(() => props.searchQuery, async (newQuery) => {
+  if (!newQuery) {
+    fetchedIssue.value = null;
+    emit('fetched-issue', null);
+    return;
+  }
+
+  const query = newQuery.trim().toUpperCase();
+  const jiraKeyRegex = /^[A-Z0-9]+-[0-9]+$/;
+  
+  if (jiraKeyRegex.test(query)) {
+    // If it's already in the list, don't fetch
+    if (issues.value.some(i => i.key.toUpperCase() === query)) {
+      fetchedIssue.value = null;
+      emit('fetched-issue', null);
+      return;
+    }
+
+    try {
+      const issue = await fetchJiraIssue(query);
+      if (issue) {
+        fetchedIssue.value = issue;
+        emit('fetched-issue', issue);
+      } else {
+        fetchedIssue.value = null;
+        emit('fetched-issue', null);
+      }
+    } catch (e) {
+      console.error('Error fetching single Jira issue:', e);
+      fetchedIssue.value = null;
+      emit('fetched-issue', null);
+    }
+  } else {
+    fetchedIssue.value = null;
+    emit('fetched-issue', null);
+  }
 });
 
 const selectIssue = (issue) => {

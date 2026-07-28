@@ -7,7 +7,7 @@ using FlightPlan.Services;
 namespace FlightPlan.Controllers;
 
 public record JiraCommentResponseDto(string Author, string Body, DateTime Created);
-public record JiraIssueResponseDto(string Key, string Summary, string Status, string Priority, string Url, string? Assignee, DateTime? Created, DateTime? Updated, string? Description, List<JiraCommentResponseDto>? Comments = null);
+public record JiraIssueResponseDto(string Key, string Summary, string Status, string Priority, string Url, string? Assignee, DateTime? Created, DateTime? Updated, string? Description, string? IssueType = null, List<JiraCommentResponseDto>? Comments = null);
 public record GitHubCommentResponseDto(string Author, string Body, DateTimeOffset CreatedAt);
 public record GitHubPrResponseDto(string Title, string Repository, string Author, string Status, string Url, DateTimeOffset CreatedAt, string? Body, List<GitHubCommentResponseDto>? Comments, bool IsDraft, int Number);
 
