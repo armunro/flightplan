@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content jira-queries-dialog">
       <div class="modal-header">
         <h3><i class="bi bi-kanban me-2"></i>Jira Queries</h3>
@@ -20,9 +20,26 @@
           </div>
           
           <div class="queries-list">
-            <div v-for="(query, index) in localQueries" :key="index" class="query-card mb-3 p-3 border border-secondary rounded">
+            <div v-for="(query, index) in localQueries" :key="index" class="query-card mb-3 p-3 border border-secondary rounded position-relative">
               <div class="d-flex justify-content-between mb-2 align-items-center">
-                <input v-model="query.name" type="text" class="form-control form-control-sm bg-dark text-light border-secondary me-2" placeholder="Query Name">
+                <div class="d-flex align-items-center flex-grow-1 me-2">
+                  <div class="d-flex flex-column me-2">
+                    <button class="btn btn-xs btn-link p-0 text-muted" :disabled="index === 0" @click="moveQuery(index, -1)">
+                      <i class="bi bi-chevron-up"></i>
+                    </button>
+                    <button class="btn btn-xs btn-link p-0 text-muted" :disabled="index === localQueries.length - 1" @click="moveQuery(index, 1)">
+                      <i class="bi bi-chevron-down"></i>
+                    </button>
+                  </div>
+                  <ColorPicker v-model="query.color" size="sm" class="me-2" />
+                  <div class="input-group input-group-sm me-2" style="width: 240px;">
+                    <span class="input-group-text bg-dark border-secondary text-muted">
+                      <i class="bi" :class="query.icon || 'bi-filter'"></i>
+                    </span>
+                    <input v-model="query.icon" type="text" class="form-control bg-dark text-light border-secondary" placeholder="bi-icon">
+                  </div>
+                  <input v-model="query.name" type="text" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Query Name">
+                </div>
                 <button class="btn btn-sm btn-outline-danger" @click="removeQuery(index)">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -49,7 +66,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import ColorPicker from './ColorPicker.vue';
 import { showToast } from './Toast.vue';
 import { fetchSettings, updateSettings } from '../js/dashboard-api';
 
@@ -60,7 +78,14 @@ const saving = ref(false);
 const config = ref(null);
 const localQueries = ref([]);
 
+const onKeyDown = (e) => {
+  if (e.key === 'Escape') {
+    emit('close');
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener('keydown', onKeyDown);
   try {
     const data = await fetchSettings();
     config.value = data;
@@ -72,12 +97,24 @@ onMounted(async () => {
   }
 });
 
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown);
+});
+
 const addQuery = () => {
-  localQueries.value.push({ name: '', jql: '' });
+  localQueries.value.push({ name: '', jql: '', color: '#58a6ff', icon: 'bi-filter' });
 };
 
 const removeQuery = (index) => {
   localQueries.value.splice(index, 1);
+};
+
+const moveQuery = (index, direction) => {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= localQueries.value.length) return;
+  
+  const item = localQueries.value.splice(index, 1)[0];
+  localQueries.value.splice(newIndex, 0, item);
 };
 
 const save = async () => {
@@ -114,8 +151,8 @@ const save = async () => {
   background: #161b22;
   border: 1px solid var(--border-primary);
   border-radius: 8px;
-  width: 500px;
-  max-width: 90vw;
+  width: 700px;
+  max-width: 95vw;
   max-height: 85vh;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   display: flex;
@@ -156,6 +193,20 @@ const save = async () => {
 
 .query-card {
   background-color: rgba(255, 255, 255, 0.02);
+}
+
+.btn-xs {
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.btn-link:hover {
+  color: var(--accent-blue) !important;
+}
+
+.btn-link:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .form-control:focus {

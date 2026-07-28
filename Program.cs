@@ -87,8 +87,8 @@ if (dashConfig.GitHub.Queries == null || dashConfig.GitHub.Queries.Count == 0)
 {
     dashConfig.GitHub.Queries = new List<GitHubQuery>
     {
-        new GitHubQuery { Name = "Approve", Query = $"is:open is:pr review-requested:{dashConfig.GitHub.Username}" },
-        new GitHubQuery { Name = "Drafts", Query = $"is:open is:pr author:{dashConfig.GitHub.Username} draft:true" }
+        new GitHubQuery { Name = "Approve", Query = $"is:open is:pr review-requested:{dashConfig.GitHub.Username}", Color = "#fd7e14", Icon = "bi-check2-circle" },
+        new GitHubQuery { Name = "Drafts", Query = $"is:open is:pr author:{dashConfig.GitHub.Username} draft:true", Color = "#adb5bd", Icon = "bi-file-earmark-diff" }
     };
 }
 

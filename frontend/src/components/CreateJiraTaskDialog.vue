@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content create-dialog">
       <div class="modal-header">
         <h3>Create Task from Jira: {{ issue?.key }}</h3>
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 
 export default {
   name: 'CreateJiraTaskDialog',
@@ -61,8 +61,19 @@ export default {
         return jiraProject ? jiraProject.id : props.projects[0]?.id;
     };
 
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        emit('close');
+      }
+    };
+
     onMounted(() => {
         selectedProjectId.value = findJiraProject();
+        window.addEventListener('keydown', onKeyDown);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('keydown', onKeyDown);
     });
 
     const selectedProject = computed(() => {

@@ -27,12 +27,17 @@
                  @dragover.prevent="onProjectDragOver($event, project.id)"
                  @dragleave="onProjectDragLeave($event)"
                  @drop="onProjectDrop($event, project.id)"
+                 @contextmenu.prevent="onProjectContextMenu($event, project)"
                  :title="sidebarCollapsed ? project.name : ''">
               <div class="project-icon-wrapper" :style="{ backgroundColor: project.color }">
                 <i :class="[getProjectIconClass(project)]"></i>
               </div>
               <span v-if="!sidebarCollapsed" class="project-name">{{ project.name }}</span>
-              <span v-if="!sidebarCollapsed" class="project-task-count">{{ getTaskCount(project) }}</span>
+              <div v-if="!sidebarCollapsed" class="project-task-counts">
+                <span class="project-task-count main-count" title="Tasks (excluding subtasks)">{{ getTaskCount(project, false) }}</span>
+                <span class="count-separator">/</span>
+                <span class="project-task-count sub-count" title="Total tasks (including subtasks)">{{ getTaskCount(project, true) }}</span>
+              </div>
             </div>
           </template>
         </div>
@@ -48,8 +53,17 @@
         <div class="main-content" v-if="selectedProject">
           <div class="tasks-container">
             <div class="controls-bar">
-              <div class="project-title-area">
-                <h2 contenteditable="true" @blur="onUpdateProjectName($event, selectedProject)">{{ selectedProject.name }}</h2>
+              <div class="project-title-area d-flex align-items-center gap-3">
+                <ColorPicker :modelValue="selectedProject.color" @update:modelValue="onUpdateProjectColor($event, selectedProject)" size="sm" />
+                <h2 class="mb-0 text-truncate" style="max-width: 300px;">{{ selectedProject.name }}</h2>
+                <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-sm btn-link text-info p-0" @click="onEditProject(selectedProject)" title="Edit Project">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-link text-info p-0" @click.prevent="onAddList(selectedProject.id)" title="Add List">
+                    <i class="bi bi-plus-lg"></i>
+                  </button>
+                </div>
               </div>
               <div v-if="selectedTaskIds.length > 0" class="bulk-action-bar">
                 <div class="bulk-info">
@@ -107,12 +121,6 @@
                 <button class="btn-close btn-close-white" @click="onSelectNone"></button>
               </div>
               <div class="btn-group" role="group">
-                <button class="btn btn-outline-primary btn-sm" @click.prevent="onEditProject(selectedProject)">
-                  <i class="bi bi-pencil-square me-1"></i>Edit Project
-                </button>
-                <button class="btn btn-outline-primary btn-sm" @click.prevent="onAddList(selectedProject.id)">
-                  <i class="bi bi-plus-lg me-1"></i>Add List
-                </button>
                 <button class="btn btn-outline-info btn-sm" @click.prevent="autosizeColumns">
                   <i class="bi bi-arrows-expand-vertical me-1" style="transform: rotate(90deg); display: inline-block;"></i>Autosize
                 </button>
@@ -126,8 +134,22 @@
                  class="context-menu" 
                  :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
                  @click.stop>
-            <div class="context-menu-item" @click="onShowMoveDialog(contextMenu.task)">Move Task...</div>
-              <div class="context-menu-item delete" @click="onDeleteTaskFromMenu">Delete Task</div>
+              <template v-if="contextMenu.task">
+                <div class="context-menu-item" @click="onShowMoveDialog(contextMenu.task)">Move Task...</div>
+                <div class="context-menu-separator"></div>
+                <div class="context-menu-header">Due at...</div>
+                <div class="context-menu-item" @click="onSetTaskDueDate('today')">Today</div>
+                <div class="context-menu-item" @click="onSetTaskDueDate('this-week')">This Week</div>
+                <div class="context-menu-item" @click="onSetTaskDueDate('next-week')">Next Week</div>
+                <div class="context-menu-item" @click="onSetTaskDueDate('this-month')">This Month</div>
+                <div class="context-menu-item" @click="onSetTaskDueDate('next-month')">Next Month</div>
+                <div class="context-menu-separator"></div>
+                <div class="context-menu-item delete" @click="onDeleteTaskFromMenu">Delete Task</div>
+              </template>
+              <template v-else-if="contextMenu.project">
+                <div class="context-menu-item" @click="onAddList(contextMenu.project.id)">Add List</div>
+                <div class="context-menu-item" @click="onEditProject(contextMenu.project)">Edit Project</div>
+              </template>
             </div>
 
             <task-detail v-if="selectedTask" 
@@ -168,10 +190,11 @@
                      'list-drag-over-after': dropListPosition === 'after' && dropListId === list.id,
                      'collapsed': collapsedLists.has(list.id)
                    }">
-                <div class="list-header" :class="{ 'collapsed': collapsedLists.has(list.id) }">
+                <div class="list-header" :class="{ 'collapsed': collapsedLists.has(list.id) }"
+                     draggable="true" @dragstart="onListDragStart($event, list.id)">
                   <span class="collapse-toggle" :class="{ collapsed: collapsedLists.has(list.id) }" @click="toggleListCollapse(list.id)">
                   </span>
-                  <h3 draggable="true" @dragstart="onListDragStart($event, list.id)">{{ list.name }}</h3>
+                  <h3>{{ list.name }}</h3>
                   <div class="list-actions-dropdown">
                     <button class="list-actions-btn" @click.stop="onAddTask(list.id, selectedProject)" title="Add Task">+</button>
                     <button class="list-actions-btn" @click.stop="onListMenu($event, list.id)" title="List Actions">...</button>
@@ -185,18 +208,18 @@
                 </div>
                 
                 <div class="tasks-grid" v-if="!collapsedLists.has(list.id)">
-                  <div class="tasks-header-row" :style="gridStyle">
+                  <div class="tasks-header-row" :class="{ 'is-empty': getSortedTasks(list.tasks).length === 0 }" :style="gridStyle">
                     <div class="tasks-header selection-header">
                       <input type="checkbox" :checked="isListAllSelected(list)" @change="toggleListSelectAll(list)">
                     </div>
-                    <div class="tasks-header sortable" @click="toggleSort('title')">
-                      Task Name
-                      <span v-if="sortBy === 'title'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(0, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('taskTypeId')">
+                    <div class="tasks-header sortable type-column" @click="toggleSort('taskTypeId')">
                       Type
                       <span v-if="sortBy === 'taskTypeId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                      <div class="resizer" @mousedown.stop="startResize(0, $event)"></div>
+                    </div>
+                    <div class="tasks-header sortable name-column" @click="toggleSort('title')">
+                      Task Name
+                      <span v-if="sortBy === 'title'" class="sort-icon" :class="{ desc: sortDesc }"></span>
                       <div class="resizer" @mousedown.stop="startResize(1, $event)"></div>
                     </div>
                     <div class="tasks-header sortable" @click="toggleSort('statusId')">
@@ -265,7 +288,8 @@ import TaskDetail from './components/TaskDetail.vue';
 import MoveTaskDialog from './components/MoveTaskDialog.vue';
 import BulkDateDialog from './components/BulkDateDialog.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
-import { addTask, moveTask, bulkMoveTasks, addList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, bulkUpdateTasks } from './js/tasks-api';
+import ColorPicker from './components/ColorPicker.vue';
+import { addTask, moveTask, bulkMoveTasks, addList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
 import { findTaskInProjects, formatFriendlyDate, formatEstimate } from './js/utils';
 
 export default {
@@ -276,7 +300,8 @@ export default {
     TaskDetail,
     MoveTaskDialog,
     BulkDateDialog,
-    ProjectDialog
+    ProjectDialog,
+    ColorPicker
   },
   setup() {
     const loadSetting = (key, defaultValue) => {
@@ -377,12 +402,13 @@ export default {
       visible: false,
       x: 0,
       y: 0,
-      task: null
+      task: null,
+      project: null
     });
 
     // Resizing state
     const selectionColumnWidth = ref(40);
-    const columnWidths = ref(loadSetting('columnWidths', [400, 100, 150, 150, 180, 180, 120, 0])); // Task Name, Type, Status, Priority, Start, End, Est, Dead
+    const columnWidths = ref(loadSetting('columnWidths', [100, 400, 150, 150, 180, 180, 120, 0])); // Type, Task Name, Status, Priority, Start, End, Est, Dead
     const isResizing = ref(false);
     const activeResizer = ref(-1);
     const startX = ref(0);
@@ -416,15 +442,24 @@ export default {
         return context.measureText(text).width;
       };
 
-      const padding = 24; // Padding and extra space
-      const datePadding = 48; // Extra padding for date columns to accommodate clear button and icons
+      const padding = 16; // Padding and extra space (8px left + 8px right)
+      const datePadding = 32; // Extra padding for date columns
       const newWidths = [...columnWidths.value];
 
-      // 0: Task Name
+      // 0: Type
+      let maxTypeWidth = getTextWidth('Type');
+      selectedProject.value.taskTypes.forEach(t => {
+        const w = getTextWidth(t.name);
+        if (w > maxTypeWidth) maxTypeWidth = w;
+      });
+      // 8px left padding + 16px badge padding + 12px for icon/spacing (since right padding is 0)
+      newWidths[0] = Math.ceil(maxTypeWidth + 8 + 16 + 12); 
+
+      // 1: Task Name
       let maxNameWidth = getTextWidth('Task Name');
       const checkTasks = (tasks, depth) => {
         tasks.forEach(t => {
-          const w = getTextWidth(t.title) + (depth * 20) + 40; // Indent + some extra for icons/spacing
+          const w = getTextWidth(t.title) + (depth * 20) + 24; // Indent + icon space
           if (w > maxNameWidth) maxNameWidth = w;
           if (t.subtasks) checkTasks(t.subtasks, depth + 1);
         });
@@ -432,15 +467,8 @@ export default {
       selectedProject.value.lists.forEach(l => {
         if (l.tasks) checkTasks(l.tasks, 0);
       });
-      newWidths[0] = Math.max(200, Math.ceil(maxNameWidth + padding));
-
-      // 1: Type
-      let maxTypeWidth = getTextWidth('Type');
-      selectedProject.value.taskTypes.forEach(t => {
-        const w = getTextWidth(t.name);
-        if (w > maxTypeWidth) maxTypeWidth = w;
-      });
-      newWidths[1] = Math.ceil(maxTypeWidth + padding + 40);
+      // 4px left padding + 8px right padding + maxNameWidth
+      newWidths[1] = Math.max(200, Math.ceil(maxNameWidth + 4 + 8));
 
       // 2: Status
       let maxStatusWidth = getTextWidth('Status');
@@ -448,7 +476,7 @@ export default {
         const w = getTextWidth(s.name);
         if (w > maxStatusWidth) maxStatusWidth = w;
       });
-      newWidths[2] = Math.ceil(maxStatusWidth + padding + 40); // Extra for badge padding and non-wrapping
+      newWidths[2] = Math.ceil(maxStatusWidth + padding + 32); // Extra for badge padding and non-wrapping
 
       // 3: Priority
       let maxPriorityWidth = getTextWidth('Priority');
@@ -456,7 +484,7 @@ export default {
         const w = getTextWidth(p.name);
         if (w > maxPriorityWidth) maxPriorityWidth = w;
       });
-      newWidths[3] = Math.ceil(maxPriorityWidth + padding + 40);
+      newWidths[3] = Math.ceil(maxPriorityWidth + padding + 32);
 
       // 4: Start
       // 5: End
@@ -506,13 +534,13 @@ export default {
       
       if (totalFixedWidth + minLastColumnWidth > availableWidth) {
         const excess = totalFixedWidth + minLastColumnWidth - availableWidth;
-        // Reduce Task Name column first (index 0)
-        if (newWidths[0] - excess >= 200) {
-          newWidths[0] -= excess;
+        // Reduce Task Name column first (index 1)
+        if (newWidths[1] - excess >= 200) {
+          newWidths[1] -= excess;
         } else {
           // If we can't take it all from Task Name, set it to min and spread the rest?
           // For now, just cap it to available space even if it's below min
-          newWidths[0] = Math.max(100, newWidths[0] - excess);
+          newWidths[1] = Math.max(100, newWidths[1] - excess);
         }
       }
 
@@ -571,6 +599,9 @@ export default {
         if (sortBy.value === 'title') {
           valA = (valA || '').toString().trim().toLowerCase();
           valB = (valB || '').toString().trim().toLowerCase();
+        } else if (sortBy.value === 'taskTypeId') {
+          valA = valA === null || valA === undefined ? -1 : valA;
+          valB = valB === null || valB === undefined ? -1 : valB;
         } else if (sortBy.value === 'priority' || sortBy.value === 'estimateMinutes') {
           if (sortBy.value === 'priority') {
             const pA = selectedProject.value.priorities.find(p => p.id === a.priorityId);
@@ -750,7 +781,7 @@ export default {
 
     const onBulkUpdate = async (data) => {
       await bulkUpdateTasks(selectedTaskIds.value, data);
-      await fetchProjects();
+      fetchProjects();
     };
 
     const onBulkDateUpdate = async (dates) => {
@@ -840,7 +871,28 @@ export default {
     };
 
     const onUpdateProjectName = async (e, project) => {
-      await updateProject(project.id, { name: e.target.innerText });
+      await updateProject(project.id, { 
+        name: e.target.innerText,
+        icon: project.icon,
+        color: project.color,
+        description: project.description,
+        statuses: project.statuses,
+        taskTypes: project.taskTypes,
+        priorities: project.priorities
+      });
+    };
+
+    const onUpdateProjectColor = async (color, project) => {
+      await updateProject(project.id, { 
+        name: project.name,
+        icon: project.icon,
+        color: color,
+        description: project.description,
+        statuses: project.statuses,
+        taskTypes: project.taskTypes,
+        priorities: project.priorities
+      });
+      fetchProjects();
     };
 
     const onProjectDragStart = (e, projectId) => {
@@ -891,11 +943,7 @@ export default {
 
       if (isDraggingTask) {
         e.preventDefault();
-        if (!e.target.closest('.task-row')) {
-          e.currentTarget.classList.add('drag-over');
-        } else {
-          e.currentTarget.classList.remove('drag-over');
-        }
+        e.currentTarget.classList.add('drag-over');
       } else if (isDraggingList) {
         e.preventDefault();
         dropListId.value = listId;
@@ -950,7 +998,21 @@ export default {
         visible: true,
         x: e.pageX,
         y: e.pageY,
-        task: task
+        task: task,
+        project: null
+      };
+      setTimeout(() => {
+        document.addEventListener('click', closeContextMenu);
+      }, 0);
+    };
+
+    const onProjectContextMenu = (e, project) => {
+      contextMenu.value = {
+        visible: true,
+        x: e.pageX,
+        y: e.pageY,
+        task: null,
+        project: project
       };
       setTimeout(() => {
         document.addEventListener('click', closeContextMenu);
@@ -969,6 +1031,62 @@ export default {
         fetchProjects();
       }
       closeContextMenu();
+    };
+
+    const onSetTaskDueDate = async (period) => {
+      const task = contextMenu.value.task;
+      if (!task) return;
+
+      const now = new Date();
+      let dueDate = new Date();
+
+      switch (period) {
+        case 'today':
+          // End of today
+          dueDate.setHours(23, 59, 59, 999);
+          break;
+        case 'this-week':
+          // End of this week (Sunday)
+          const dayOfWeek = now.getDay(); // 0 is Sunday
+          const diffToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+          dueDate.setDate(now.getDate() + diffToSunday);
+          dueDate.setHours(23, 59, 59, 999);
+          break;
+        case 'next-week':
+          // End of next week (Next Sunday)
+          const dayOfWeekNext = now.getDay();
+          const diffToNextSunday = (dayOfWeekNext === 0 ? 7 : 7 - dayOfWeekNext) + 7;
+          dueDate.setDate(now.getDate() + (dayOfWeekNext === 0 ? 7 : 7 - dayOfWeekNext + 7));
+          dueDate.setHours(23, 59, 59, 999);
+          break;
+        case 'this-month':
+          // End of this month
+          dueDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+          break;
+        case 'next-month':
+          // End of next month
+          dueDate = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59, 999);
+          break;
+      }
+
+      // Convert local date to ISO string for backend
+      const tzoffset = dueDate.getTimezoneOffset() * 60000;
+      const formattedDate = (new Date(dueDate - tzoffset)).toISOString();
+      
+      // If task is in selectedTaskIds, update all selected tasks
+      if (selectedTaskIds.value.includes(task.id)) {
+        await onBulkUpdate({ end: formattedDate });
+      } else {
+        await onUpdateTask(task.id, { ...task, end: formattedDate });
+      }
+      
+      fetchProjects();
+      closeContextMenu();
+    };
+
+    const onUpdateTask = async (taskId, data) => {
+      await apiUpdateTask(taskId, data);
+      fetchProjects();
     };
 
     const onShowMoveDialog = (task = null) => {
@@ -1052,12 +1170,24 @@ export default {
       localStorage.setItem('collapsedLists', JSON.stringify(Array.from(collapsedLists.value)));
     };
 
-    const getTaskCount = (project) => {
+    const getTaskCount = (project, includeSubtasks = false) => {
       if (!project || !project.lists) return 0;
       let count = 0;
+      
+      const countTasks = (tasks) => {
+        let internalCount = 0;
+        tasks.forEach(task => {
+          internalCount++;
+          if (includeSubtasks && task.subtasks && task.subtasks.length > 0) {
+            internalCount += countTasks(task.subtasks);
+          }
+        });
+        return internalCount;
+      };
+
       project.lists.forEach(list => {
         if (list.tasks) {
-          count += list.tasks.length;
+          count += countTasks(list.tasks);
         }
       });
       return count;
@@ -1122,6 +1252,7 @@ export default {
       onAddList,
       onAddProject,
       onUpdateProjectName,
+      onUpdateProjectColor,
       onProjectDragStart,
       onProjectDragOver,
       onProjectDragLeave,
@@ -1133,6 +1264,9 @@ export default {
       onOpenTask,
       contextMenu,
       onTaskContextMenu,
+      onProjectContextMenu,
+      onSetTaskDueDate,
+      onUpdateTask,
       onDeleteTaskFromMenu,
       moveDialogTargetTask,
       moveDialogTargetTaskIds,
@@ -1300,12 +1434,27 @@ label, .form-label {
   font-size: var(--fs-base);
 }
 
-.project-task-count {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
+.project-task-counts {
+  display: flex;
+  align-items: center;
   background-color: var(--bg-darker);
   padding: 2px 6px;
   border-radius: 10px;
+}
+
+.project-task-count {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.count-separator {
+  font-size: var(--fs-xs);
+  color: var(--border-primary);
+  margin: 0 2px;
+}
+
+.sub-count {
+  opacity: 0.7;
 }
 
 .main-content {
@@ -1324,6 +1473,7 @@ label, .form-label {
 
 .project-title-area h2 {
   outline: none;
+  margin-bottom: 0;
 }
 
 .project-content {
@@ -1332,7 +1482,6 @@ label, .form-label {
   overflow-y: visible;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   align-items: stretch;
 }
 
@@ -1378,6 +1527,8 @@ label, .form-label {
   min-width: 100%;
   z-index: 2;
   background-color: var(--bg-dark);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .list-actions-dropdown {
@@ -1413,7 +1564,7 @@ label, .form-label {
 }
 
 .tasks-grid {
-  overflow-y: visible;
+  overflow: visible;
   border-top: 1px solid var(--border-primary);
 }
 
@@ -1445,6 +1596,12 @@ label, .form-label {
   display: grid;
 }
 
+.tasks-header-row.is-empty {
+  border-bottom: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
 /* Ensure that when a row has an open dropdown, it goes above the sticky header */
 .tasks-grid:has(.show) .tasks-header-row {
   z-index: 1;
@@ -1455,7 +1612,6 @@ label, .form-label {
   font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-muted);
-  text-transform: uppercase;
   position: relative; /* For resizer positioning */
 }
 

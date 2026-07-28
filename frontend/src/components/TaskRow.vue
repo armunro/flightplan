@@ -8,27 +8,12 @@
              @drop="onDrop"
              @contextmenu.prevent="onContextMenu"
              @dblclick="onOpenTask"
-             :class="[dropClass, { 'has-subtasks': task && task.subtasks && task.subtasks.length > 0 }]"
+             :class="[dropClass, { 'has-subtasks': task && task.subtasks && task.subtasks.length > 0, 'is-last-row': isLast && getSortedSubtasks(task.subtasks).length === 0 }]"
              :style="gridStyle">
             <div class="tasks-cell selection-cell">
                 <input type="checkbox" :checked="isSelected" @mousedown="onCheckboxMouseDown($event)" @click.stop="onCheckboxClick($event)">
             </div>
-            <div class="tasks-cell task-title-container" 
-                 :style="depth > 0 ? { paddingLeft: (depth * 20) + 24 + 'px' } : {}">
-                <span v-if="depth > 0" class="subtask-indent"></span>
-                <span class="task-title"
-                      ref="titleElement"
-                      contenteditable="true" 
-                      tabindex="0"
-                      @blur="onUpdateTitle"
-                      @keydown.enter="onTitleKeyDown"
-                      @keydown.tab="onTitleTabKeyDown"
-                      @keydown.esc="onTitleEsc"
-                      @keydown="onGeneralKeyDown"
-                      @paste="onPaste">{{ task?.title || '' }}</span>
-                <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon" title="Open link"></a>
-            </div>
-            <div class="tasks-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[2] }">
+            <div class="tasks-cell type-column" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[1] }">
                 <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
                     <span class="type-badge dropdown-toggle" 
                           data-bs-toggle="dropdown"
@@ -46,6 +31,23 @@
                         </li>
                     </ul>
                 </div>
+            </div>
+            <div class="tasks-cell task-title-container name-column" 
+                 :style="depth > 0 ? { paddingLeft: (depth * 20) + 24 + 'px' } : { width: gridStyle.gridTemplateColumns.split(' ')[2] }">
+                <span v-if="depth > 0" class="subtask-indent"></span>
+                <span class="task-title"
+                      ref="titleElement"
+                      contenteditable="true" 
+                      tabindex="0"
+                      @blur="onUpdateTitle"
+                      @keydown.enter="onTitleKeyDown"
+                      @keydown.tab="onTitleTabKeyDown"
+                      @keydown.esc="onTitleEsc"
+                      @keydown="onGeneralKeyDown"
+                      @paste="onPaste">{{ task?.title || '' }}</span>
+                <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon" title="Open link">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </a>
             </div>
             <div class="tasks-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[3] }">
                 <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
@@ -561,6 +563,12 @@ export default {
     overflow: visible;
 }
 
+.tasks-row.is-last-row {
+    border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 .tasks-row:hover {
     background-color: var(--bg-card);
 }
@@ -680,13 +688,7 @@ export default {
 .drag-over-inside { background-color: rgba(88, 166, 255, 0.1) !important; }
 
 .action-link-icon {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-box-arrow-up-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: contain;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
 .action-link-icon:hover {

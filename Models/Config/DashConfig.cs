@@ -45,6 +45,8 @@ public class JiraQuery
 {
     public string Name { get; set; } = string.Empty;
     public string Jql { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
 }
 
 public class GitHubConfig
@@ -59,4 +61,6 @@ public class GitHubQuery
 {
     public string Name { get; set; } = string.Empty;
     public string Query { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
 }

@@ -142,7 +142,7 @@
       </div>
 
       <!-- Edit Link Modal -->
-      <div v-if="editingLink" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+      <div v-if="editingLink" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @keydown.esc="editingLink = null">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content bg-dark border-secondary text-light">
             <div class="modal-header border-secondary">
@@ -171,7 +171,7 @@
         </div>
       </div>
       <!-- Edit Category Modal -->
-      <div v-if="editingCategory" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+      <div v-if="editingCategory" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @keydown.esc="editingCategory = null">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content bg-dark border-secondary text-light">
             <div class="modal-header border-secondary">
@@ -205,7 +205,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
 import ColorPicker from './components/ColorPicker.vue';
 
@@ -243,12 +243,24 @@ const loadSetting = (key, defaultValue) => {
   }
 };
 
+const onKeyDown = (e) => {
+  if (e.key === 'Escape') {
+    if (editingLink.value) editingLink.value = null;
+    else if (editingCategory.value) editingCategory.value = null;
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener('keydown', onKeyDown);
   sidebarCollapsed.value = loadSetting('linksSidebarCollapsed', false);
   selectedCategoryId.value = loadSetting('linksSelectedCategoryId', null);
   showChildren.value = loadSetting('linksShowChildren', true);
   sidebarWidth.value = loadSetting('linksSidebarWidth', 260);
   await fetchBookmarks();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown);
 });
 
 const sidebarStyle = computed(() => {

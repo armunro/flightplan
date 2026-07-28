@@ -3,7 +3,7 @@
     <Toast />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
-        <i class="bi bi-airplane-engines-fill brand-icon"></i>
+        <i class="bi bi-send brand-icon"></i>
         <span v-if="!isCollapsed" class="brand-text">FlightPlan</span>
       </a>
     </div>

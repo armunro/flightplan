@@ -33,7 +33,7 @@
                    @click="selectQuery(query)"
                    :title="sidebarCollapsed ? query.name : ''">
                 <div class="filter-icon-wrapper">
-                  <i class="bi bi-filter"></i>
+                  <i class="bi" :class="query.icon || 'bi-filter'" :style="query.color ? { color: query.color } : {}"></i>
                 </div>
                 <span v-if="!sidebarCollapsed" class="filter-name text-truncate">{{ query.name }}</span>
               </div>
@@ -314,6 +314,7 @@ onMounted(() => {
   justify-content: center;
   margin-right: 12px;
   font-size: 1.1rem;
+  border-radius: 4px;
 }
 
 .filter-icon-wrapper.starred {

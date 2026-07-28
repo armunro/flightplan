@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content bulk-date-dialog">
       <div class="modal-header">
         <h3>Bulk Update</h3>
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import DateTimeSelector from './DateTimeSelector.vue';
 
 export default {
@@ -78,6 +78,20 @@ export default {
 
       emit('apply', payload);
     };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        emit('close');
+      }
+    };
+
+    onMounted(() => {
+      window.addEventListener('keydown', onKeyDown);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('keydown', onKeyDown);
+    });
 
     return {
       start,

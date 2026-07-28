@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content move-dialog">
       <div class="modal-header">
         <h3 v-if="task">Move Task: {{ task.title }}</h3>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 
 export default {
   name: 'MoveTaskDialog',
@@ -98,6 +98,20 @@ export default {
         }
       }
     };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        emit('close');
+      }
+    };
+
+    onMounted(() => {
+      window.addEventListener('keydown', onKeyDown);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('keydown', onKeyDown);
+    });
 
     return {
       selectedProjectId,

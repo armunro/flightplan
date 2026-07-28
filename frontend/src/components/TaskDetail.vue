@@ -1,5 +1,5 @@
 <template>
-  <div class="task-detail-overlay" @click.self="$emit('close')">
+  <div class="task-detail-overlay">
     <div class="task-detail-modal">
       <div class="task-detail-header" v-if="localTask">
         <h2 contenteditable="true" @blur="onUpdateTitle">{{ localTask.title }}</h2>
@@ -140,10 +140,18 @@ export default {
       ...props.task
     });
 
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        emit('close');
+      }
+    };
+
     onMounted(() => {
+      window.addEventListener('keydown', onKeyDown);
     });
 
     onUnmounted(() => {
+      window.removeEventListener('keydown', onKeyDown);
     });
 
     watch(() => props.task, (newVal) => {

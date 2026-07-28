@@ -2,13 +2,13 @@
   <div class="vh-100 d-flex flex-row overflow-hidden">
     <Navbar />
     <div class="flex-grow-1 overflow-auto bg-darker main-content p-3">
-      <div class="container-fluid">
+      <div class="container-fluid pb-5">
         <header class="mb-3 mt-1">
           <h1 class="display-6 fw-bold text-light">Welcome back</h1>
           <p class="text-muted fs-md">Here's what's happening across your projects today.</p>
         </header>
 
-        <div class="row g-4 mb-5">
+        <div class="row g-4">
           <div v-for="item in visibleMenuItems" :key="item.id" class="col-12 col-md-6 col-lg-4 col-xl-3">
             <a :href="item.href" class="text-decoration-none h-100 d-block">
               <div class="card h-100 dashboard-card border-0">
@@ -28,59 +28,6 @@
           </div>
         </div>
 
-        <div class="row g-4">
-          <div class="col-12 col-xl-8">
-            <div class="card border-0 bg-dark h-100">
-              <div class="card-header bg-transparent border-bottom border-secondary p-3 d-flex align-items-center">
-                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>
-                <h5 class="mb-0 text-light">Recent Activity</h5>
-              </div>
-              <div class="card-body p-0">
-                <div class="p-5 text-center text-muted opacity-50">
-                   <i class="bi bi-clock-history display-4 mb-3 d-block"></i>
-                   <p>No recent activity to show yet.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-xl-4">
-            <div class="card border-0 bg-dark h-100">
-               <div class="card-header bg-transparent border-bottom border-secondary p-3 d-flex align-items-center">
-                <i class="bi bi-check2-circle text-success me-2"></i>
-                <h5 class="mb-0 text-light">Quick Stats</h5>
-              </div>
-              <div class="card-body">
-                <div class="stat-item mb-3">
-                  <div class="d-flex justify-content-between mb-1">
-                    <span class="text-muted small">Jira Issues</span>
-                    <span class="text-light small">12 Active</span>
-                  </div>
-                  <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-primary" style="width: 70%"></div>
-                  </div>
-                </div>
-                <div class="stat-item mb-3">
-                  <div class="d-flex justify-content-between mb-1">
-                    <span class="text-muted small">Open PRs</span>
-                    <span class="text-light small">4 Pending</span>
-                  </div>
-                  <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-success" style="width: 40%"></div>
-                  </div>
-                </div>
-                 <div class="stat-item">
-                  <div class="d-flex justify-content-between mb-1">
-                    <span class="text-muted small">Unread Emails</span>
-                    <span class="text-light small">8 New</span>
-                  </div>
-                  <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-warning" style="width: 60%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content project-dialog">
       <div class="modal-header">
         <h3>{{ isNew ? 'Add Project' : 'Edit Project' }}</h3>
@@ -104,7 +104,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import ColorPicker from './ColorPicker.vue';
 
 export default {
@@ -136,8 +136,19 @@ export default {
       priorities: props.project.priorities ? JSON.parse(JSON.stringify(props.project.priorities)) : []
     });
 
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        emit('close');
+      }
+    };
+
     onMounted(() => {
       nameInput.value?.focus();
+      window.addEventListener('keydown', onKeyDown);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('keydown', onKeyDown);
     });
 
     const addStatus = () => {

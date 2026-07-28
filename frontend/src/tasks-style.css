@@ -140,7 +140,7 @@
     background: transparent;
     border: none;
     border-radius: 8px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
 }
@@ -148,7 +148,7 @@
 .project-header { display: flex; align-items: center; margin-bottom: 8px; }
 .project-header h2 { margin: 0; color: var(--text-primary); font-size: 1.1em; }
 .collapse-toggle { 
-    cursor: pointer; 
+    cursor: pointer !important; 
     color: var(--accent-blue); 
     margin-right: 12px; 
     font-size: 0.8em; 
@@ -159,6 +159,8 @@
     justify-content: center;
     user-select: none; 
     transition: transform 0.2s ease-in-out; 
+    position: relative;
+    z-index: 10;
 }
 .collapse-toggle::before {
     content: '';
@@ -180,8 +182,19 @@
     align-items: center; 
     position: relative; /* Anchor for potential absolute children if needed, though dropdown is in .list-actions-dropdown */
     padding: 10px 0;
+    cursor: grab;
 }
-.list h3 { font-size: 1.1em; color: var(--accent-blue); display: inline-block; margin: 0; padding-bottom: 2px; }
+.list-header:active {
+    cursor: grabbing;
+}
+.list h3 { 
+    font-size: 1.1em; 
+    color: var(--accent-blue); 
+    display: inline-block; 
+    margin: 0; 
+    padding-bottom: 2px; 
+    flex-grow: 1;
+}
 
 .delete-list-btn { display: none; }
 
@@ -199,7 +212,7 @@
     background: none;
     border: none;
     color: var(--text-muted);
-    cursor: pointer;
+    cursor: pointer !important;
     font-size: 1.2em;
     padding: 0 5px;
     line-height: 1;
@@ -360,7 +373,7 @@
     min-width: fit-content;
 }
 
-.email-header { font-weight: 600; color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; padding: 8px 12px; }
+.email-header { font-weight: 600; color: var(--text-muted); font-size: 0.85em; padding: 8px 12px; }
 
 .email-cell { padding: 6px 12px; display: flex; align-items: center; min-height: 32px; background-color: var(--bg-darker); position: relative; border-right: 1px solid var(--border-primary); }
 .email-cell:last-child { border-right: none; }
@@ -411,7 +424,7 @@
 /* Actually, the defaults should handle this now. */
 
 .tasks-cell { 
-    padding: 8px 12px; 
+    padding: 8px 8px; 
     display: flex; 
     align-items: center; 
     min-height: 40px; 
@@ -421,6 +434,12 @@
     box-sizing: border-box; 
     overflow: visible;
 }
+.tasks-cell.type-column {
+    padding-right: 0px;
+}
+.tasks-cell.name-column {
+    padding-left: 4px;
+}
 .tasks-cell:first-child { border-left: none !important; }
 
 .grid-cell { padding: 6px 12px; display: flex; align-items: center; min-height: 32px; background-color: var(--bg-darker); position: relative; border-right: 1px solid var(--border-primary); }
@@ -429,15 +448,20 @@
     font-weight: 600; 
     color: var(--text-muted); 
     font-size: 0.875rem; 
-    text-transform: uppercase; 
-    padding: 8px 12px; 
+    padding: 8px 8px; 
     border-right: none; 
     box-sizing: border-box; 
     overflow: hidden;
     position: relative;
 }
+.tasks-header.type-column {
+    padding-right: 0px;
+}
+.tasks-header.name-column {
+    padding-left: 4px;
+}
 .tasks-header:first-child { border-left: none !important; }
-.grid-header { font-weight: 600; color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase; padding: 8px 12px; }
+.grid-header { font-weight: 600; color: var(--text-muted); font-size: 0.875rem; padding: 8px 12px; }
 .date-cell { font-size: 0.875rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .link-cell { justify-content: center; }
 .task-link { color: var(--accent-blue); text-decoration: none; font-size: 0.875rem; font-weight: 600; }
@@ -491,7 +515,7 @@
     opacity: 0.7;
 }
 
-.priority { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
+.priority { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; display: inline-block; line-height: 1.3; letter-spacing: 0.5px; }
 .priority-Critical { background: #ff0000; color: #ffffff; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 .priority-Highest { background: #ff4500; color: #ffffff; }
 .priority-High { background: #ffa500; color: #000000; }
@@ -555,7 +579,7 @@
 .priority-select:focus { outline: 1px solid var(--accent-blue); }
 
 .priority-badge { cursor: pointer; }
-.status-badge { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
+.status-badge { font-weight: 700; font-size: 0.875rem; padding: 2px 8px; border-radius: 4px; display: inline-block; cursor: pointer; color: #ffffff; line-height: 1.3; letter-spacing: 0.5px; }
 
 .add-row { color: var(--text-muted); cursor: pointer; font-style: italic; font-size: 0.875rem; }
 .add-row:hover { color: var(--text-primary); background-color: var(--bg-card); }
@@ -591,8 +615,7 @@
     color: var(--text-muted);
 }
 .action-link-icon::before {
-    content: '🔗';
-    font-size: 1.1em;
+    content: none;
 }
 .action-link-icon:hover {
     background: var(--border-primary);
@@ -637,6 +660,21 @@
     color: #ffffff;
 }
 
+.context-menu-separator {
+    height: 1px;
+    background: var(--border-primary);
+    margin: 4px 0;
+}
+
+.context-menu-header {
+    padding: 4px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .add-list-container { display: none; }
 .add-list-btn { display: none; }
 
@@ -674,7 +712,7 @@
     z-index: 10;
 }
 
-.list.drag-over { background-color: var(--bg-card); border-radius: 4px; }
+.list.drag-over { background-color: rgba(88, 166, 255, 0.05); border: 1px solid var(--accent-blue); border-radius: 8px; }
 .list-drag-over-before { border-top: 3px solid var(--accent-blue); }
 .list-drag-over-after { border-bottom: 3px solid var(--accent-blue); }
 .project-drag-over-before { border-top: 3px solid var(--accent-blue); }
