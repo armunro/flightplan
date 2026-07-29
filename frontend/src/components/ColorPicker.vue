@@ -23,7 +23,23 @@
       </div>
 
       <div v-if="showPalette" class="color-palette-popover card bg-dark border-secondary shadow p-2" :style="paletteStyle">
-        <div class="color-grid">
+        <!-- Tabs for Standard vs Schemes -->
+        <div v-if="effectiveSchemes && effectiveSchemes.length > 0" class="picker-tabs sticky-top bg-dark mb-2" style="z-index: 10;">
+          <div class="nav nav-pills nav-fill bg-secondary bg-opacity-10 rounded-1 p-1 gap-1">
+            <button 
+              class="nav-link py-1 px-2" 
+              :class="{ 'active': activeTab === 'standard' }"
+              @click="activeTab = 'standard'"
+            >Standard</button>
+            <button 
+              class="nav-link py-1 px-2" 
+              :class="{ 'active': activeTab === 'schemes' }"
+              @click="activeTab = 'schemes'"
+            >Schemes</button>
+          </div>
+        </div>
+
+        <div v-if="activeTab === 'standard'" class="color-grid px-1">
           <button
             v-for="color in standardColors"
             :key="color"
@@ -34,8 +50,30 @@
             :title="color"
           ></button>
         </div>
-        <div class="palette-footer mt-2 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-          <small class="text-muted">Standard Colors</small>
+
+        <div v-else-if="activeTab === 'schemes'" class="schemes-container px-1">
+          <div v-if="effectiveSchemes.length === 0" class="p-2 text-center text-muted" style="font-size: 0.75rem;">
+            No color schemes found. 
+            <div class="mt-1">Add them in Settings.</div>
+          </div>
+          <div v-for="scheme in effectiveSchemes" :key="scheme.name" class="scheme-group mb-2">
+            <div class="scheme-name mb-1">{{ scheme.name }}</div>
+            <div class="color-grid">
+              <button
+                v-for="c in scheme.colors"
+                :key="c.name + c.color"
+                class="color-cell"
+                :class="{ active: modelValue.toLowerCase() === c.color.toLowerCase() }"
+                :style="{ backgroundColor: c.color }"
+                @click="selectColor(c.color)"
+                :title="c.name + ': ' + c.color"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="palette-footer mt-2 pt-2 border-top border-secondary d-flex justify-content-between align-items-center px-1">
+          <small class="text-muted">{{ activeTab === 'standard' ? 'Standard Colors' : 'Color Schemes' }}</small>
           <button class="btn btn-sm btn-link text-info p-0" @click="showPalette = false">Close</button>
         </div>
       </div>
@@ -44,7 +82,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { fetchSettings } from '../js/dashboard-api';
 
 const props = defineProps({
   modelValue: {
@@ -66,6 +105,10 @@ const props = defineProps({
   palettePlacement: {
     type: String,
     default: 'bottom-start' // 'bottom-start', 'bottom-end', 'top-start', 'top-end'
+  },
+  colorSchemes: {
+    type: Array,
+    default: null
   }
 });
 
@@ -73,6 +116,12 @@ const emit = defineEmits(['update:modelValue']);
 
 const showPalette = ref(false);
 const pickerRef = ref(null);
+const activeTab = ref('standard');
+const fetchedSchemes = ref([]);
+
+const effectiveSchemes = computed(() => {
+  return props.colorSchemes || fetchedSchemes.value;
+});
 
 const handleClickOutside = (event) => {
   if (showPalette.value && pickerRef.value && !pickerRef.value.contains(event.target)) {
@@ -80,8 +129,21 @@ const handleClickOutside = (event) => {
   }
 };
 
-import { onMounted, onUnmounted } from 'vue';
-onMounted(() => document.addEventListener('click', handleClickOutside));
+onMounted(async () => {
+  document.addEventListener('click', handleClickOutside);
+  
+  if (!props.colorSchemes) {
+    try {
+      const config = await fetchSettings();
+      if (config && config.colorSchemes) {
+        fetchedSchemes.value = config.colorSchemes;
+      }
+    } catch (e) {
+      console.error('Failed to fetch color schemes for ColorPicker:', e);
+    }
+  }
+});
+
 onUnmounted(() => document.removeEventListener('click', handleClickOutside));
 
 const paletteStyle = computed(() => {
@@ -162,7 +224,48 @@ const swatchStyle = computed(() => ({
 .color-palette-popover {
   position: absolute;
   z-index: 1060;
-  width: 180px;
+  width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 4px;
+}
+
+.picker-tabs {
+  margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.nav-pills .nav-link {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  border-radius: 2px;
+  transition: all 0.2s;
+  border: none;
+}
+
+.nav-pills .nav-link:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--accent-blue);
+  color: white;
+  font-weight: bold;
+}
+
+.schemes-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.scheme-name {
+  font-size: 0.65rem;
+  color: #6c757d;
+  text-transform: uppercase;
 }
 
 .color-grid {
