@@ -1,10 +1,10 @@
 ﻿<template>
-  <div class="my-day-app">
+  <div class="dashboard-app">
     <Navbar />
     <div class="main-content">
       <div class="controls-bar">
         <div class="d-flex align-items-center">
-          <h5 class="mb-0 me-3 text-primary">My Day</h5>
+          <h5 class="mb-0 me-3 text-primary">Dashboard</h5>
           <span class="text-muted small">{{ todayDate }}</span>
         </div>
         <div class="ms-auto">
@@ -155,12 +155,12 @@ const todayDate = computed(() => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const response = await fetch('/api/myday');
+    const response = await fetch('/api/dashboard');
     if (response.ok) {
       data.value = await response.json();
     }
   } catch (e) {
-    console.error('Failed to load My Day data:', e);
+    console.error('Failed to load Dashboard data:', e);
   } finally {
     loading.value = false;
   }
@@ -201,7 +201,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.my-day-app {
+.dashboard-app {
   display: flex;
   height: 100vh;
   background-color: var(--bg-darker);

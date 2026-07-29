@@ -7,7 +7,7 @@ using FlightPlan.Core.Interfaces;
 
 namespace FlightPlan.Controllers;
 
-public record MyDayDto(
+public record DashboardDto(
     List<TaskItem> UpcomingTasks,
     List<EmailWithRulesDto> RecentEmails,
     List<CalendarEventResponseDto> TodaysEvents,
@@ -17,14 +17,14 @@ public record MyDayDto(
 
 [ApiController]
 [Route("api/[controller]")]
-public class MyDayController : ControllerBase
+public class DashboardController : ControllerBase
 {
     private readonly ProjectManager _projectManager;
     private readonly IGraphService _graphService;
     private readonly IRuleService _ruleService;
     private readonly DashConfig _config;
 
-    public MyDayController(ProjectManager projectManager, IGraphService graphService, IRuleService ruleService, DashConfig config)
+    public DashboardController(ProjectManager projectManager, IGraphService graphService, IRuleService ruleService, DashConfig config)
     {
         _projectManager = projectManager;
         _graphService = graphService;
@@ -33,7 +33,7 @@ public class MyDayController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMyDay()
+    public async Task<IActionResult> GetDashboard()
     {
         var today = DateTime.Today;
         var tomorrow = today.AddDays(1);
@@ -101,7 +101,7 @@ public class MyDayController : ControllerBase
             }
         }
 
-        return Ok(new MyDayDto(upcomingTasks, recentEmails, todaysEvents, emailVisible, calendarVisible));
+        return Ok(new DashboardDto(upcomingTasks, recentEmails, todaysEvents, emailVisible, calendarVisible));
     }
 
     private List<TaskItem> FindAllIncompleteTasks(List<TaskItem> tasks)

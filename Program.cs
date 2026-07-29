@@ -200,7 +200,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 
-app.MapGet("/", () => Results.Redirect("/MyDay"));
+app.MapGet("/", () => Results.Redirect("/Dashboard"));
 
 using (var scope = app.Services.CreateScope())
 {

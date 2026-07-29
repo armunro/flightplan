@@ -1,15 +1,15 @@
-﻿@page "/MyDay"
+﻿@page "/Dashboard"
 @using FlightPlan.Services
 @{
     Layout = "_DashboardLayout";
-    ViewData["Title"] = "My Day";
+    ViewData["Title"] = "Dashboard";
 }
 
 <div id="app" class="p-0"></div>
 
 @section Scripts {
-    @Html.ViteAsset("my-day.html")
+    @Html.ViteAsset("dashboard.html")
 }
 @section Head {
-    @Html.ViteStyle("my-day.html")
+    @Html.ViteStyle("dashboard.html")
 }

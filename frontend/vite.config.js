@@ -25,7 +25,7 @@ export default defineConfig({
         jira: resolve(__dirname, 'jira.html'),
         debug: resolve(__dirname, 'debug.html'),
         'scheduled-tasks': resolve(__dirname, 'scheduled-tasks.html'),
-        'my-day': resolve(__dirname, 'my-day.html'),
+        'dashboard': resolve(__dirname, 'dashboard.html'),
       },
       output: {
         entryFileNames: `[name].js`,

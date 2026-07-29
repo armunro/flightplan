@@ -1,6 +1,6 @@
 ﻿import { createApp } from 'vue'
 import '../global.css'
-import App from '../MyDayApp.vue'
+import App from '../DashboardApp.vue'
 
 const app = createApp(App)
 

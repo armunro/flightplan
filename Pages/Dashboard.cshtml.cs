@@ -2,7 +2,7 @@
 
 namespace FlightPlan.Pages;
 
-public class MyDayModel : PageModel
+public class DashboardModel : PageModel
 {
     public void OnGet()
     {

@@ -2,7 +2,7 @@
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
     <Toast />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
-      <a href="/MyDay" class="navbar-brand d-flex align-items-center">
+      <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
         <i class="bi bi-send brand-icon"></i>
         <span v-if="!isCollapsed" class="brand-text">FlightPlan</span>
       </a>
@@ -68,7 +68,7 @@ const toggleNavbar = () => {
 };
 
 const navItems = [
-  { id: 'myday', name: 'My Day', href: '/MyDay', icon: 'bi-sun' },
+  { id: 'dashboard', name: 'Dashboard', href: '/Dashboard', icon: 'bi-speedometer2' },
   { id: 'jira', name: 'Jira', href: '/Jira', icon: 'bi-kanban' },
   { id: 'github', name: 'Github', href: '/Github', icon: 'bi-github' },
   { id: 'tasks', name: 'Tasks', href: '/Tasks', icon: 'bi-check2-square' },
@@ -89,7 +89,7 @@ const visibleNavItems = computed(() => {
 
 const currentPath = computed(() => {
   const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
-  if (path === '' || path === '/myday') return 'myday';
+  if (path === '' || path === '/dashboard') return 'dashboard';
   if (path === '/jira') return 'jira';
   if (path === '/github') return 'github';
   if (path === '/settings') return 'settings';
