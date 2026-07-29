@@ -1,5 +1,5 @@
 <template>
-  <div class="task-detail-overlay">
+  <div class="task-detail-overlay" :class="themeClass">
     <div class="task-detail-modal">
       <div class="task-detail-header" v-if="localTask">
         <h2 contenteditable="true" @blur="onUpdateTitle">{{ localTask.title }}</h2>
@@ -17,7 +17,7 @@
                   <i :class="getTaskTypeIcon(localTask.taskTypeId)"></i>
                   {{ getTaskTypeName(localTask.taskTypeId) }}
                 </span>
-                <ul class="dropdown-menu dropdown-menu-dark">
+                <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                   <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
                   <li v-for="t in projectTaskTypes" :key="t.id">
                     <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
@@ -37,7 +37,7 @@
                 <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 6px;"></i>
                 {{ getStatusName(localTask.statusId) }}
               </span>
-              <ul class="dropdown-menu dropdown-menu-dark">
+              <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                 <li v-for="s in projectStatuses" :key="s.id">
                   <a class="dropdown-item" href="#" @click.prevent="onUpdateStatus({ target: { value: s.id } })" :style="{ color: s.color }">
                     <i class="bi bi-circle-fill me-2" style="font-size: 8px;"></i>{{ s.name }}
@@ -56,7 +56,7 @@
                 <i :class="getPriorityIcon(localTask.priorityId)" style="margin-right: 6px;"></i>
                 {{ getPriorityName(localTask.priorityId) }}
               </span>
-              <ul class="dropdown-menu dropdown-menu-dark">
+              <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                 <li v-for="p in projectPriorities" :key="p.id">
                   <a class="dropdown-item" href="#" @click.prevent="onUpdatePriorityId(p.id)" :style="{ color: p.color }">
                     <i :class="p.icon" class="me-2"></i>{{ p.name }}
@@ -133,7 +133,7 @@ export default {
   components: {
     DateTimeSelector
   },
-  props: ['task', 'projectStatuses', 'projectTaskTypes', 'projectPriorities'],
+  props: ['task', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'theme'],
   emits: ['close', 'refresh'],
   setup(props, { emit }) {
     const localTask = ref({ 
@@ -406,7 +406,6 @@ export default {
   background: var(--bg-darker);
   color: var(--text-primary);
   border-radius: 4px;
-  color-scheme: dark;
 }
 
 .form-control:focus {

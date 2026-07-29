@@ -7,6 +7,7 @@ public class DashConfig
     public MicrosoftGraphConfig MicrosoftGraph { get; set; } = new();
     public List<PageVisibility> PageVisibilities { get; set; } = new();
     public List<ColorScheme> ColorSchemes { get; set; } = new();
+    public string Theme { get; set; } = "Cosmic";
     public DebugConfig Debug { get; set; } = new();
 }
 

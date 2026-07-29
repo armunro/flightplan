@@ -1,24 +1,24 @@
 ﻿<template>
-  <div class="vh-100 d-flex flex-row overflow-hidden">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
-    <div class="flex-grow-1 overflow-hidden d-flex flex-column">
+    <div class="flex-grow-1 overflow-hidden d-flex flex-column theme-bg-darker">
       <div class="flex-grow-1 overflow-hidden d-flex flex-row">
       <!-- Sidebar for files -->
       <div class="file-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
-        <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
-          <h5 v-if="!sidebarCollapsed" class="mb-0">Files</h5>
+        <div class="sidebar-header d-flex align-items-center theme-border" :class="{ 'collapsed': sidebarCollapsed }">
+          <h5 v-if="!sidebarCollapsed" class="mb-0 theme-text">Files</h5>
           <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
-            <button class="btn-icon" @click="createNewFile" title="New File">
+            <button class="btn-icon theme-text" @click="createNewFile" title="New File">
               <i class="bi bi-plus-lg"></i>
             </button>
           </div>
-          <i v-else class="bi bi-sticky"></i>
+          <i v-else class="bi bi-sticky theme-text"></i>
         </div>
         <div class="file-list flex-grow-1 overflow-auto">
           <div 
             v-for="file in files" 
             :key="file" 
-            class="file-item"
+            class="file-item theme-border"
             :class="{ 'active': currentFile === file }"
             @click="selectFile(file)"
             :title="sidebarCollapsed ? file : ''"
@@ -27,15 +27,15 @@
               <i class="bi bi-file-earmark-text"></i>
             </div>
             <div v-if="!sidebarCollapsed" class="d-flex align-items-center flex-grow-1 min-w-0">
-              <span class="text-truncate flex-grow-1" :title="file">{{ file }}</span>
+              <span class="text-truncate flex-grow-1 theme-text" :title="file">{{ file }}</span>
               <button class="btn btn-sm btn-link text-danger p-0 ms-2 opacity-0 delete-btn" @click.stop="deleteFile(file)">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
           </div>
         </div>
-        <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
-          <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
+        <div class="sidebar-footer theme-border" :class="{ 'collapsed': sidebarCollapsed }">
+          <button class="sidebar-toggle theme-text" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand Menu' : 'Collapse Menu'">
             <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
           </button>
         </div>
@@ -45,10 +45,10 @@
       <div v-if="!sidebarCollapsed" class="sidebar-resizer" @mousedown="startSidebarResize"></div>
 
       <!-- Main Editor Area -->
-      <div class="main-area d-flex flex-column flex-grow-1">
-        <div class="controls-bar">
+      <div class="main-area d-flex flex-column flex-grow-1 theme-bg-darker">
+        <div class="controls-bar theme-border">
           <div class="d-flex align-items-center">
-            <h5 class="mb-0 me-3"><i class="bi bi-journal-text"></i> {{ currentFile || 'No file selected' }}</h5>
+            <h5 class="mb-0 me-3 theme-text"><i class="bi bi-journal-text"></i> {{ currentFile || 'No file selected' }}</h5>
             <div v-if="currentFile" class="save-status small" :class="{ 'text-success': saveStatus === 'Saved', 'text-warning': saveStatus === 'Saving...', 'text-danger': saveStatus === 'Error' }">
               {{ saveStatus }}
             </div>
@@ -58,20 +58,20 @@
         <div v-if="currentFile" class="editor-area flex-grow-1 overflow-hidden">
           <MdEditor 
             v-model="content" 
-            theme="dark" 
+            :theme="mdTheme" 
             @onChange="onInput" 
             :completions="completions"
             language="en-US"
             style="height: 100%"
           />
         </div>
-        <div v-else class="flex-grow-1 d-flex align-items-center justify-content-center text-muted">
+        <div v-else class="flex-grow-1 d-flex align-items-center justify-content-center theme-text-muted">
           Select or create a file to start writing
         </div>
-      </div> <!-- Close main-area (42) -->
-    </div> <!-- Close flex-row (5) -->
-  </div> <!-- Close main-wrapper (4) -->
-</div> <!-- Close vh-100 (2) -->
+      </div>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -80,12 +80,17 @@ import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
+import { fetchSettings } from './js/dashboard-api';
 
 const files = ref([]);
 const currentFile = ref(null);
 const content = ref('');
 const saveStatus = ref('');
 const saveTimeout = ref(null);
+
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
+const mdTheme = computed(() => theme.value.toLowerCase() === 'light' ? 'light' : 'dark');
 
 const loadSetting = (key, defaultValue) => {
   const val = localStorage.getItem(key);
@@ -289,7 +294,17 @@ const saveNote = async () => {
   }
 };
 
-onMounted(loadFileList);
+onMounted(async () => {
+  await loadFileList();
+  try {
+    const settings = await fetchSettings();
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
+    }
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  }
+});
 
 onUnmounted(() => {
   if (saveTimeout.value) clearTimeout(saveTimeout.value);

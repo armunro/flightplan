@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="vh-100 d-flex flex-row overflow-hidden">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column">
       <div id="app-content" class="scheduled-tasks-app-container flex-grow-1">
@@ -56,14 +56,14 @@
           <div class="project-content">
             <div class="row">
               <div class="col-md-6">
-                <div class="card bg-dark border-secondary mb-4">
-                  <div class="card-header border-secondary text-primary">
+                <div class="card theme-card mb-4">
+                  <div class="card-header theme-border text-primary">
                     <h5 class="mb-0">Schedule Info</h5>
                   </div>
                   <div class="card-body">
                     <div class="mb-3">
-                      <label class="form-label">Schedule Name</label>
-                      <input v-model="form.name" type="text" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Daily Standup Prep">
+                      <label class="form-label theme-text">Schedule Name</label>
+                      <input v-model="form.name" type="text" class="form-control theme-input" placeholder="e.g. Daily Standup Prep">
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Recurrence Type</label>
@@ -77,30 +77,30 @@
                     </div>
 
                     <div v-if="form.recurrenceType === 'Cron'" class="mb-3">
-                      <label class="form-label">Cron Schedule</label>
-                      <input v-model="form.cronSchedule" type="text" class="form-control bg-dark text-light border-secondary" placeholder="0 0 9 ? * MON-FRI">
+                      <label class="form-label theme-text">Cron Schedule</label>
+                      <input v-model="form.cronSchedule" type="text" class="form-control theme-input" placeholder="0 0 9 ? * MON-FRI">
                       <CronEditor v-model="form.cronSchedule" />
                     </div>
 
                     <div v-if="form.recurrenceType === 'Custom'">
                       <div class="row mb-3">
                         <div class="col-6">
-                          <label class="form-label">Start Date</label>
-                          <input v-model="form.startDate" type="date" class="form-control bg-dark text-light border-secondary">
+                          <label class="form-label theme-text">Start Date</label>
+                          <input v-model="form.startDate" type="date" class="form-control theme-input">
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Start Time</label>
-                          <input v-model="form.startTime" type="time" class="form-control bg-dark text-light border-secondary">
+                          <label class="form-label theme-text">Start Time</label>
+                          <input v-model="form.startTime" type="time" class="form-control theme-input">
                         </div>
                       </div>
                       <div class="row mb-3">
                         <div class="col-6">
-                          <label class="form-label">Every X</label>
-                          <input v-model.number="form.interval" type="number" min="1" class="form-control bg-dark text-light border-secondary">
+                          <label class="form-label theme-text">Every X</label>
+                          <input v-model.number="form.interval" type="number" min="1" class="form-control theme-input">
                         </div>
                         <div class="col-6">
-                          <label class="form-label">Unit</label>
-                          <select v-model="form.intervalUnit" class="form-select bg-dark text-light border-secondary">
+                          <label class="form-label theme-text">Unit</label>
+                          <select v-model="form.intervalUnit" class="form-select theme-input">
                             <option value="Days">Days</option>
                             <option value="Weeks">Weeks</option>
                             <option value="Months">Months</option>
@@ -122,42 +122,42 @@
               </div>
 
               <div class="col-md-6">
-                <div class="card bg-dark border-secondary mb-4">
-                  <div class="card-header border-secondary text-primary">
+                <div class="card theme-card mb-4">
+                  <div class="card-header theme-border text-primary">
                     <h5 class="mb-0">Task Template</h5>
                   </div>
                   <div class="card-body">
                     <div class="mb-3">
-                      <label class="form-label">Target Project</label>
-                      <select v-model="form.projectId" class="form-select bg-dark text-light border-secondary">
+                      <label class="form-label theme-text">Target Project</label>
+                      <select v-model="form.projectId" class="form-select theme-input">
                         <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
                       </select>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Target List</label>
-                      <select v-model="form.listId" class="form-select bg-dark text-light border-secondary" :disabled="!selectedProject">
+                      <label class="form-label theme-text">Target List</label>
+                      <select v-model="form.listId" class="form-select theme-input" :disabled="!selectedProject">
                         <option v-for="l in selectedProject?.lists" :key="l.id" :value="l.id">{{ l.name }}</option>
                       </select>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Task Title Template</label>
-                      <input v-model="form.taskTitleTemplate" type="text" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Daily Standup - {{date}}">
-                      <div class="form-text small opacity-75">Tip: Use <code>{{date}}</code> for current date</div>
+                      <label class="form-label theme-text">Task Title Template</label>
+                      <input v-model="form.taskTitleTemplate" type="text" class="form-control theme-input" placeholder="e.g. Daily Standup - {{date}}">
+                      <div class="form-text small theme-text-muted">Tip: Use <code>{{date}}</code> for current date</div>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Description</label>
-                      <textarea v-model="form.taskDescription" class="form-control bg-dark text-light border-secondary" rows="3"></textarea>
+                      <label class="form-label theme-text">Description</label>
+                      <textarea v-model="form.taskDescription" class="form-control theme-input" rows="3"></textarea>
                     </div>
                     <div class="row">
                       <div class="col-md-6 mb-3">
-                        <label class="form-label">Priority</label>
-                        <select v-model="form.priority" class="form-select bg-dark text-light border-secondary">
+                        <label class="form-label theme-text">Priority</label>
+                        <select v-model="form.priority" class="form-select theme-input">
                           <option v-for="p in priorities" :key="p.value" :value="p.value">{{ p.label }}</option>
                         </select>
                       </div>
                       <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
-                        <select v-model="form.statusId" class="form-select bg-dark text-light border-secondary" :disabled="!selectedProject">
+                        <label class="form-label theme-text">Status</label>
+                        <select v-model="form.statusId" class="form-select theme-input" :disabled="!selectedProject">
                           <option :value="null">Default</option>
                           <option v-for="s in selectedProject?.statuses" :key="s.id" :value="s.id">{{ s.name }}</option>
                         </select>
@@ -180,12 +180,16 @@ import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import CronEditor from './components/CronEditor.vue';
 import * as api from './js/scheduled-tasks-api';
+import { fetchSettings } from './js/dashboard-api';
 
 const scheduledTasks = ref([]);
 const projects = ref([]);
 const selectedTaskId = ref(null);
 const sidebarCollapsed = ref(localStorage.getItem('scheduledTasksSidebarCollapsed') === 'true');
 const sidebarWidth = ref(parseInt(localStorage.getItem('scheduledTasksSidebarWidth')) || 250);
+
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 
 const isResizingSidebar = ref(false);
 let sidebarStartWidth = 0;
@@ -376,14 +380,28 @@ const formatDate = (date) => {
 };
 
 onMounted(async () => {
-  await fetchProjects();
-  await fetchTasks();
+  await Promise.all([
+    fetchProjects(),
+    fetchTasks(),
+    loadSettings()
+  ]);
   if (scheduledTasks.value.length > 0) {
     selectTask(scheduledTasks.value[0]);
   } else if (projects.value.length > 0) {
     resetForm();
   }
 });
+
+const loadSettings = async () => {
+  try {
+    const settings = await fetchSettings();
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
+    }
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  }
+};
 
 </script>
 

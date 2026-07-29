@@ -1,10 +1,10 @@
 ﻿<template>
-  <div class="card bg-dark text-light border-secondary">
+  <div class="card theme-card">
     <div class="card-body">
-      <p class="small text-muted mb-3">Choose which modules are visible in the sidebar and dashboard.</p>
+      <p class="small theme-text-muted mb-3">Choose which modules are visible in the sidebar and dashboard.</p>
       <div class="row">
         <div v-for="page in allPages" :key="page.id" class="col-6 mb-2">
-          <div class="form-check form-switch">
+          <div class="form-check form-switch theme-text">
             <input class="form-check-input" type="checkbox" 
                    :id="'vis-' + page.id" 
                    :checked="getPageVisibility(page.id)"

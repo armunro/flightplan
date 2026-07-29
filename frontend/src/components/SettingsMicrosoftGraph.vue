@@ -1,13 +1,13 @@
 ﻿<template>
-  <div class="card bg-dark text-light border-secondary">
+  <div class="card theme-card">
     <div class="card-body">
       <div class="mb-3">
-        <label class="form-label">Tenant ID</label>
-        <input v-model="microsoftGraph.tenantId" type="text" class="form-control bg-dark text-light border-secondary">
+        <label class="form-label theme-text">Tenant ID</label>
+        <input v-model="microsoftGraph.tenantId" type="text" class="form-control theme-input">
       </div>
       <div class="mb-3">
-        <label class="form-label">Client ID</label>
-        <input v-model="microsoftGraph.clientId" type="text" class="form-control bg-dark text-light border-secondary">
+        <label class="form-label theme-text">Client ID</label>
+        <input v-model="microsoftGraph.clientId" type="text" class="form-control theme-input">
       </div>
     </div>
   </div>

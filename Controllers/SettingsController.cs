@@ -36,6 +36,7 @@ public class SettingsController : ControllerBase
         _config.MicrosoftGraph = newConfig.MicrosoftGraph;
         _config.PageVisibilities = newConfig.PageVisibilities;
         _config.ColorSchemes = newConfig.ColorSchemes;
+        _config.Theme = newConfig.Theme;
         _config.Debug = newConfig.Debug;
 
         try

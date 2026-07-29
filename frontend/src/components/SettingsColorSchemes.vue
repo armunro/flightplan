@@ -1,7 +1,7 @@
 ﻿<template>
-  <div class="card bg-dark text-light border-secondary">
-    <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 small text-muted text-uppercase fw-bold">Templates</h5>
+  <div class="card theme-card">
+    <div class="card-header theme-border d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 small theme-text-muted text-uppercase fw-bold">Templates</h5>
       <div class="d-flex gap-2">
         <button v-for="preset in presets" :key="preset.name" 
                 class="btn btn-sm btn-outline-secondary preset-btn"
@@ -12,29 +12,29 @@
       </div>
     </div>
     <div class="card-body">
-      <div v-if="!colorSchemes || colorSchemes.length === 0" class="p-4 text-center text-muted">
+      <div v-if="!colorSchemes || colorSchemes.length === 0" class="p-4 text-center theme-text-muted">
         No color schemes created yet.
       </div>
       
       <div class="row g-3">
         <div v-for="(scheme, schemeIdx) in colorSchemes" :key="schemeIdx" class="col-md-6">
-          <div class="card bg-dark border-secondary h-100">
-            <div class="card-header border-secondary p-2 d-flex justify-content-between align-items-center bg-secondary bg-opacity-10">
-              <input v-model="scheme.name" type="text" class="form-control form-control-sm bg-transparent text-light border-0 fw-bold p-0" placeholder="Scheme Name">
+          <div class="card theme-card h-100">
+            <div class="card-header theme-border p-2 d-flex justify-content-between align-items-center bg-secondary bg-opacity-10">
+              <input v-model="scheme.name" type="text" class="form-control form-control-sm bg-transparent theme-text border-0 fw-bold p-0" placeholder="Scheme Name">
               <button class="btn btn-link btn-sm text-danger p-0 ms-2" @click="removeScheme(schemeIdx)">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
             <div class="card-body p-2">
               <div v-for="(color, colorIdx) in scheme.colors" :key="colorIdx" class="d-flex align-items-center mb-2">
-                <input v-model="color.name" type="text" class="form-control form-control-sm bg-dark text-light border-secondary me-2" style="flex: 2" placeholder="Color Name">
-                <input v-model="color.color" type="color" class="form-control form-control-color form-control-sm bg-dark border-secondary me-2" style="width: 40px; height: 31px; padding: 2px;">
+                <input v-model="color.name" type="text" class="form-control form-control-sm theme-input me-2" style="flex: 2" placeholder="Color Name">
+                <input v-model="color.color" type="color" class="form-control form-control-color form-control-sm theme-input me-2" style="width: 40px; height: 31px; padding: 2px;">
                 
                 <div class="dropdown me-2">
                   <button class="btn btn-sm btn-outline-info dropdown-toggle no-caret" type="button" data-bs-toggle="dropdown" title="Coordinate Colors">
                     <i class="bi bi-magic"></i>
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-dark border-secondary shadow">
+                  <ul class="dropdown-menu border-primary shadow" :class="{ 'dropdown-menu-dark': config && config.theme === 'Cosmic' }">
                     <li><h6 class="dropdown-header">Add Coordinating Color</h6></li>
                     <li><a class="dropdown-item" href="#" @click.prevent="addCoordinated(scheme, color.color, 'complementary')">Complementary</a></li>
                     <li><a class="dropdown-item" href="#" @click.prevent="addCoordinated(scheme, color.color, 'analogous')">Analogous (2)</a></li>
@@ -64,6 +64,10 @@ const props = defineProps({
   colorSchemes: {
     type: Array,
     required: true
+  },
+  config: {
+    type: Object,
+    required: false
   }
 });
 

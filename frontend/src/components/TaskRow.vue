@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="task-row-container" :class="{ 'is-selected': isSelected }">
+    <div class="task-row-container" :class="[{ 'is-selected': isSelected }, themeClass]">
         <div class="tasks-row" 
              draggable="true" 
              @dragstart="onDragStart"
@@ -22,7 +22,7 @@
                         <i :class="getTaskTypeIcon(task.taskTypeId)"></i>
                         <span class="ms-1">{{ getTaskTypeName(task.taskTypeId) }}</span>
                     </span>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
                         <li v-for="t in projectTaskTypes" :key="t.id">
                             <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
@@ -58,7 +58,7 @@
                         <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
                         <span>{{ getStatusName(task.statusId) }}</span>
                     </span>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li v-for="s in projectStatuses" :key="s.id">
                             <a class="dropdown-item" href="#" @click.prevent="onUpdateStatus({ target: { value: s.id } })" :style="{ color: s.color }">
                                 <i class="bi bi-circle-fill me-2" style="font-size: 8px;"></i>{{ s.name }}
@@ -76,7 +76,7 @@
                         <i :class="getPriorityIcon(task.priorityId)" style="margin-right: 4px;"></i>
                         <span>{{ getPriorityName(task.priorityId) }}</span>
                     </span>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li v-for="p in projectPriorities" :key="p.id">
                             <a class="dropdown-item" href="#" @click.prevent="onUpdatePriorityId(p.id)" :style="{ color: p.color }">
                                 <i :class="p.icon" class="me-2"></i>{{ p.name }}
@@ -129,6 +129,7 @@
                           :grid-style="gridStyle" 
                           :is-last="isLast && index === getSortedSubtasks(task.subtasks).length - 1"
                           :selected-task-ids="selectedTaskIds"
+                          :theme="theme"
                           @refresh="$emit('refresh')" 
                           @open-task="$emit('open-task', $event)"
                           @toggle-select="$emit('toggle-select', $event)"
@@ -149,9 +150,10 @@ export default {
     components: {
         DateTimeSelector
     },
-    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds', 'parentTaskId', 'previousTaskId'],
+    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds', 'parentTaskId', 'previousTaskId', 'theme'],
     emits: ['refresh', 'open-task', 'context-menu', 'toggle-select'],
     setup(props, { emit }) {
+        const themeClass = computed(() => `theme-${(props.theme || 'Cosmic').toLowerCase()}`);
         const dropPosition = ref(null); // 'before', 'after', 'inside'
         const isEditingEstimate = ref(false);
         const titleElement = ref(null);
@@ -542,7 +544,8 @@ export default {
             formatFriendlyDate,
             formatForInput,
             formatEstimate,
-            dropClass
+            dropClass,
+            themeClass
         };
     }
 };

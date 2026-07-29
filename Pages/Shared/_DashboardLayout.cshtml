@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Cosmic (Default) */
             --bg-darker: #0d1117;
             --bg-dark: #161b22;
             --bg-card: #21262d;
@@ -26,9 +27,26 @@
             --scrollbar-thumb: #484f58;
             --scrollbar-track: #0d1117;
         }
+
+        .theme-light {
+            --bg-darker: #f6f8fa;
+            --bg-dark: #ffffff;
+            --bg-card: #ffffff;
+            --border-primary: #d0d7de;
+            --text-primary: #24292f;
+            --text-muted: #57606a;
+            --accent-blue: #0969da;
+            --accent-green: #1a7f37;
+            --accent-red: #cf222e;
+            --accent-orange: #bc4c00;
+            --accent-purple: #8250df;
+            --scrollbar-thumb: #d0d7de;
+            --scrollbar-track: #f6f8fa;
+        }
+
         body {
-            background-color: var(--bg-darker) !important;
-            color: var(--text-primary) !important;
+            background-color: var(--bg-darker);
+            color: var(--text-primary);
             font-family: 'Noto Sans', sans-serif;
         }
         /* Remove rounded corners from panels and badges */
@@ -72,7 +90,7 @@
     </style>
     @await RenderSectionAsync("Head", required: false)
 </head>
-<body class="d-flex flex-column bg-dark text-light" style="min-height: 100vh;">
+<body class="d-flex flex-column" style="min-height: 100vh;">
     @RenderBody()
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

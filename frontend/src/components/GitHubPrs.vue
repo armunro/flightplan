@@ -5,8 +5,8 @@
         <div class="spinner-border text-info mb-3" role="status"></div>
         <p class="text-muted">Loading pull requests...</p>
       </div>
-      <div v-else-if="prs.length === 0" class="p-4 text-center text-light">
-        <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+      <div v-else-if="prs.length === 0" class="p-4 text-center theme-text">
+        <i class="bi bi-inbox fs-1 theme-text-muted mb-3 d-block"></i>
         <p>No open pull requests found or access token not configured.</p>
       </div>
       <div v-else-if="filteredPrs.length === 0" class="p-5 text-center text-muted">
@@ -33,14 +33,14 @@
                 <div class="d-flex flex-column overflow-hidden">
                   <div class="d-flex align-items-center gap-2 mb-1">
                     <span class="text-info fw-bold truncate-text">
-                      <span class="badge rounded-pill bg-dark border border-secondary text-muted px-1 fs-xxs me-1">#{{ pr.number }}</span>
+                      <span class="badge rounded-pill theme-bg-dark theme-border theme-text-muted px-1 fs-xxs me-1">#{{ pr.number }}</span>
                       {{ pr.title }}
                       <span v-if="pr.isDraft" class="draft-badge ms-1">DRAFT</span>
                     </span>
                   </div>
                   <div class="col-description">
-                    <span v-if="pr.body" class="text-muted fs-xs truncate-text">{{ pr.body }}</span>
-                    <span v-else class="text-muted fs-xs italic">No description</span>
+                    <span v-if="pr.body" class="theme-text-muted fs-xs truncate-text">{{ pr.body }}</span>
+                    <span v-else class="theme-text-muted fs-xs italic">No description</span>
                   </div>
                 </div>
               </div>
@@ -48,15 +48,15 @@
             <div class="col-repo">
               <div class="d-flex flex-column align-items-end text-end">
                 <span class="status-text fw-bold fs-xs mb-1" :style="{ color: getStatusColor(pr.status) }">{{ pr.status }}</span>
-                <span class="text-light fs-xxs truncate-text">{{ pr.repository }}</span>
+                <span class="theme-text fs-xxs truncate-text">{{ pr.repository }}</span>
               </div>
             </div>
             <div class="col-author">
               <div class="d-flex flex-column align-items-end text-end">
                 <div class="d-flex align-items-center gap-1 mb-1">
-                  <span class="text-secondary fs-xs truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
+                  <span class="theme-text-muted fs-xs truncate-text"><i class="bi bi-person me-1"></i> {{ pr.author }}</span>
                 </div>
-                <span class="text-muted fs-xxs">Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
+                <span class="theme-text-muted fs-xxs">Opened {{ formatFriendlyDate(pr.createdAt, false, true) }}</span>
               </div>
             </div>
           </div>
@@ -173,14 +173,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--bg-dark);
 }
 
 .github-list-header {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  background-color: var(--bg-dark);
   border-bottom: 1px solid var(--border-primary);
   font-size: var(--fs-xxs);
   text-transform: uppercase;
@@ -202,11 +200,11 @@ onMounted(() => {
 }
 
 .github-pr-row:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-hover, rgba(255, 255, 255, 0.03));
 }
 
 .github-pr-row.selected {
-  background-color: rgba(88, 166, 255, 0.1);
+  background-color: var(--bg-selected, rgba(88, 166, 255, 0.1));
   border-left: 3px solid var(--accent-blue) !important;
 }
 
@@ -237,7 +235,7 @@ onMounted(() => {
   font-size: 0.65rem;
   line-height: 1;
   padding: 2px 4px;
-  background-color: #2c313a;
+  background-color: var(--bg-badge, #2c313a);
   color: var(--text-primary);
   border-radius: 3px;
   vertical-align: middle;

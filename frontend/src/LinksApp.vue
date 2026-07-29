@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="vh-100 d-flex flex-row overflow-hidden app-root">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden app-root', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <div id="app-content" class="links-app-container flex-grow-1">
@@ -8,13 +8,13 @@
           <!-- Sidebar -->
         <div class="links-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
           <div class="sidebar-header d-flex align-items-center">
-            <h5 v-if="!sidebarCollapsed">Categories</h5>
+            <h5 v-if="!sidebarCollapsed" class="theme-text">Categories</h5>
             <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
-              <button class="btn-icon" @click="isEditingCategories = !isEditingCategories" :title="isEditingCategories ? 'Save Categories' : 'Edit Categories'">
+              <button class="btn-icon theme-text" @click="isEditingCategories = !isEditingCategories" :title="isEditingCategories ? 'Save Categories' : 'Edit Categories'">
                 <i class="bi" :class="isEditingCategories ? 'bi-check-lg text-success' : 'bi-pencil-square'"></i>
               </button>
             </div>
-            <div v-else class="mx-auto">
+            <div v-else class="mx-auto theme-text">
               <i class="bi bi-link-45deg"></i>
             </div>
           </div>
@@ -44,34 +44,34 @@
           <!-- Main Content -->
           <div class="main-content">
             <div class="links-container">
-              <div class="controls-bar">
+              <div class="controls-bar theme-border">
                 <div class="category-title-area d-flex align-items-center gap-3">
                   <template v-if="selectedCategory">
                     <ColorPicker v-model="selectedCategory.color" size="sm" />
-                    <h2 class="mb-0 text-truncate" style="max-width: 300px;">{{ selectedCategory.name }}</h2>
+                    <h2 class="mb-0 text-truncate theme-text" style="max-width: 300px;">{{ selectedCategory.name }}</h2>
                     <button class="btn btn-sm btn-link text-info p-0" @click="editCategory(selectedCategory)" title="Edit Category">
                       <i class="bi bi-pencil"></i>
                     </button>
                   </template>
-                  <h2 v-else>Links & Bookmarks</h2>
+                  <h2 v-else class="theme-text">Links & Bookmarks</h2>
                 </div>
 
                 <div class="d-flex align-items-center gap-3 flex-grow-1 justify-content-end">
                   <!-- View & Filter Group -->
-                  <div class="d-flex align-items-center gap-3 bg-darker rounded-pill px-3 py-1 border border-secondary">
+                  <div class="d-flex align-items-center gap-3 theme-bg-dark rounded-pill px-3 py-1 theme-border border">
                     <div class="search-box position-relative" style="width: 200px;">
                       <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-info opacity-75 x-small"></i>
-                      <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 text-light ps-4 search-input" placeholder="Search..." />
-                      <button v-if="searchQuery" class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y me-0 p-0 text-muted" @click="searchQuery = ''">
+                      <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 theme-text ps-4 search-input" placeholder="Search..." />
+                      <button v-if="searchQuery" class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y me-0 p-0 theme-text-muted" @click="searchQuery = ''">
                         <i class="bi bi-x-circle-fill"></i>
                       </button>
                     </div>
 
-                    <div class="vr h-50 my-auto text-secondary opacity-25"></div>
+                    <div class="vr h-50 my-auto theme-border opacity-25"></div>
 
                     <div class="form-check form-switch mb-0 d-flex align-items-center gap-2 ps-0">
                       <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="showChildrenToggle" v-model="showChildren">
-                      <label class="form-check-label small text-light text-nowrap" for="showChildrenToggle">Show Children</label>
+                      <label class="form-check-label small theme-text text-nowrap" for="showChildrenToggle">Show Children</label>
                     </div>
                   </div>
 
@@ -93,11 +93,11 @@
 
               <div v-if="selectedCategory" class="tiles-grid p-4">
                 <div v-for="(link, lIdx) in allLinksInSelected" :key="link.id" class="link-tile-wrapper">
-                  <div class="link-tile card bg-dark border-secondary h-100 shadow-sm">
+                  <div class="link-tile card theme-card h-100 shadow-sm">
                     <div class="card-body d-flex flex-column p-3">
                       <div class="d-flex justify-content-between align-items-start mb-2">
                         <img v-if="link.url" :src="getFavicon(link.url)" class="favicon-large" @error="handleIconError" />
-                        <div v-else class="favicon-placeholder"><i class="bi bi-link-45deg"></i></div>
+                        <div v-else class="favicon-placeholder theme-text"><i class="bi bi-link-45deg"></i></div>
                         <div class="tile-actions">
                           <button class="btn btn-sm btn-link text-info p-0 me-2" @click="editLink(link.id)" title="Edit Link">
                             <i class="bi bi-pencil"></i>
@@ -121,7 +121,7 @@
                 </div>
                 <!-- Add Link Tile -->
                 <div class="link-tile-wrapper">
-                  <div class="link-tile card bg-dark border-secondary border-dashed h-100 shadow-sm add-tile" @click="addLink">
+                  <div class="link-tile card theme-card border-dashed h-100 shadow-sm add-tile" @click="addLink">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-info">
                       <i class="bi bi-plus-lg fs-2 mb-2"></i>
                       <span class="fw-bold">Add Link</span>
@@ -144,26 +144,26 @@
       <!-- Edit Link Modal -->
       <div v-if="editingLink" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @keydown.esc="editingLink = null">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content bg-dark border-secondary text-light">
-            <div class="modal-header border-secondary">
+          <div class="modal-content theme-modal">
+            <div class="modal-header theme-modal-header">
               <h5 class="modal-title">{{ isNewLink ? 'Add Link' : 'Edit Link' }}</h5>
-              <button type="button" class="btn-close btn-close-white" @click="editingLink = null"></button>
+              <button type="button" class="btn-close theme-btn-close" @click="editingLink = null"></button>
             </div>
             <div class="modal-body">
               <div class="mb-3">
-                <label class="form-label text-info small fw-bold">URL</label>
-                <input v-model="tempLink.url" class="form-control bg-darker border-secondary text-light" placeholder="https://..." @blur="autoPopulateTitle" />
+                <label class="form-label theme-text text-info small fw-bold">URL</label>
+                <input v-model="tempLink.url" class="form-control theme-input" placeholder="https://..." @blur="autoPopulateTitle" />
               </div>
               <div class="mb-3">
-                <label class="form-label text-info small fw-bold">Title</label>
-                <input v-model="tempLink.title" class="form-control bg-darker border-secondary text-light" placeholder="Site Name" />
+                <label class="form-label theme-text text-info small fw-bold">Title</label>
+                <input v-model="tempLink.title" class="form-control theme-input" placeholder="Site Name" />
               </div>
               <div class="mb-3">
-                <label class="form-label text-info small fw-bold">Description</label>
-                <textarea v-model="tempLink.description" class="form-control bg-darker border-secondary text-light" rows="2" placeholder="Brief description..."></textarea>
+                <label class="form-label theme-text text-info small fw-bold">Description</label>
+                <textarea v-model="tempLink.description" class="form-control theme-input" rows="2" placeholder="Brief description..."></textarea>
               </div>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer theme-modal-footer">
               <button type="button" class="btn btn-secondary" @click="editingLink = null">Cancel</button>
               <button type="button" class="btn btn-primary" @click="saveLinkEdit">Confirm</button>
             </div>
@@ -173,22 +173,22 @@
       <!-- Edit Category Modal -->
       <div v-if="editingCategory" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" @keydown.esc="editingCategory = null">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content bg-dark border-secondary text-light">
-            <div class="modal-header border-secondary">
+          <div class="modal-content theme-modal">
+            <div class="modal-header theme-modal-header">
               <h5 class="modal-title">Edit Category</h5>
-              <button type="button" class="btn-close btn-close-white" @click="editingCategory = null"></button>
+              <button type="button" class="btn-close theme-btn-close" @click="editingCategory = null"></button>
             </div>
             <div class="modal-body">
               <div class="mb-3">
-                <label class="form-label text-info small fw-bold">Name</label>
-                <input v-model="tempCategory.name" class="form-control bg-darker border-secondary text-light" placeholder="Category Name" />
+                <label class="form-label theme-text text-info small fw-bold">Name</label>
+                <input v-model="tempCategory.name" class="form-control theme-input" placeholder="Category Name" />
               </div>
               <div class="mb-3">
-                <label class="form-label text-info small fw-bold">Color</label>
+                <label class="form-label theme-text text-info small fw-bold">Color</label>
                 <ColorPicker v-model="tempCategory.color" show-text size="lg" palette-placement="top-start" />
               </div>
             </div>
-            <div class="modal-footer border-secondary justify-content-between">
+            <div class="modal-footer theme-modal-footer justify-content-between">
               <button type="button" class="btn btn-outline-danger" @click="removeCategory(tempCategory.id)">
                 <i class="bi bi-trash me-1"></i>Delete
               </button>
@@ -208,10 +208,13 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
 import ColorPicker from './components/ColorPicker.vue';
+import { fetchSettings } from './js/dashboard-api';
 
 import CategoryTree from './components/CategoryTree.vue';
 
 const categories = ref([]);
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 const loading = ref(true);
 const saving = ref(false);
 const editingLink = ref(null);
@@ -360,9 +363,17 @@ const stopResize = () => {
 const fetchBookmarks = async () => {
   loading.value = true;
   try {
-    const response = await fetch('/api/bookmarks');
-    if (response.ok) {
-      const data = await response.json();
+    const [bookmarksResponse, settings] = await Promise.all([
+      fetch('/api/bookmarks'),
+      fetchSettings()
+    ]);
+    
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
+    }
+
+    if (bookmarksResponse.ok) {
+      const data = await bookmarksResponse.json();
       
       const ensureIds = (cats) => {
         return cats.map(c => ({

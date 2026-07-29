@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="dashboard-app">
+  <div :class="['dashboard-app', themeClass]">
     <Navbar />
     <div class="main-content">
       <div class="controls-bar">
@@ -28,8 +28,8 @@
             <div class="d-flex flex-column" :style="paneStyles.todayEvents">
               <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
                 <i class="bi bi-calendar3 me-2 text-info"></i>
-                <h6 class="mb-0 text-primary fs-base">Today's Events</h6>
-                <span class="badge bg-secondary ms-auto text-light small">{{ data.todaysEvents.length }}</span>
+                <h6 class="mb-0 theme-text fs-base">Today's Events</h6>
+                <span class="badge theme-badge ms-auto small">{{ data.todaysEvents.length }}</span>
               </div>
               <div class="pane-body flex-grow-1 overflow-auto">
                 <div v-if="data.todaysEvents.length === 0" class="py-3 px-4 text-center text-muted small">
@@ -66,8 +66,8 @@
             <div class="d-flex flex-column" :style="paneStyles.upcomingEvents">
               <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
                 <i class="bi bi-calendar-range me-2 text-info"></i>
-                <h6 class="mb-0 text-primary fs-base">Upcoming Events</h6>
-                <span class="badge bg-secondary ms-auto text-light small">{{ data.upcomingEvents.length }}</span>
+                <h6 class="mb-0 theme-text fs-base">Upcoming Events</h6>
+                <span class="badge theme-badge ms-auto small">{{ data.upcomingEvents.length }}</span>
               </div>
               <div class="pane-body flex-grow-1 overflow-auto">
                 <div v-if="data.upcomingEvents.length === 0" class="py-3 px-4 text-center text-muted small">
@@ -105,8 +105,8 @@
           <div class="dashboard-pane d-flex flex-column h-100" :style="paneStyles.tasks">
             <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
               <i class="bi bi-check2-square me-2 text-success"></i>
-              <h6 class="mb-0 text-primary fs-base">Upcoming Deadlines</h6>
-              <span class="badge bg-secondary ms-auto text-light small">{{ data.upcomingTasks.length }}</span>
+              <h6 class="mb-0 theme-text fs-base">Upcoming Deadlines</h6>
+              <span class="badge theme-badge ms-auto small">{{ data.upcomingTasks.length }}</span>
             </div>
             <div class="pane-body flex-grow-1 overflow-auto">
               <div v-if="data.upcomingTasks.length === 0" class="py-3 px-4 text-center text-muted small">
@@ -178,8 +178,8 @@
           <div v-if="data.emailVisible" class="dashboard-pane d-flex flex-column h-100" :style="paneStyles.email">
             <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
               <i class="bi bi-envelope me-2 text-warning"></i>
-              <h6 class="mb-0 text-primary fs-base">Recent Emails</h6>
-              <span class="badge bg-secondary ms-auto text-light small">{{ data.recentEmails.length }}</span>
+              <h6 class="mb-0 theme-text fs-base">Recent Emails</h6>
+              <span class="badge theme-badge ms-auto small">{{ data.recentEmails.length }}</span>
             </div>
             <div class="pane-body flex-grow-1 overflow-auto">
               <div v-if="data.recentEmails.length === 0" class="py-3 px-4 text-center text-muted small">
@@ -234,9 +234,12 @@ import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
 import { formatFriendlyDate, formatEstimate, getDateColorClass } from './js/utils';
 import { updateTask } from './js/tasks-api';
+import { fetchSettings } from './js/dashboard-api';
 
 const loading = ref(true);
 const data = ref(null);
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 
 // Resize state
 const splitWidths = ref(JSON.parse(localStorage.getItem('dashboardSplitWidths')) || [33.33, 33.33, 33.33]);
@@ -296,9 +299,17 @@ const paneStyles = computed(() => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const response = await fetch('/api/dashboard');
-    if (response.ok) {
-      data.value = await response.json();
+    const [dashResponse, settings] = await Promise.all([
+      fetch('/api/dashboard'),
+      fetchSettings()
+    ]);
+
+    if (dashResponse.ok) {
+      data.value = await dashResponse.json();
+    }
+    
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
     }
   } catch (e) {
     console.error('Failed to load Dashboard data:', e);

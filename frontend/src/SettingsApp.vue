@@ -1,26 +1,26 @@
 <template>
-  <div class="vh-100 d-flex flex-row overflow-hidden app-root">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden app-root', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <div id="app-content" class="settings-app-container flex-grow-1">
         <!-- Sidebar -->
         <div class="tasks-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
           <div class="sidebar-header d-flex align-items-center">
-            <h5 v-if="!sidebarCollapsed">Settings</h5>
-            <div v-else class="mx-auto">
+            <h5 v-if="!sidebarCollapsed" class="theme-text">Settings</h5>
+            <div v-else class="mx-auto theme-text">
               <i class="bi bi-gear-fill"></i>
             </div>
           </div>
           <div class="project-list">
             <div v-for="cat in categories" :key="cat.id" 
-                 class="project-item"
+                 class="project-item theme-text"
                  :class="{ active: activeCategory === cat.id }"
                  @click="activeCategory = cat.id"
                  :title="sidebarCollapsed ? cat.name : ''">
               <div class="project-icon-wrapper" :style="{ backgroundColor: cat.color }">
                 <i :class="cat.icon"></i>
               </div>
-              <span v-if="!sidebarCollapsed" class="project-name">{{ cat.name }}</span>
+              <span v-if="!sidebarCollapsed" class="project-name theme-text">{{ cat.name }}</span>
             </div>
           </div>
           <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
@@ -35,8 +35,8 @@
 
         <!-- Main Content -->
         <div class="main-content">
-          <div class="controls-bar">
-            <div class="d-flex align-items-center">
+          <div class="controls-bar theme-border">
+            <div class="d-flex align-items-center theme-text">
               <i :class="currentCategory.icon" class="me-2 fs-5"></i>
               <h5 class="mb-0">{{ currentCategory.name }} Settings</h5>
             </div>
@@ -61,6 +61,7 @@
 
             <div v-else class="row g-4 pb-5 content-area">
               <div class="col-md-12">
+                <SettingsGeneral v-if="activeCategory === 'general'" :config="config" />
                 <SettingsJira v-if="activeCategory === 'jira'" :jira="config.jira" />
                 <SettingsGitHub v-if="activeCategory === 'github'" :gitHub="config.gitHub" />
                 <SettingsMicrosoftGraph v-if="activeCategory === 'msgraph'" :microsoftGraph="config.microsoftGraph" />
@@ -68,7 +69,8 @@
                                         :pageVisibilities="config.pageVisibilities" 
                                         :allPages="allPages" />
                 <SettingsColorSchemes v-if="activeCategory === 'colorschemes'" 
-                                     :colorSchemes="config.colorSchemes" />
+                                     :colorSchemes="config.colorSchemes"
+                                     :config="config" />
                 <SettingsDebug v-if="activeCategory === 'debug'" 
                                :debug="config.debug" />
               </div>
@@ -84,6 +86,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
 import SettingsJira from './components/SettingsJira.vue';
+import SettingsGeneral from './components/SettingsGeneral.vue';
 import SettingsGitHub from './components/SettingsGitHub.vue';
 import SettingsMicrosoftGraph from './components/SettingsMicrosoftGraph.vue';
 import SettingsPageVisibility from './components/SettingsPageVisibility.vue';
@@ -108,10 +111,12 @@ const config = ref({
   microsoftGraph: { tenantId: '', clientId: '' },
   pageVisibilities: [],
   colorSchemes: [],
+  theme: 'Cosmic',
   debug: { demoMode: false }
 });
 
 const allPages = [
+  { id: 'general', name: 'General' },
   { id: 'jira', name: 'Jira' },
   { id: 'github', name: 'GitHub' },
   { id: 'tasks', name: 'Tasks' },
@@ -125,6 +130,7 @@ const allPages = [
 ];
 
 const categories = [
+  { id: 'general', name: 'General', icon: 'bi bi-gear-wide-connected text-white', color: '#6c757d' },
   { id: 'jira', name: 'Jira', icon: 'bi bi-kanban text-white', color: '#0052CC' },
   { id: 'github', name: 'GitHub', icon: 'bi bi-github text-white', color: '#333' },
   { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft text-white', color: '#00a4ef' },
@@ -133,11 +139,13 @@ const categories = [
   { id: 'debug', name: 'Debug', icon: 'bi bi-bug text-white', color: '#ffc107' }
 ];
 
-const activeCategory = ref('jira');
+const activeCategory = ref('general');
 const currentCategory = computed(() => categories.find(c => c.id === activeCategory.value));
 
 const loading = ref(true);
 const saving = ref(false);
+
+const themeClass = computed(() => `theme-${config.value.theme.toLowerCase()}`);
 
 const sidebarCollapsed = ref(loadSetting('sidebarCollapsed', false));
 const sidebarWidth = ref(loadSetting('settingsSidebarWidth', 260));

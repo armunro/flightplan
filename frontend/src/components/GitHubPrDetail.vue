@@ -1,6 +1,6 @@
 <template>
-  <div class="h-100 d-flex flex-column bg-dark text-light overflow-hidden">
-    <div v-if="!pr" class="flex-grow-1 d-flex align-items-center justify-content-center" style="color: #ffffff !important; font-style: italic;">
+  <div class="h-100 d-flex flex-column theme-bg-dark theme-text overflow-hidden">
+    <div v-if="!pr" class="flex-grow-1 d-flex align-items-center justify-content-center theme-text-muted italic">
       <div class="text-center">
         <i class="bi bi-github display-1 mb-3"></i>
         <p>Select a pull request to view details</p>
@@ -28,14 +28,14 @@
 
       <div class="row mb-4">
         <div class="col-md-6">
-          <div class="detail-label small text-uppercase fw-bold mb-1" style="color: #ffffff !important;">Author</div>
+          <div class="detail-label small text-uppercase fw-bold mb-1 theme-text">Author</div>
           <div class="d-flex align-items-center">
             <i class="bi bi-person-circle me-2 fs-5"></i>
             <span>{{ pr.author || 'Unknown' }}</span>
           </div>
         </div>
         <div class="col-md-6">
-          <div class="detail-label small text-uppercase fw-bold mb-1" style="color: #ffffff !important;">Created</div>
+          <div class="detail-label small text-uppercase fw-bold mb-1 theme-text">Created</div>
           <div class="d-flex align-items-center">
             <i class="bi bi-calendar3 me-2"></i>
             <span>{{ formatDate(pr.createdAt) }}</span>
@@ -44,25 +44,25 @@
       </div>
 
       <div class="mb-4">
-        <div class="detail-label small text-uppercase fw-bold mb-2" style="color: #ffffff !important;">Description</div>
-        <div class="description-content p-3 rounded" style="background-color: #21262d; border: 1px solid #30363d;">
+        <div class="detail-label small text-uppercase fw-bold mb-2 theme-text">Description</div>
+        <div class="description-content p-3 rounded theme-card" style="border: 1px solid var(--border-primary);">
           <div v-if="pr.body" class="github-body" v-html="formatBody(pr.body)"></div>
-          <div v-else style="color: #ffffff !important; font-style: italic; display: block; min-height: 1.5em;">No description provided.</div>
+          <div v-else class="theme-text-muted italic block min-h-1.5em">No description provided.</div>
         </div>
       </div>
 
       <div class="mb-4">
-        <div class="detail-label small text-uppercase fw-bold mb-3" style="color: #ffffff !important; font-style: normal;">Conversation</div>
+        <div class="detail-label small text-uppercase fw-bold mb-3 theme-text">Conversation</div>
         <div v-if="pr.comments && pr.comments.length > 0" class="comments-list">
-          <div v-for="(comment, index) in pr.comments" :key="index" class="comment-item mb-3 p-3 rounded" style="background-color: var(--bg-darker); border: 1px solid var(--border-primary);">
+          <div v-for="(comment, index) in pr.comments" :key="index" class="comment-item mb-3 p-3 rounded theme-bg-darker theme-border">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-bold text-info">{{ comment.author }}</span>
-              <span class="small" style="color: #ffffff !important; font-style: italic;">{{ formatDate(comment.createdAt) }}</span>
+              <span class="small theme-text-muted italic">{{ formatDate(comment.createdAt) }}</span>
             </div>
             <div v-html="formatBody(comment.body)" class="github-comment-body"></div>
           </div>
         </div>
-        <div v-else class="p-3 rounded" style="background-color: #21262d; border: 1px solid #30363d; color: #ffffff !important; font-style: italic; display: block; min-height: 1.5em;">
+        <div v-else class="p-3 rounded theme-card theme-border theme-text-muted italic block min-h-1.5em">
           No comments yet.
         </div>
       </div>

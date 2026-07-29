@@ -1,25 +1,25 @@
 <template>
-  <div class="vh-100 d-flex flex-row overflow-hidden app-root">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden app-root', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <!-- Rule Progress Modal -->
     <div v-if="applyingRuleName" class="modal-overlay d-flex align-items-center justify-content-center">
-      <div class="card bg-dark border-secondary shadow-lg" style="width: 400px;">
+      <div class="card theme-card shadow-lg" style="width: 400px;">
         <div class="card-body p-4 text-center">
-          <h5 class="text-light mb-3">Applying Rule: {{ applyingRuleName }}</h5>
+          <h5 class="theme-text mb-3">Applying Rule: {{ applyingRuleName }}</h5>
           <div class="progress mb-3" style="height: 10px;">
             <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
                  role="progressbar" 
                  :style="{ width: (ruleProgressTotal > 0 ? (ruleProgress / ruleProgressTotal * 100) : 0) + '%' }">
             </div>
           </div>
-          <div class="d-flex justify-content-between x-small text-light opacity-75 mb-3">
+          <div class="d-flex justify-content-between x-small theme-text opacity-75 mb-3">
             <span>Processing {{ ruleProgress }} of {{ ruleProgressTotal }}</span>
             <span>{{ Math.round(ruleProgressTotal > 0 ? (ruleProgress / ruleProgressTotal * 100) : 0) }}%</span>
           </div>
           <div class="text-start">
-            <label class="x-small text-light opacity-50 d-block mb-1">Current Item:</label>
-            <div class="small text-light text-truncate" :title="ruleProgressSubject">
+            <label class="x-small theme-text opacity-50 d-block mb-1">Current Item:</label>
+            <div class="small theme-text text-truncate" :title="ruleProgressSubject">
               {{ ruleProgressSubject || 'Pending...' }}
             </div>
           </div>
@@ -30,16 +30,16 @@
     <div id="app-content" class="email-app-container flex-grow-1" :class="{ 'editing-folders': isEditingFolders }">
         <div class="email-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
           <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
-            <h5 v-if="!sidebarCollapsed">Folders</h5>
+            <h5 v-if="!sidebarCollapsed" class="theme-text">Folders</h5>
             <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
-              <button class="btn-icon ms-0" @click="isEditingFolders = !isEditingFolders" :title="isEditingFolders ? 'Save Folders' : 'Edit Folders'">
+              <button class="btn-icon ms-0 theme-text" @click="isEditingFolders = !isEditingFolders" :title="isEditingFolders ? 'Save Folders' : 'Edit Folders'">
                 <i class="bi" :class="isEditingFolders ? 'bi-check-lg text-success' : 'bi-pencil-square'"></i>
               </button>
             </div>
-            <i v-else class="bi bi-folder2"></i>
+            <i v-else class="bi bi-folder2 theme-text"></i>
           </div>
           <div class="folder-list">
-            <div v-if="foldersLoading" class="sidebar-loading">
+            <div v-if="foldersLoading" class="sidebar-loading theme-text">
               <div class="spinner"></div>
               <span v-if="!sidebarCollapsed">Loading folders...</span>
             </div>
@@ -54,14 +54,14 @@
                   <i class="bi" :class="getFolderIcon(folder)"></i>
                 </div>
                 <div v-if="!sidebarCollapsed" class="d-flex align-items-center flex-grow-1 min-w-0">
-                  <span v-if="!isEditingFolders" class="folder-name">{{ folder.displayName }}</span>
+                  <span v-if="!isEditingFolders" class="folder-name theme-text">{{ folder.displayName }}</span>
                   <input v-else-if="isEditingFolders" 
-                         class="folder-name-input" 
+                         class="folder-name-input theme-input" 
                          :value="folder.displayName"
                          @click.stop
                          @input="renameFolder(folder.id, $event.target.value)"
                          @blur="isEditingFolders = isEditingFolders" />
-                  <span v-if="folder.unreadItemCount > 0 && !isEditingFolders" class="folder-count ms-2">{{ folder.unreadItemCount }}</span>
+                  <span v-if="folder.unreadItemCount > 0 && !isEditingFolders" class="folder-count ms-2 theme-badge">{{ folder.unreadItemCount }}</span>
                 </div>
                 
                 <div v-if="isEditingFolders" class="folder-edit-controls d-flex gap-1 ms-auto">
@@ -109,19 +109,19 @@
 
       <div class="main-content">
         <div class="email-container">
-          <div class="controls-bar">
+          <div class="controls-bar theme-border">
             <div class="page-title-area">
-              <h2 class="fw-bold mb-0">{{ currentFolderName }}</h2>
+              <h2 class="fw-bold mb-0 theme-text">{{ currentFolderName }}</h2>
             </div>
             <div class="d-flex align-items-center gap-2">
               <div class="input-group input-group-sm">
                 <button class="btn btn-outline-secondary" @click="showRulesManager = true" title="Manage Rules">
                   <i class="bi bi-gear"></i>
                 </button>
-                <span class="input-group-text bg-dark border-secondary text-light">
+                <span class="input-group-text theme-input">
                   <i class="bi bi-envelope me-1"></i> {{ emails.length }}
                 </span>
-                <select v-model="pageSize" class="form-select bg-dark border-secondary text-light" style="width: auto;">
+                <select v-model="pageSize" class="form-select theme-input" style="width: auto;">
                   <option :value="10">10</option>
                   <option :value="20">20</option>
                   <option :value="50">50</option>
@@ -134,7 +134,7 @@
                         aria-expanded="false">
                   Apply Rules
                 </button>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                <ul class="dropdown-menu border-primary dropdown-menu-end shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                   <li v-for="rule in rules" :key="rule.name">
                     <a class="dropdown-item" href="#" @click.prevent="applyToAll(rule.name)" :title="'Apply ' + rule.name + ' to all emails'">
                       Apply {{ rule.name }}
@@ -151,9 +151,9 @@
                 <span class="visually-hidden">Loading...</span>
               </div>
             </div>
-            <div v-else-if="emails.length === 0" class="card bg-dark border-secondary">
+            <div v-else-if="emails.length === 0" class="card theme-card">
               <div class="card-body text-center py-5">
-                <p class="text-light opacity-50 mb-0">No emails found or failed to fetch emails.</p>
+                <p class="theme-text-muted opacity-50 mb-0">No emails found or failed to fetch emails.</p>
               </div>
             </div>
             <div v-else class="email-list">
@@ -161,8 +161,8 @@
                 <div class="email-item-content">
                   <div class="email-item-top">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="email-sender fs-base" :title="email.fromAddress">{{ email.from }}</span>
-                      <span class="email-address text-light fs-xs opacity-75">&lt;{{ email.fromAddress }}&gt;</span>
+                      <span class="email-sender fs-base theme-text" :title="email.fromAddress">{{ email.from }}</span>
+                      <span class="email-address theme-text-muted fs-xs opacity-75">&lt;{{ email.fromAddress }}&gt;</span>
                       <div v-if="email.matchingRules && email.matchingRules.length > 0" class="email-item-tags d-flex gap-1 ms-1">
                         <span v-for="rule in email.matchingRules" 
                               :key="rule.name" 
@@ -188,10 +188,10 @@
                 
                 <div class="email-item-actions">
                   <div class="dropdown">
-                    <button class="btn btn-link p-1 text-muted action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-link p-1 theme-text-muted action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="bi bi-three-dots"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                       <li><a class="dropdown-item small" href="#" @click.prevent="createRuleFromEmail(email.id)">
                         <i class="bi bi-filter me-2"></i> Create Rule
                       </a></li>
@@ -203,7 +203,7 @@
                           <i class="bi bi-chevron-left small me-2"></i>
                           <span><i class="bi bi-lightning me-2"></i> Apply Rule</span>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-dark">
+                        <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                           <li v-for="rule in rules" :key="rule.name">
                             <a class="dropdown-item small" href="#" @click.prevent="applyRule(email.id, rule.name)">{{ rule.name }}</a>
                           </li>
@@ -214,7 +214,7 @@
                           <i class="bi bi-chevron-left small me-2"></i>
                           <span><i class="bi bi-plus-circle me-2"></i> Add Sender to Rule</span>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-dark">
+                        <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                           <li v-for="rule in rules" :key="rule.name">
                             <a class="dropdown-item small" href="#" @click.prevent="addSenderToRule(rule.name, email.fromAddress, email.subject)">{{ rule.name }}</a>
                           </li>
@@ -240,28 +240,28 @@
     <!-- Rules Manager Modal -->
     <div v-if="showRulesManager" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.7)">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark text-light border-secondary">
-          <div class="modal-header border-secondary">
-            <h5 class="modal-title">Manage Email Rules</h5>
-            <button type="button" class="btn-close btn-close-white" @click="showRulesManager = false"></button>
+        <div class="modal-content theme-modal-content">
+          <div class="modal-header theme-modal-header">
+            <h5 class="modal-title theme-text">Manage Email Rules</h5>
+            <button type="button" class="btn-close theme-btn-close" @click="showRulesManager = false"></button>
           </div>
           <div class="modal-body overflow-auto" style="max-height: 70vh;">
             <div v-if="!editingRule">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="mb-0 text-light opacity-75">Configure automated actions for incoming emails.</p>
+                <p class="mb-0 theme-text-muted opacity-75">Configure automated actions for incoming emails.</p>
                 <button class="btn btn-sm btn-info" @click="startCreateRule">
                   <i class="bi bi-plus-lg me-1"></i> Add Rule
                 </button>
               </div>
-              <div class="list-group list-group-flush border-top border-secondary">
-                <div v-for="rule in rules" :key="rule.name" class="list-group-item bg-transparent text-light border-secondary d-flex align-items-center py-3">
+              <div class="list-group list-group-flush border-top theme-border">
+                <div v-for="rule in rules" :key="rule.name" class="list-group-item theme-list-group-item d-flex align-items-center py-3">
                   <div class="rule-color-indicator me-3" :style="{ backgroundColor: rule.color || '#3498db' }"></div>
                   <div class="flex-grow-1">
-                    <h6 class="mb-0">{{ rule.name }}</h6>
-                    <small class="text-light opacity-75">{{ rule.filters.length }} filters, {{ rule.actions.length }} actions</small>
+                    <h6 class="mb-0 theme-text">{{ rule.name }}</h6>
+                    <small class="theme-text-muted opacity-75">{{ rule.filters.length }} filters, {{ rule.actions.length }} actions</small>
                   </div>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-light" @click="editRule(rule)">Edit</button>
+                    <button class="btn btn-sm btn-outline-info" @click="editRule(rule)">Edit</button>
                     <button class="btn btn-sm btn-outline-danger" @click="deleteRule(rule.name)">Delete</button>
                   </div>
                 </div>
@@ -271,35 +271,35 @@
             <!-- Rule Editor -->
             <div v-else>
               <div class="mb-3">
-                <label class="form-label small text-light opacity-75">Rule Name</label>
-                <input v-model="editingRule.name" class="form-control bg-darker border-secondary text-light" placeholder="e.g. Work Invoices" />
+                <label class="form-label small theme-text-muted opacity-75">Rule Name</label>
+                <input v-model="editingRule.name" class="form-control theme-input" placeholder="e.g. Work Invoices" />
               </div>
               <div class="mb-3">
-                <label class="form-label small text-light opacity-75">Tag Color</label>
+                <label class="form-label small theme-text-muted opacity-75">Tag Color</label>
                 <ColorPicker v-model="editingRule.color" palette-placement="bottom-start" />
               </div>
               
               <div class="mb-3">
-                <label class="form-label d-flex justify-content-between align-items-center small text-light opacity-75">
+                <label class="form-label d-flex justify-content-between align-items-center small theme-text-muted opacity-75">
                   Filters
                   <button class="btn btn-sm btn-link text-info p-0" @click="addFilter">Add Filter</button>
                 </label>
-                <div v-for="(filter, fIdx) in editingRule.filters" :key="fIdx" class="card bg-darker border-secondary mb-2">
+                <div v-for="(filter, fIdx) in editingRule.filters" :key="fIdx" class="card theme-card mb-2">
                   <div class="card-body p-2">
                     <div class="d-flex justify-content-between mb-2">
                       <span class="small text-info">Criteria #{{ fIdx + 1 }}</span>
-                      <button class="btn-close btn-close-white" style="font-size: 0.6rem" @click="editingRule.filters.splice(fIdx, 1)"></button>
+                      <button class="btn-close theme-btn-close" style="font-size: 0.6rem" @click="editingRule.filters.splice(fIdx, 1)"></button>
                     </div>
                     <div class="mb-2">
-                      <label class="x-small text-light opacity-75 d-block">From (one per line)</label>
-                      <textarea class="form-control form-control-sm bg-dark border-secondary text-light" 
+                      <label class="x-small theme-text-muted opacity-75 d-block">From (one per line)</label>
+                      <textarea class="form-control form-control-sm theme-input" 
                                 :value="filter.from?.join('\n')"
                                 @input="e => filter.from = e.target.value.split('\n')"
                                 rows="2"></textarea>
                     </div>
                     <div class="mb-2">
-                      <label class="x-small text-light opacity-75 d-block">Subject Contains (one per line)</label>
-                      <textarea class="form-control form-control-sm bg-dark border-secondary text-light" 
+                      <label class="x-small theme-text-muted opacity-75 d-block">Subject Contains (one per line)</label>
+                      <textarea class="form-control form-control-sm theme-input" 
                                 :value="filter.subjectContains?.join('\n')"
                                 @input="e => filter.subjectContains = e.target.value.split('\n')"
                                 rows="2"></textarea>
@@ -309,14 +309,14 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label d-flex justify-content-between align-items-center small text-light opacity-75">
+                <label class="form-label d-flex justify-content-between align-items-center small theme-text-muted opacity-75">
                   Actions
                   <button class="btn btn-sm btn-link text-info p-0" @click="addAction">Add Action</button>
                 </label>
                 <div v-for="(action, aIdx) in editingRule.actions" :key="aIdx" class="d-flex gap-2 mb-2 align-items-center">
                   <select :value="normalizeActionType(action.type)" 
                           @change="action.type = $event.target.value"
-                          class="form-select form-select-sm bg-dark border-secondary text-light">
+                          class="form-select form-select-sm theme-input">
                     <option v-for="opt in actionTypeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                   </select>
                   <FolderSelect v-if="normalizeActionType(action.type) == 3" 
@@ -325,7 +325,7 @@
                                 :folder-preferences="folderPreferences" />
                   <input v-else-if="normalizeActionType(action.type) == 1" 
                          v-model="action.value" 
-                         class="form-control form-control-sm bg-dark border-secondary text-light" 
+                         class="form-control form-control-sm theme-input" 
                          placeholder="Category Name" />
                   <button class="btn btn-sm btn-outline-danger" @click="editingRule.actions.splice(aIdx, 1)">
                     <i class="bi bi-trash"></i>
@@ -334,7 +334,7 @@
               </div>
             </div>
           </div>
-          <div class="modal-footer border-secondary">
+          <div class="modal-footer theme-modal-footer">
             <button v-if="!editingRule" type="button" class="btn btn-secondary" @click="showRulesManager = false">Close</button>
             <template v-else>
               <button type="button" class="btn btn-secondary" @click="editingRule = null">Cancel</button>
@@ -354,6 +354,7 @@ import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import ColorPicker from './components/ColorPicker.vue';
 import FolderSelect from './components/FolderSelect.vue';
+import { fetchSettings } from './js/dashboard-api';
 import { formatFriendlyDate } from './js/utils.js';
 
 const loadSetting = (key, defaultValue) => {
@@ -367,6 +368,8 @@ const loadSetting = (key, defaultValue) => {
 };
 
 const emails = ref([]);
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 const pageSize = ref(loadSetting('emailPageSize', 50));
 const folders = ref([]);
 const foldersLoading = ref(true);
@@ -600,9 +603,17 @@ const stopResize = () => {
 const fetchEmails = async () => {
   loading.value = true;
   try {
-    const response = await fetch(`/api/email?folderId=${currentFolderId.value}&top=${pageSize.value}`);
-    if (response.ok) {
-      emails.value = await response.json();
+    const [emailResponse, settings] = await Promise.all([
+      fetch(`/api/email?folderId=${currentFolderId.value}&top=${pageSize.value}`),
+      fetchSettings()
+    ]);
+
+    if (emailResponse.ok) {
+      emails.value = await emailResponse.json();
+    }
+    
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
     }
   } catch (error) {
     console.error('Error fetching emails:', error);

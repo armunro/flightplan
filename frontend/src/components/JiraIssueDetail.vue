@@ -1,5 +1,5 @@
 <template>
-  <div class="h-100 d-flex flex-column bg-dark text-light overflow-hidden">
+  <div class="h-100 d-flex flex-column theme-bg-dark theme-text overflow-hidden">
     <div v-if="!issue" class="flex-grow-1 d-flex align-items-center justify-content-center text-muted fst-italic">
       <div class="text-center">
         <i class="bi bi-kanban display-1 mb-3 opacity-25"></i>
@@ -23,7 +23,7 @@
               <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
             </div>
           </div>
-          <h2 class="h3 mb-0 text-light w-100">{{ issue.summary }}</h2>
+          <h2 class="h3 mb-0 theme-text w-100">{{ issue.summary }}</h2>
         </div>
 
       <div class="row mb-4">
@@ -91,7 +91,7 @@
         <div class="p-3 rounded add-comment-container" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
           <textarea 
             v-model="newComment" 
-            class="form-control bg-dark text-light border-secondary mb-2" 
+            class="form-control theme-input mb-2" 
             rows="3" 
             placeholder="Type your comment here..."
             :disabled="isSubmitting"

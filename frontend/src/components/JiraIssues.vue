@@ -14,8 +14,8 @@
         <i class="bi bi-search display-4 mb-3 opacity-25"></i>
         <p>No issues match your search "{{ searchQuery }}".</p>
       </div>
-      <div v-else class="jira-issues-list">
-        <div class="jira-list-header">
+      <div v-else class="jira-issues-list theme-bg-dark">
+        <div class="jira-list-header theme-bg-dark theme-border">
           <div class="col-key">Key / Status</div>
           <div class="col-summary">Summary</div>
           <div class="col-status">Type / Priority</div>
@@ -41,10 +41,10 @@
             </div>
             
             <div class="col-summary">
-              <span class="text-light truncate-summary fw-bold mb-1">{{ issue.summary }}</span>
+              <span class="theme-text truncate-summary fw-bold mb-1">{{ issue.summary }}</span>
               <div class="col-description">
-                <span v-if="issue.description" class="text-muted fs-xs truncate-description">{{ formatPlainTextDescription(issue.description) }}</span>
-                <span v-else class="text-muted fs-xs italic">No description</span>
+                <span v-if="issue.description" class="theme-text-muted fs-xs truncate-description">{{ formatPlainTextDescription(issue.description) }}</span>
+                <span v-else class="theme-text-muted fs-xs italic">No description</span>
               </div>
             </div>
 
@@ -57,9 +57,9 @@
 
             <div class="col-assignee">
               <div class="d-flex flex-column align-items-end text-end">
-                <span class="text-secondary fs-xs text-nowrap mb-1"><i class="bi bi-person me-1"></i> {{ issue.assignee || 'Unassigned' }}</span>
-                <span v-if="issue.updated" class="text-muted fs-xxs">Upd. {{ formatFriendlyDate(issue.updated, false, true) }}</span>
-                <span v-else-if="issue.created" class="text-muted fs-xxs">Cre. {{ formatFriendlyDate(issue.created, false, true) }}</span>
+                <span class="theme-text-muted fs-xs text-nowrap mb-1"><i class="bi bi-person me-1"></i> {{ issue.assignee || 'Unassigned' }}</span>
+                <span v-if="issue.updated" class="theme-text-muted fs-xxs">Upd. {{ formatFriendlyDate(issue.updated, false, true) }}</span>
+                <span v-else-if="issue.created" class="theme-text-muted fs-xxs">Cre. {{ formatFriendlyDate(issue.created, false, true) }}</span>
               </div>
             </div>
 
@@ -449,14 +449,12 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--bg-dark);
 }
 
 .jira-list-header {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  background-color: var(--bg-dark);
   border-bottom: 1px solid var(--border-primary);
   font-size: var(--fs-xxs);
   text-transform: uppercase;
@@ -468,11 +466,11 @@ onUnmounted(() => {
 }
 
 .jira-issue-row:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-hover, rgba(255, 255, 255, 0.03));
 }
 
 .jira-issue-row.selected {
-  background-color: rgba(88, 166, 255, 0.1);
+  background-color: var(--bg-selected, rgba(88, 166, 255, 0.1));
 }
 
 /* Column Widths */
@@ -529,7 +527,7 @@ onUnmounted(() => {
   border: 1px solid currentColor;
   border-radius: 4px;
   color: var(--text-muted);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-badge, rgba(255, 255, 255, 0.05));
   display: inline-block;
   white-space: nowrap;
   font-weight: 600;
@@ -541,7 +539,7 @@ onUnmounted(() => {
   padding: 2px 6px;
   border: 1px solid currentColor;
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-badge, rgba(255, 255, 255, 0.05));
   white-space: nowrap;
   display: inline-block;
   font-weight: 600;
@@ -573,7 +571,7 @@ onUnmounted(() => {
 
 .issue-actions-btn:hover {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-hover, rgba(255, 255, 255, 0.1));
 }
 
 .star-container {

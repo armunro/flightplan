@@ -1,25 +1,25 @@
 ﻿<template>
-  <div class="vh-100 d-flex flex-row overflow-hidden app-root">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden app-root', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <div id="app-content" class="tasks-app-container flex-grow-1">
         <div class="tasks-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
           <div class="sidebar-header d-flex align-items-center">
-            <h5 v-if="!sidebarCollapsed">Projects</h5>
-            <button v-if="!sidebarCollapsed" class="btn-icon ms-auto" @click="onAddProject" title="Add Project">+</button>
-            <div v-else class="mx-auto">
+            <h5 v-if="!sidebarCollapsed" class="theme-text">Projects</h5>
+            <button v-if="!sidebarCollapsed" class="btn-icon ms-auto theme-text" @click="onAddProject" title="Add Project">+</button>
+            <div v-else class="mx-auto theme-text">
               <i class="bi bi-check2-square"></i>
             </div>
           </div>
           <div class="project-list">
-            <div v-if="loading" class="sidebar-loading">
+            <div v-if="loading" class="sidebar-loading theme-text">
               <div class="spinner"></div>
               <span v-if="!sidebarCollapsed">Loading projects...</span>
             </div>
-            <div v-else-if="error" class="p-3 text-danger small">{{ error }}</div>
+            <div v-else-if="error" class="p-3 text-danger small theme-text">{{ error }}</div>
             <template v-else>
               <div v-for="project in projects" :key="project.id" 
-                 class="project-item"
+                 class="project-item theme-text"
                  :class="{ active: selectedProjectId === project.id, 'project-drag-over-before': dropProjectPosition === 'before' && dropProjectId === project.id, 'project-drag-over-after': dropProjectPosition === 'after' && dropProjectId === project.id }"
                  @click="selectedProjectId = project.id"
                  draggable="true"
@@ -32,8 +32,8 @@
               <div class="project-icon-wrapper" :style="{ backgroundColor: project.color }">
                 <i :class="[getProjectIconClass(project)]"></i>
               </div>
-              <span v-if="!sidebarCollapsed" class="project-name">{{ project.name }}</span>
-              <div v-if="!sidebarCollapsed" class="project-task-counts">
+              <span v-if="!sidebarCollapsed" class="project-name theme-text">{{ project.name }}</span>
+              <div v-if="!sidebarCollapsed" class="project-task-counts theme-text-muted">
                 <span class="project-task-count main-count" title="Tasks (excluding subtasks)">{{ getTaskCount(project, false) }}</span>
                 <span class="count-separator">/</span>
                 <span class="project-task-count sub-count" title="Total tasks (including subtasks)">{{ getTaskCount(project, true) }}</span>
@@ -52,10 +52,10 @@
 
         <div class="main-content" v-if="selectedProject">
           <div class="tasks-container">
-            <div class="controls-bar">
+            <div class="controls-bar theme-border">
               <div class="project-title-area d-flex align-items-center gap-3">
                 <ColorPicker :modelValue="selectedProject.color" @update:modelValue="onUpdateProjectColor($event, selectedProject)" size="sm" />
-                <h2 class="mb-0 text-truncate" style="max-width: 300px;">{{ selectedProject.name }}</h2>
+                <h2 class="mb-0 text-truncate theme-text" style="max-width: 300px;">{{ selectedProject.name }}</h2>
                 <div class="d-flex align-items-center gap-2">
                   <button class="btn btn-sm btn-link text-info p-0" @click="onEditProject(selectedProject)" title="Edit Project">
                     <i class="bi bi-pencil"></i>
@@ -69,27 +69,27 @@
                 <div class="bulk-info">
                   <span class="selected-count">{{ selectedTaskIds.length }} tasks selected</span>
                   <div class="btn-group ms-2">
-                    <button class="btn btn-outline-light btn-sm" @click="onSelectAll">Select All</button>
-                    <button class="btn btn-outline-light btn-sm" @click="onSelectNone">Select None</button>
+                    <button class="btn theme-btn-outline btn-sm" @click="onSelectAll">Select All</button>
+                    <button class="btn theme-btn-outline btn-sm" @click="onSelectNone">Select None</button>
                   </div>
                 </div>
                 <div class="bulk-actions">
                   <div class="btn-group">
                     <div class="dropdown d-inline-block">
-                      <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      <button class="btn btn-sm theme-btn-outline dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         Status
                       </button>
-                      <ul class="dropdown-menu dropdown-menu-dark">
+                      <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li v-for="s in selectedProject.statuses" :key="s.id">
                           <a class="dropdown-item" href="#" @click.prevent="onBulkUpdate({ statusId: s.id })">{{ s.name }}</a>
                         </li>
                       </ul>
                     </div>
                     <div class="dropdown d-inline-block">
-                      <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      <button class="btn btn-sm theme-btn-outline dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         Priority
                       </button>
-                      <ul class="dropdown-menu dropdown-menu-dark">
+                      <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li v-for="p in selectedProject.priorities" :key="p.id">
                           <a class="dropdown-item" href="#" @click.prevent="onBulkUpdate({ priorityId: p.id })">
                             <i :class="p.icon" :style="{ color: p.color }" class="me-2"></i>{{ p.name }}
@@ -98,19 +98,19 @@
                       </ul>
                     </div>
                     <div class="dropdown d-inline-block">
-                      <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      <button class="btn btn-sm theme-btn-outline dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         Type
                       </button>
-                      <ul class="dropdown-menu dropdown-menu-dark">
+                      <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
                         <li v-for="t in selectedProject.taskTypes" :key="t.id">
                           <a class="dropdown-item" href="#" @click.prevent="onBulkUpdate({ taskTypeId: t.id })">{{ t.name }}</a>
                         </li>
                       </ul>
                     </div>
-                    <button class="btn btn-sm btn-outline-light" @click="showBulkDateDialog = true" title="Bulk Edit">
+                    <button class="btn btn-sm theme-btn-outline" @click="showBulkDateDialog = true" title="Bulk Edit">
                       <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-light" @click="onShowMoveDialog()" title="Move Tasks">
+                    <button class="btn btn-sm theme-btn-outline" @click="onShowMoveDialog()" title="Move Tasks">
                       <i class="bi bi-arrow-right-short"></i>
                     </button>
                     <button class="btn btn-sm btn-danger" @click="onBulkDelete" title="Delete Tasks">
@@ -140,7 +140,8 @@
             </div>
 
             <div v-if="contextMenu.visible" 
-                 class="context-menu" 
+                 class="context-menu shadow" 
+                 :class="{ 'theme-cosmic': theme === 'Cosmic', 'theme-light': theme === 'Light' }"
                  :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
                  @click.stop>
               <template v-if="contextMenu.task">
@@ -166,6 +167,7 @@
                          :project-statuses="selectedProjectStatuses" 
                          :project-task-types="selectedProjectTaskTypes" 
                          :project-priorities="selectedProjectPriorities" 
+                         :theme="theme"
                          @close="selectedTask = null" 
                          @refresh="fetchProjects"></task-detail>
 
@@ -222,7 +224,8 @@
                     <button class="list-actions-btn" @click.stop="onListMenu($event, list.id)" title="List Actions">...</button>
                     <div v-if="listMenu.visible && listMenu.listId === list.id" 
                          class="dropdown-menu show dropdown-menu-end active-list-menu" 
-                         style="position: absolute; right: 0; top: 100%; z-index: 10000; display: block !important; background: #2d2d2d; border: 1px solid var(--border-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
+                         :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }"
+                         style="position: absolute; right: 0; top: 100%; z-index: 10000; display: block !important; border: 1px solid var(--border-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
                          @click.stop>
                       <div class="dropdown-item" @click="onRenameListFromMenu"><i class="bi bi-pencil me-2"></i>Rename List</div>
                       <div class="dropdown-item delete" @click="onDeleteListFromMenu"><i class="bi bi-trash me-2"></i>Delete List</div>
@@ -284,6 +287,7 @@
                               :grid-style="gridStyle" 
                               :is-last="index === getSortedTasks(list.tasks).length - 1"
                               :selected-task-ids="selectedTaskIds"
+                              :theme="theme"
                               @refresh="fetchProjects" 
                               @open-task="onOpenTask($event, selectedProject.statuses, selectedProject.taskTypes, selectedProject.priorities)"
                               @toggle-select="onToggleSelect"
@@ -313,6 +317,7 @@ import BulkDateDialog from './components/BulkDateDialog.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
 import ColorPicker from './components/ColorPicker.vue';
 import { addTask, moveTask, bulkMoveTasks, addList, updateList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
+import { fetchSettings } from './js/dashboard-api';
 import { findTaskInProjects, formatFriendlyDate, formatEstimate } from './js/utils';
 
 export default {
@@ -343,6 +348,8 @@ export default {
     const collapsedLists = ref(new Set());
     const loading = ref(true);
     const error = ref(null);
+    const theme = ref('Cosmic');
+    const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
     const showClosed = ref(false);
     const dropListId = ref(null);
     const dropListPosition = ref(null);
@@ -818,8 +825,16 @@ export default {
 
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/projects');
-        projects.value = await response.json();
+        const [projectsResponse, settings] = await Promise.all([
+          fetch('/api/projects'),
+          fetchSettings()
+        ]);
+        
+        projects.value = await projectsResponse.json();
+        
+        if (settings) {
+          theme.value = settings.theme || 'Cosmic';
+        }
         
         if (projects.value.length > 0) {
           if (!selectedProjectId.value || !projects.value.find(p => p.id === selectedProjectId.value)) {
@@ -1374,7 +1389,9 @@ export default {
       sidebarWidth,
       isResizingSidebar,
       sidebarStyle,
-      startSidebarResize
+      startSidebarResize,
+      theme,
+      themeClass
     };
   }
 };
@@ -1477,7 +1494,7 @@ label, .form-label {
 }
 
 .project-item.active {
-  background-color: rgba(88, 166, 255, 0.1);
+  background-color: var(--bg-selected);
   border-left-color: var(--accent-blue);
 }
 

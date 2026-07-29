@@ -1,5 +1,5 @@
 <template>
-  <div class="vh-100 d-flex flex-row overflow-hidden app-root">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden app-root', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column main-wrapper">
       <div class="github-app-container flex-grow-1">
@@ -72,10 +72,10 @@
               </div>
 
               <!-- Search Box -->
-              <div class="d-flex align-items-center gap-3 bg-darker rounded-pill px-3 py-1 border border-secondary">
+              <div class="d-flex align-items-center gap-3 theme-bg-darker rounded-pill px-3 py-1 border border-secondary">
                 <div class="search-box position-relative" style="width: 200px;">
                   <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-info opacity-75 x-small"></i>
-                  <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 text-light ps-4 search-input" placeholder="Search..." />
+                  <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 theme-text ps-4 search-input" placeholder="Search..." />
                   <button v-if="searchQuery" class="btn btn-link btn-sm position-absolute top-50 end-0 translate-middle-y me-0 p-0 text-muted" @click="searchQuery = ''">
                     <i class="bi bi-x-circle-fill"></i>
                   </button>
@@ -127,7 +127,7 @@ import Navbar from './components/Navbar.vue';
 import GitHubPrs from './components/GitHubPrs.vue';
 import GitHubPrDetail from './components/GitHubPrDetail.vue';
 import GitHubQueriesDialog from './components/GitHubQueriesDialog.vue';
-import { fetchGitHubQueries } from './js/dashboard-api';
+import { fetchGitHubQueries, fetchSettings } from './js/dashboard-api';
 
 const selectedPr = ref(null);
 const queries = ref([]);
@@ -136,6 +136,9 @@ const searchQuery = ref('');
 const showStarredOnly = ref(false);
 const loadingFilters = ref(false);
 const showQueriesDialog = ref(false);
+
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 
 // Sidebar state
 const sidebarCollapsed = ref(localStorage.getItem('githubSidebarCollapsed') === 'true');
@@ -224,9 +227,21 @@ watch(sidebarCollapsed, (val) => {
   localStorage.setItem('githubSidebarCollapsed', val);
 });
 
-onMounted(() => {
+onMounted(async () => {
   loadFilters();
+  loadSettings();
 });
+
+const loadSettings = async () => {
+  try {
+    const settings = await fetchSettings();
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
+    }
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  }
+};
 </script>
 
 <style scoped>

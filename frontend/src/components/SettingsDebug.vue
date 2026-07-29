@@ -1,15 +1,15 @@
 ﻿<template>
-  <div class="card bg-dark text-light border-secondary">
+  <div class="card theme-card">
     <div class="card-body">
-      <h5 class="card-title mb-4">Diagnostics & Debugging</h5>
+      <h5 class="card-title mb-4 theme-text">Diagnostics & Debugging</h5>
       <div class="row">
         <div class="col-md-12">
-          <div class="form-check form-switch custom-switch">
+          <div class="form-check form-switch custom-switch theme-text">
             <input class="form-check-input" type="checkbox" id="demoModeSwitch" v-model="debug.demoMode">
             <label class="form-check-label ms-2" for="demoModeSwitch">
               <strong>Enable Demo Mode</strong>
             </label>
-            <div class="text-muted small mt-1">
+            <div class="theme-text-muted small mt-1">
               When enabled, the application will use mock data instead of connecting to real APIs (Jira, GitHub, etc.). 
               Any changes made in this mode are volatile and will be lost when the application is restarted.
             </div>

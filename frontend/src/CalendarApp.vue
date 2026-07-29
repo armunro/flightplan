@@ -1,5 +1,5 @@
 <template>
-  <div class="vh-100 d-flex flex-row overflow-hidden">
+  <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column">
       <div id="app-content" class="calendar-app-container flex-grow-1" :class="{ 'editing-folders': isEditingFolders }">
@@ -85,7 +85,7 @@
           <div v-if="loading && folders.length === 0" class="d-flex align-items-center justify-content-center h-100">
             <div class="text-center">
               <div class="spinner-border text-info mb-2" role="status"></div>
-              <div class="text-light">Loading calendars...</div>
+              <div class="theme-text">Loading calendars...</div>
             </div>
           </div>
           <div v-else-if="folders.length === 0" class="d-flex align-items-center justify-content-center h-100">
@@ -112,6 +112,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import { fetchSettings } from './js/dashboard-api';
 
 const loadSetting = (key, defaultValue) => {
   const val = localStorage.getItem(key);
@@ -136,6 +137,9 @@ let sidebarStartX = 0;
 let sidebarStartWidth = 0;
 
 const fullCalendar = ref(null);
+
+const theme = ref('Cosmic');
+const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
@@ -408,10 +412,22 @@ const formatDate = (dateString, format) => {
   return date.toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
-onMounted(() => {
+onMounted(async () => {
   fetchPreferences();
   fetchCalendars();
+  loadSettings();
 });
+
+const loadSettings = async () => {
+  try {
+    const settings = await fetchSettings();
+    if (settings) {
+      theme.value = settings.theme || 'Cosmic';
+    }
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  }
+};
 </script>
 
 <style>

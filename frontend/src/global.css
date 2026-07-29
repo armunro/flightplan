@@ -1,23 +1,175 @@
 ﻿:root {
-  --bg-darker: #0d1117;
-  --bg-dark: #161b22;
-  --bg-card: #21262d;
-  --border-primary: #30363d;
-  --text-primary: #c9d1d9;
-  --text-muted: #b1bac4;
-  --accent-blue: #58a6ff;
-  --accent-green: #3fb950;
-  --accent-red: #f85149;
-  --accent-orange: #f0883e;
-  --accent-purple: #bc8cff;
-  --accent-yellow: #d29922;
-
   /* Standard Font Sizes */
   --fs-base: 0.9rem;
   --fs-lead: 0.85rem;
   --fs-sm: 0.8rem;
   --fs-xs: 0.75rem;
   --fs-xxs: 0.7rem;
+}
+
+.theme-btn-close {
+  filter: var(--btn-close-filter) !important;
+}
+
+.theme-cosmic {
+  --bg-darker: #0d1117;
+  --bg-dark: #161b22;
+  --bg-card: #21262d;
+  --border-primary: #30363d;
+  --text-primary: #c9d1d9;
+  --text-muted: #b1bac4;
+  --btn-close-filter: invert(1) grayscale(100%) brightness(200%);
+  --bg-hover: rgba(255, 255, 255, 0.03);
+  --bg-selected: rgba(88, 166, 255, 0.1);
+  --bg-badge: rgba(255, 255, 255, 0.05);
+  --accent-blue: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-red: #f85149;
+  --accent-orange: #f0883e;
+  --accent-purple: #bc8cff;
+  --accent-yellow: #d29922;
+}
+
+.theme-light {
+  --bg-darker: #f6f8fa;
+  --bg-dark: #ffffff;
+  --bg-card: #ffffff;
+  --border-primary: #d0d7de;
+  --text-primary: #24292f;
+  --text-muted: #57606a;
+  --btn-close-filter: none;
+  --bg-hover: rgba(0, 0, 0, 0.03);
+  --bg-selected: rgba(9, 105, 218, 0.1);
+  --bg-badge: rgba(0, 0, 0, 0.05);
+  --accent-blue: #0969da;
+  --accent-green: #1a7f37;
+  --accent-red: #cf222e;
+  --accent-orange: #bc4c00;
+  --accent-purple: #8250df;
+  --accent-yellow: #9a6700;
+}
+
+.theme-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-text {
+  color: var(--text-primary) !important;
+}
+
+.theme-text-muted {
+  color: var(--text-muted) !important;
+}
+
+.theme-bg-dark {
+  background-color: var(--bg-dark) !important;
+}
+
+.theme-border {
+  border-color: var(--border-primary) !important;
+}
+
+.theme-input {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.theme-badge {
+  background-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-btn-outline {
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+  background-color: transparent !important;
+}
+
+.theme-btn-outline:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-modal {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-modal-content {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-modal-header {
+  border-bottom-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-modal-footer {
+  border-top-color: var(--border-primary) !important;
+}
+
+.theme-list-group-item {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-text-primary {
+  color: var(--text-primary) !important;
+}
+
+.theme-bg-darker {
+  background-color: var(--bg-darker) !important;
+}
+
+.theme-text-muted-75 {
+  color: var(--text-muted) !important;
+  opacity: 0.75 !important;
+}
+
+.theme-text-muted-50 {
+  color: var(--text-muted) !important;
+  opacity: 0.5 !important;
+}
+
+.theme-text-light {
+  color: var(--text-primary) !important;
+}
+
+.theme-table {
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-table thead th {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-table tbody td {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.theme-table.table-hover tbody tr:hover td {
+  background-color: var(--bg-hover) !important;
+}
+
+.theme-table-dark {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-primary) !important;
 }
 
 body {
