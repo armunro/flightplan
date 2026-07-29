@@ -24,31 +24,74 @@
         <div v-else-if="data" class="dashboard-grid h-100 overflow-hidden d-flex">
           <!-- Calendar Section -->
           <div v-if="data.calendarVisible" class="dashboard-pane d-flex flex-column h-100" :style="paneStyles.calendar">
-            <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
-              <i class="bi bi-calendar3 me-2 text-info"></i>
-              <h6 class="mb-0 text-primary fs-base">Today's Events</h6>
-              <span class="badge bg-secondary ms-auto text-light small">{{ data.todaysEvents.length }}</span>
-            </div>
-            <div class="pane-body flex-grow-1 overflow-auto">
-              <div v-if="data.todaysEvents.length === 0" class="py-3 px-4 text-center text-muted small">
-                No events scheduled for today.
+            <!-- Today's Events Split -->
+            <div class="d-flex flex-column" :style="paneStyles.todayEvents">
+              <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
+                <i class="bi bi-calendar3 me-2 text-info"></i>
+                <h6 class="mb-0 text-primary fs-base">Today's Events</h6>
+                <span class="badge bg-secondary ms-auto text-light small">{{ data.todaysEvents.length }}</span>
               </div>
-              <div v-else class="list-group list-group-flush">
-                <div v-for="event in data.todaysEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-3">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div class="event-details">
-                      <div class="fw-bold fs-sm text-primary">{{ event.subject }}</div>
-                      <div class="text-muted fs-xs mt-1">
-                        <i class="bi bi-clock me-1"></i>
-                        {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
-                        <span v-if="event.location" class="ms-2">
-                          <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
-                        </span>
+              <div class="pane-body flex-grow-1 overflow-auto">
+                <div v-if="data.todaysEvents.length === 0" class="py-3 px-4 text-center text-muted small">
+                  No events scheduled for today.
+                </div>
+                <div v-else class="list-group list-group-flush">
+                  <div v-for="event in data.todaysEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-2 px-3 event-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="event-details min-width-0 d-flex gap-2">
+                        <div class="event-icon-wrapper mt-1" :style="{ color: getCalendarPref(event.calendarId).color || 'var(--accent-blue)' }">
+                          <i class="bi" :class="getCalendarPref(event.calendarId).icon || 'bi-calendar3'"></i>
+                        </div>
+                        <div class="min-width-0">
+                          <div class="fw-bold fs-xs text-primary text-truncate">{{ event.subject }}</div>
+                          <div class="text-muted fs-xxs mt-1">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
+                          </div>
+                        </div>
                       </div>
+                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2">
+                        <i class="bi bi-box-arrow-up-right fs-xs"></i>
+                      </a>
                     </div>
-                    <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue">
-                      <i class="bi bi-box-arrow-up-right"></i>
-                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horizontal Resizer -->
+            <div class="horizontal-resizer" @mousedown="startResize('calendarVertical', $event)"></div>
+
+            <!-- Upcoming Events Split -->
+            <div class="d-flex flex-column" :style="paneStyles.upcomingEvents">
+              <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
+                <i class="bi bi-calendar-range me-2 text-info"></i>
+                <h6 class="mb-0 text-primary fs-base">Upcoming Events</h6>
+                <span class="badge bg-secondary ms-auto text-light small">{{ data.upcomingEvents.length }}</span>
+              </div>
+              <div class="pane-body flex-grow-1 overflow-auto">
+                <div v-if="data.upcomingEvents.length === 0" class="py-3 px-4 text-center text-muted small">
+                  No upcoming events.
+                </div>
+                <div v-else class="list-group list-group-flush">
+                  <div v-for="event in data.upcomingEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-2 px-3 event-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="event-details min-width-0 d-flex gap-2">
+                        <div class="event-icon-wrapper mt-1" :style="{ color: getCalendarPref(event.calendarId).color || 'var(--accent-blue)' }">
+                          <i class="bi" :class="getCalendarPref(event.calendarId).icon || 'bi-calendar3'"></i>
+                        </div>
+                        <div class="min-width-0">
+                          <div class="fw-bold fs-xs text-primary text-truncate">{{ event.subject }}</div>
+                          <div class="text-muted fs-xxs mt-1">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {{ formatTaskDate(event.start) }} • {{ formatTime(event.start) }}
+                          </div>
+                        </div>
+                      </div>
+                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2">
+                        <i class="bi bi-box-arrow-up-right fs-xs"></i>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -73,12 +116,24 @@
                 <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2">
                   <div class="d-flex align-items-center w-100 px-3">
                     <div class="flex-grow-1 min-width-0">
-                      <!-- First Line: Title -->
+                      <!-- First Line: Project & List -->
+                      <div class="d-flex align-items-center gap-2 mb-1">
+                        <span v-if="task.projectName" class="d-flex align-items-center gap-1" :style="{ color: task.projectColor || 'var(--accent-blue)' }">
+                          <i v-if="task.projectIcon" class="bi fs-xxs" :class="task.projectIcon"></i>
+                          <span class="fs-xxs fw-bold text-uppercase">{{ task.projectName }}</span>
+                        </span>
+                        <span v-if="task.listName" class="text-muted fs-xxs">
+                          <i class="bi bi-chevron-right mx-1" style="font-size: 8px;"></i>
+                          {{ task.listName }}
+                        </span>
+                      </div>
+
+                      <!-- Second Line: Title -->
                       <div class="d-flex align-items-center">
                         <span class="task-title text-truncate fw-bold" :title="task.title">{{ task.title }}</span>
                       </div>
                       
-                      <!-- Second Line: Metadata -->
+                      <!-- Third Line: Metadata -->
                       <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
                         <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
                           <i :class="task.typeIcon || 'bi-briefcase'"></i>
@@ -185,6 +240,7 @@ const data = ref(null);
 
 // Resize state
 const splitWidths = ref(JSON.parse(localStorage.getItem('dashboardSplitWidths')) || [33.33, 33.33, 33.33]);
+const calendarSplitHeight = ref(Number(localStorage.getItem('calendarSplitHeight')) || 50); // Height of today's events in %
 
 const todayDate = computed(() => {
   return new Date().toLocaleDateString(undefined, { 
@@ -229,6 +285,8 @@ const paneStyles = computed(() => {
 
   return {
     calendar: { width: `${widths[0]}%`, flex: `0 0 ${widths[0]}%` },
+    todayEvents: { height: `${calendarSplitHeight.value}%`, flex: `0 0 ${calendarSplitHeight.value}%` },
+    upcomingEvents: { height: `${100 - calendarSplitHeight.value}%`, flex: `0 0 ${100 - calendarSplitHeight.value}%` },
     tasks: { width: `${widths[1]}%`, flex: `0 0 ${widths[1]}%` },
     email: { width: `${widths[2]}%`, flex: `0 0 ${widths[2]}%` }
   };
@@ -251,6 +309,28 @@ const loadData = async () => {
 
 const startResize = (resizer, e) => {
   e.preventDefault();
+  
+  if (resizer === 'calendarVertical') {
+    const container = e.target.parentElement;
+    if (!container) return;
+
+    const onMouseMove = (moveEvent) => {
+      const rect = container.getBoundingClientRect();
+      const percent = ((moveEvent.clientY - rect.top) / rect.height) * 100;
+      calendarSplitHeight.value = Math.max(10, Math.min(percent, 90));
+    };
+
+    const onMouseUp = () => {
+      localStorage.setItem('calendarSplitHeight', calendarSplitHeight.value.toString());
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return;
+  }
+
   const container = document.querySelector('.dashboard-grid');
   if (!container) return;
 
@@ -327,6 +407,16 @@ const getPriorityClass = (priority) => {
   return `priority-${priority}`;
 };
 
+const getCalendarPref = (calendarId) => {
+  if (!data.value?.calendarPreferences || !calendarId) return { color: '', icon: '' };
+  const pref = data.value.calendarPreferences[calendarId];
+  if (!pref) return { color: '', icon: '' };
+  return {
+    color: pref.color,
+    icon: pref.customIcon
+  };
+};
+
 const completeTask = async (task) => {
   try {
     await updateTask(task.id, { isCompleted: true });
@@ -387,6 +477,35 @@ onMounted(() => {
   min-width: 0;
 }
 
+.horizontal-resizer {
+  height: 4px;
+  cursor: row-resize;
+  background: transparent;
+  transition: background 0.2s;
+  z-index: 10;
+  margin-top: -2px;
+  margin-bottom: -2px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.horizontal-resizer::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--border-primary);
+  transform: translateY(-50%);
+  transition: background-color 0.2s;
+}
+
+.horizontal-resizer:hover::after, .horizontal-resizer:active::after {
+  background-color: var(--accent-blue);
+  height: 2px;
+}
+
 .pane-header {
   height: 48px;
   background-color: rgba(255, 255, 255, 0.03);
@@ -416,8 +535,18 @@ onMounted(() => {
 .priority-Low { background: #22c55e; color: white; }
 .priority-Lowest { background: #6366f1; color: white; }
 
-.task-item:hover, .email-item:hover {
+.task-item:hover, .email-item:hover, .event-item:hover {
   background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.event-icon-wrapper {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
 .spin {

@@ -20,15 +20,29 @@ public record DashboardTaskDto(
     string? StatusColor,
     string? PriorityName,
     string? PriorityColor,
-    string? PriorityIcon
+    string? PriorityIcon,
+    string? ProjectName,
+    string? ProjectColor,
+    string? ProjectIcon,
+    string? ListName
 );
 
 public record DashboardDto(
     List<DashboardTaskDto> UpcomingTasks,
     List<EmailWithRulesDto> RecentEmails,
     List<CalendarEventResponseDto> TodaysEvents,
+    List<CalendarEventResponseDto> UpcomingEvents,
     bool EmailVisible,
-    bool CalendarVisible
+    bool CalendarVisible,
+    Dictionary<string, CalendarPreferenceDto>? CalendarPreferences
+);
+
+public record CalendarPreferenceDto(
+    int Order,
+    bool Hidden,
+    string? CustomName,
+    string? CustomIcon,
+    string? Color
 );
 
 [ApiController]
@@ -39,13 +53,15 @@ public class DashboardController : ControllerBase
     private readonly IGraphService _graphService;
     private readonly IRuleService _ruleService;
     private readonly DashConfig _config;
+    private readonly IStorageService _storageService;
 
-    public DashboardController(ProjectManager projectManager, IGraphService graphService, IRuleService ruleService, DashConfig config)
+    public DashboardController(ProjectManager projectManager, IGraphService graphService, IRuleService ruleService, DashConfig config, IStorageService storageService)
     {
         _projectManager = projectManager;
         _graphService = graphService;
         _ruleService = ruleService;
         _config = config;
+        _storageService = storageService;
     }
 
     [HttpGet]
@@ -63,38 +79,40 @@ public class DashboardController : ControllerBase
         
         foreach (var project in allProjects)
         {
-            var projectTasks = new List<TaskItem>();
             foreach (var list in project.Lists)
             {
-                projectTasks.AddRange(FindAllIncompleteTasks(list.Tasks));
+                var incompleteTasks = FindAllIncompleteTasks(list.Tasks);
+                var projectUpcoming = incompleteTasks
+                    .Where(t => t.End.HasValue)
+                    .Select(t =>
+                    {
+                        var type = project.TaskTypes.FirstOrDefault(tt => tt.Id == t.TaskTypeId);
+                        var status = project.Statuses.FirstOrDefault(s => s.Id == t.StatusId);
+                        var priority = project.Priorities.FirstOrDefault(p => p.Id == t.PriorityId);
+
+                        return new DashboardTaskDto(
+                            t.Id,
+                            t.Title,
+                            t.IsCompleted,
+                            t.End,
+                            t.EstimateMinutes,
+                            type?.Name,
+                            type?.Color,
+                            type?.Icon,
+                            status?.Name,
+                            status?.Color,
+                            priority?.Name,
+                            priority?.Color,
+                            priority?.Icon,
+                            project.Name,
+                            project.Color,
+                            project.Icon,
+                            list.Name
+                        );
+                    });
+
+                allUpcoming.AddRange(projectUpcoming);
             }
-
-            var projectUpcoming = projectTasks
-                .Where(t => t.End.HasValue)
-                .Select(t =>
-                {
-                    var type = project.TaskTypes.FirstOrDefault(tt => tt.Id == t.TaskTypeId);
-                    var status = project.Statuses.FirstOrDefault(s => s.Id == t.StatusId);
-                    var priority = project.Priorities.FirstOrDefault(p => p.Id == t.PriorityId);
-
-                    return new DashboardTaskDto(
-                        t.Id,
-                        t.Title,
-                        t.IsCompleted,
-                        t.End,
-                        t.EstimateMinutes,
-                        type?.Name,
-                        type?.Color,
-                        type?.Icon,
-                        status?.Name,
-                        status?.Color,
-                        priority?.Name,
-                        priority?.Color,
-                        priority?.Icon
-                    );
-                });
-            
-            allUpcoming.AddRange(projectUpcoming);
         }
 
         var upcomingTasks = allUpcoming
@@ -128,14 +146,22 @@ public class DashboardController : ControllerBase
             }
         }
 
-        // 3. Today's events
+        // 3. Today's and Upcoming events
         var todaysEvents = new List<CalendarEventResponseDto>();
+        var upcomingEvents = new List<CalendarEventResponseDto>();
         if (calendarVisible)
         {
             try
             {
+                // Today's events
                 var events = await _graphService.GetNextEventsAsync(null, 20, today, tomorrow);
                 todaysEvents = events.Select(e => new CalendarEventResponseDto(
+                    e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId
+                )).ToList();
+
+                // Upcoming events (starting from tomorrow)
+                var upcoming = await _graphService.GetNextEventsAsync(null, 20, tomorrow, tomorrow.AddDays(7));
+                upcomingEvents = upcoming.Select(e => new CalendarEventResponseDto(
                     e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId
                 )).ToList();
             }
@@ -145,7 +171,26 @@ public class DashboardController : ControllerBase
             }
         }
 
-        return Ok(new DashboardDto(upcomingTasks, recentEmails, todaysEvents, emailVisible, calendarVisible));
+        // 4. Calendar preferences
+        Dictionary<string, CalendarPreferenceDto>? calendarPreferences = null;
+        try
+        {
+            var prefsPath = _storageService.GetCalendarPreferencesPath();
+            if (System.IO.File.Exists(prefsPath))
+            {
+                var json = System.IO.File.ReadAllText(prefsPath);
+                calendarPreferences = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, CalendarPreferenceDto>>(json, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+        }
+        catch
+        {
+            // Ignore pref errors
+        }
+
+        return Ok(new DashboardDto(upcomingTasks, recentEmails, todaysEvents, upcomingEvents, emailVisible, calendarVisible, calendarPreferences));
     }
 
     private List<TaskItem> FindAllIncompleteTasks(List<TaskItem> tasks)
