@@ -70,43 +70,43 @@
                 No upcoming deadlines.
               </div>
               <div v-else class="dashboard-tasks-grid">
-                <div class="tasks-header-row" :style="tasksGridStyle">
-                  <div class="tasks-header">Type</div>
-                  <div class="tasks-header">Title</div>
-                  <div class="tasks-header">Status</div>
-                  <div class="tasks-header">Priority</div>
-                  <div class="tasks-header">Due</div>
-                  <div class="tasks-header">Est</div>
-                </div>
-                <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row" :style="tasksGridStyle">
-                  <div class="tasks-cell type-column">
-                    <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
-                      <i :class="task.typeIcon || 'bi-briefcase'"></i>
-                      <span class="ms-1">{{ task.typeName || 'Work' }}</span>
-                    </span>
-                  </div>
-                  <div class="tasks-cell name-column">
-                    <span class="task-title text-truncate" :title="task.title">{{ task.title }}</span>
-                  </div>
-                  <div class="tasks-cell">
-                    <span class="status-badge" :style="{ color: task.statusColor || '#cccccc' }">
-                      <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
-                      <span>{{ task.statusName || 'Unknown' }}</span>
-                    </span>
-                  </div>
-                  <div class="tasks-cell">
-                    <span class="priority-badge" :style="{ color: task.priorityColor || '#ccc' }">
-                      <i :class="task.priorityIcon || 'bi-dash-lg'" style="margin-right: 4px;"></i>
-                      <span>{{ task.priorityName || '' }}</span>
-                    </span>
-                  </div>
-                  <div class="tasks-cell date-cell">
-                    <span :class="getDateColorClass(task.end, task.isCompleted)">
-                      {{ formatTaskDate(task.end) }}
-                    </span>
-                  </div>
-                  <div class="tasks-cell estimate-cell">
-                    {{ formatEstimate(task.estimateMinutes) }}
+                <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2">
+                  <div class="d-flex align-items-center w-100 px-3">
+                    <div class="flex-grow-1 min-width-0">
+                      <!-- First Line: Title -->
+                      <div class="d-flex align-items-center">
+                        <span class="task-title text-truncate fw-bold" :title="task.title">{{ task.title }}</span>
+                      </div>
+                      
+                      <!-- Second Line: Metadata -->
+                      <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
+                        <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
+                          <i :class="task.typeIcon || 'bi-briefcase'"></i>
+                          <span class="ms-1">{{ task.typeName || 'Work' }}</span>
+                        </span>
+
+                        <span class="status-badge" :style="{ color: task.statusColor || '#cccccc' }">
+                          <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
+                          <span>{{ task.statusName || 'Unknown' }}</span>
+                        </span>
+
+                        <span class="priority-badge" :style="{ color: task.priorityColor || '#ccc' }">
+                          <i :class="task.priorityIcon || 'bi-dash-lg'" style="margin-right: 4px;"></i>
+                          <span>{{ task.priorityName || '' }}</span>
+                        </span>
+
+                        <div class="ms-auto d-flex align-items-center gap-3">
+                          <span class="date-cell" :class="getDateColorClass(task.end, task.isCompleted)">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {{ formatTaskDate(task.end) }}
+                          </span>
+                          <span v-if="task.estimateMinutes" class="estimate-cell text-muted">
+                            <i class="bi bi-hourglass-split me-1"></i>
+                            {{ formatEstimate(task.estimateMinutes) }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -131,22 +131,35 @@
                 No recent emails.
               </div>
               <div v-else class="list-group list-group-flush">
-                <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2">
+                <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2 px-3">
                   <a :href="email.webLink" target="_blank" class="text-decoration-none text-reset">
-                    <div class="d-flex align-items-baseline">
-                      <span class="fw-bold fs-sm text-truncate text-primary" style="max-width: 150px;">{{ email.from }}</span>
-                      <span class="mx-2 text-muted fs-xs">—</span>
-                      <div class="d-flex align-items-center gap-1 flex-grow-1 overflow-hidden">
-                        <span v-for="rule in email.matchingRules" :key="rule.name" 
-                              class="badge rounded-pill x-small" 
-                              :style="{ backgroundColor: rule.color || 'var(--accent-blue)', color: 'white' }">
-                          {{ rule.name }}
-                        </span>
-                        <span class="fs-sm text-truncate text-accent-blue">{{ email.subject }}</span>
+                    <div class="d-flex flex-column">
+                      <!-- First Line: Subject -->
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="fs-sm fw-bold text-primary text-truncate">{{ email.subject }}</span>
                       </div>
-                      <span class="text-muted fs-xs whitespace-nowrap ms-2">{{ formatRelativeTime(email.receivedDateTime) }}</span>
+                      
+                      <!-- Second Line: Metadata -->
+                      <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <span class="fw-bold fs-xs text-truncate text-muted" style="max-width: 150px;">{{ email.from }}</span>
+                        
+                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                          <span v-for="rule in email.matchingRules" :key="rule.name" 
+                                class="badge rounded-pill x-small" 
+                                :style="{ backgroundColor: rule.color || 'var(--accent-blue)', color: 'white' }">
+                            {{ rule.name }}
+                          </span>
+                        </div>
+
+                        <span class="text-muted fs-xs whitespace-nowrap ms-auto">
+                          <i class="bi bi-clock me-1"></i>
+                          {{ formatRelativeTime(email.receivedDateTime) }}
+                        </span>
+                      </div>
+
+                      <!-- Third Line: Preview -->
+                      <div class="fs-xs text-muted text-truncate">{{ email.bodyPreview }}</div>
                     </div>
-                    <div class="fs-xs text-muted text-truncate">{{ email.bodyPreview }}</div>
                   </a>
                 </div>
               </div>
@@ -221,11 +234,6 @@ const paneStyles = computed(() => {
   };
 });
 
-const tasksGridStyle = computed(() => {
-  return {
-    gridTemplateColumns: '100px 1fr 100px 100px 100px 60px'
-  };
-});
 
 const loadData = async () => {
   loading.value = true;
@@ -459,46 +467,20 @@ onMounted(() => {
   width: 100%;
 }
 
-.tasks-header-row {
-  display: grid;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid var(--border-primary);
-  font-weight: bold;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tasks-header {
-  padding: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .tasks-row {
-  display: grid;
+  display: flex;
   background-color: transparent;
   transition: background-color 0.2s;
   border-bottom: 1px solid var(--border-primary);
-  overflow: visible;
 }
 
 .tasks-row:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
-.tasks-cell {
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  font-size: 0.8rem;
-}
-
 .task-title {
   color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 .type-badge, .status-badge, .priority-badge {
@@ -506,18 +488,13 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
-.date-cell {
-  color: var(--text-muted);
-}
-
-.estimate-cell {
-  color: var(--text-muted);
-  justify-content: flex-end;
+.date-cell, .estimate-cell {
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 /* Date colors from utils.js logic */
