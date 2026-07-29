@@ -7,8 +7,24 @@ using FlightPlan.Core.Interfaces;
 
 namespace FlightPlan.Controllers;
 
+public record DashboardTaskDto(
+    Guid Id,
+    string Title,
+    bool IsCompleted,
+    DateTime? End,
+    int EstimateMinutes,
+    string? TypeName,
+    string? TypeColor,
+    string? TypeIcon,
+    string? StatusName,
+    string? StatusColor,
+    string? PriorityName,
+    string? PriorityColor,
+    string? PriorityIcon
+);
+
 public record DashboardDto(
-    List<TaskItem> UpcomingTasks,
+    List<DashboardTaskDto> UpcomingTasks,
     List<EmailWithRulesDto> RecentEmails,
     List<CalendarEventResponseDto> TodaysEvents,
     bool EmailVisible,
@@ -43,17 +59,45 @@ public class DashboardController : ControllerBase
 
         // 1. Upcoming tasks
         var allProjects = _projectManager.GetAllProjects();
-        var allTasks = new List<TaskItem>();
+        var allUpcoming = new List<DashboardTaskDto>();
+        
         foreach (var project in allProjects)
         {
+            var projectTasks = new List<TaskItem>();
             foreach (var list in project.Lists)
             {
-                allTasks.AddRange(FindAllIncompleteTasks(list.Tasks));
+                projectTasks.AddRange(FindAllIncompleteTasks(list.Tasks));
             }
+
+            var projectUpcoming = projectTasks
+                .Where(t => t.End.HasValue)
+                .Select(t =>
+                {
+                    var type = project.TaskTypes.FirstOrDefault(tt => tt.Id == t.TaskTypeId);
+                    var status = project.Statuses.FirstOrDefault(s => s.Id == t.StatusId);
+                    var priority = project.Priorities.FirstOrDefault(p => p.Id == t.PriorityId);
+
+                    return new DashboardTaskDto(
+                        t.Id,
+                        t.Title,
+                        t.IsCompleted,
+                        t.End,
+                        t.EstimateMinutes,
+                        type?.Name,
+                        type?.Color,
+                        type?.Icon,
+                        status?.Name,
+                        status?.Color,
+                        priority?.Name,
+                        priority?.Color,
+                        priority?.Icon
+                    );
+                });
+            
+            allUpcoming.AddRange(projectUpcoming);
         }
 
-        var upcomingTasks = allTasks
-            .Where(t => t.End.HasValue)
+        var upcomingTasks = allUpcoming
             .OrderBy(t => t.End.Value)
             .Take(_config.Debug.UpcomingTasksCount)
             .ToList();
