@@ -844,22 +844,14 @@ const applyToAll = async (ruleName) => {
 };
 
 
-const createTask = async (email) => {
-  try {
-    const params = new URLSearchParams({
-      subject: email.subject,
-      sender: email.from,
-      link: email.webLink
-    });
-    const response = await fetch(`/api/tasks/from-email?${params.toString()}`, {
-      method: 'POST'
-    });
-    if (response.ok) {
-      showToast('Task created successfully!', 'success');
+const createTask = (email) => {
+  window.dispatchEvent(new CustomEvent('open-add-task-modal', {
+    detail: {
+      title: email.subject,
+      // We could add more prefill if we had project context here, 
+      // but let it use defaults/history for now as it's better than nothing
     }
-  } catch (error) {
-    console.error('Error creating task:', error);
-  }
+  }));
 };
 
 const createRuleFromEmail = async (emailId) => {

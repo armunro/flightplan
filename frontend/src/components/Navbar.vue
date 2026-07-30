@@ -105,8 +105,13 @@ const handleHotkeys = (e) => {
   }
 };
 
+const handleOpenAddTaskModal = () => {
+  isAddTaskModalOpen.value = true;
+};
+
 onMounted(async () => {
   window.addEventListener('keydown', handleHotkeys);
+  window.addEventListener('open-add-task-modal', handleOpenAddTaskModal);
   try {
     const settings = await fetchSettings();
     pageVisibilities.value = settings.pageVisibilities || [];
@@ -117,6 +122,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleHotkeys);
+  window.removeEventListener('open-add-task-modal', handleOpenAddTaskModal);
 });
 
 const toggleNavbar = () => {

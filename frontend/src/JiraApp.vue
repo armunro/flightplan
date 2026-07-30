@@ -99,7 +99,7 @@
               :showStarredOnly="showStarredOnly"
               :projects="projects"
               @select-issue="selectedIssue = $event" 
-              @create-task="openCreateTaskDialog"
+              @create-task="openQuickAddTask"
               @fetched-issue="tempSearchIssue = $event"
             />
           </div>
@@ -122,14 +122,6 @@
       @close="showQueriesDialog = false" 
       @saved="loadFilters" 
     />
-
-    <CreateJiraTaskDialog
-      v-if="showCreateTaskDialog"
-      :issue="issueToCreate"
-      :projects="projects"
-      @close="showCreateTaskDialog = false"
-      @create="handleCreateTask"
-    />
   </div>
 </template>
 
@@ -140,7 +132,6 @@ import Navbar from './components/Navbar.vue';
 import JiraIssues from './components/JiraIssues.vue';
 import JiraIssueDetail from './components/JiraIssueDetail.vue';
 import JiraQueriesDialog from './components/JiraQueriesDialog.vue';
-import CreateJiraTaskDialog from './components/CreateJiraTaskDialog.vue';
 import { fetchJiraQueries, fetchSettings } from './js/dashboard-api';
 
 const selectedIssue = ref(null);
@@ -151,8 +142,6 @@ const searchQuery = ref('');
 const showStarredOnly = ref(true);
 const loadingFilters = ref(false);
 const showQueriesDialog = ref(false);
-const showCreateTaskDialog = ref(false);
-const issueToCreate = ref(null);
 const projects = ref([]);
 
 const theme = ref('Cosmic');
@@ -203,28 +192,23 @@ const loadFilters = async () => {
   }
 };
 
-const openCreateTaskDialog = (issue) => {
-    issueToCreate.value = issue;
-    showCreateTaskDialog.value = true;
-};
-
-const handleCreateTask = async ({ issue, targetListId }) => {
-    try {
-        const response = await fetch(`/api/tasks/from-jira?key=${encodeURIComponent(issue.key)}&summary=${encodeURIComponent(issue.summary)}&link=${encodeURIComponent(issue.url)}&listId=${targetListId}`, {
-            method: 'POST'
-        });
-
-        if (response.ok) {
-            showCreateTaskDialog.value = false;
-            showToast('Task created successfully!', 'success');
-        } else {
-            const error = await response.text();
-            showToast(`Failed to create task: ${error}`, 'error');
-        }
-    } catch (error) {
-        console.error('Error creating task:', error);
-        showToast('Error creating task', 'error');
+const openQuickAddTask = (issue) => {
+    const jiraProject = projects.value.find(p => p.name.toLowerCase() === 'jira');
+    const projectId = jiraProject ? jiraProject.id : projects.value[0]?.id;
+    let listId = null;
+    
+    if (jiraProject && jiraProject.lists && jiraProject.lists.length > 0) {
+        const inbox = jiraProject.lists.find(l => l.name.toLowerCase() === 'inbox');
+        listId = inbox ? inbox.id : jiraProject.lists[0].id;
     }
+
+    window.dispatchEvent(new CustomEvent('open-add-task-modal', {
+        detail: {
+            title: `[${issue.key}] - ${issue.summary}`,
+            projectId: projectId,
+            listId: listId
+        }
+    }));
 };
 
 // Resize logic

@@ -1,6 +1,6 @@
 ﻿<template>
-  <div v-if="isOpen" class="modal-overlay" @click="close">
-    <div class="add-task-modal theme-card border-primary" @click.stop>
+  <div v-if="isOpen" class="modal-overlay">
+    <div class="add-task-modal theme-card border-primary">
       <div class="modal-header theme-border">
         <h5 class="theme-text mb-0">Quick Add Task</h5>
         <button class="close-btn theme-text-muted" @click="close">
@@ -10,14 +10,14 @@
       <div class="modal-body p-4">
         <div class="row g-3">
           <div class="col-12">
-            <label class="form-label theme-text-muted small text-uppercase fw-bold">Title</label>
-            <input v-model="form.title" type="text" class="form-control theme-input" placeholder="What needs to be done?" ref="titleInput" @keydown.enter="submit">
+            <label class="form-label theme-text-muted small text-uppercase fw-bold">Title <span class="text-danger">*</span></label>
+            <input v-model="form.title" type="text" class="form-control theme-input" :class="{ 'is-invalid': showValidation && !form.title.trim() }" placeholder="What needs to be done?" ref="titleInput" @keydown.enter="submit">
           </div>
 
           <div class="col-md-6">
-            <label class="form-label theme-text-muted small text-uppercase fw-bold">Project</label>
+            <label class="form-label theme-text-muted small text-uppercase fw-bold">Project <span class="text-danger">*</span></label>
             <div class="dropdown custom-dropdown" ref="projectDropdown">
-              <button class="btn theme-input w-100 text-start d-flex align-items-center justify-content-between" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+              <button class="btn theme-input w-100 text-start d-flex align-items-center justify-content-between" :class="{ 'is-invalid': showValidation && !form.projectId }" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                 <div v-if="selectedProject" class="d-flex align-items-center overflow-hidden">
                   <div class="project-icon-wrapper mini" :style="{ backgroundColor: selectedProject.color }">
                     <i :class="getProjectIconClass(selectedProject)"></i>
@@ -41,9 +41,9 @@
           </div>
           
           <div class="col-md-6">
-            <label class="form-label theme-text-muted small text-uppercase fw-bold">List</label>
+            <label class="form-label theme-text-muted small text-uppercase fw-bold">List <span class="text-danger">*</span></label>
             <div class="dropdown custom-dropdown" ref="listDropdown">
-              <button class="btn theme-input w-100 text-start d-flex align-items-center justify-content-between" type="button" data-bs-toggle="dropdown" :disabled="!form.projectId" data-bs-boundary="viewport">
+              <button class="btn theme-input w-100 text-start d-flex align-items-center justify-content-between" :class="{ 'is-invalid': showValidation && !form.listId }" type="button" data-bs-toggle="dropdown" :disabled="!form.projectId" data-bs-boundary="viewport">
                 <div v-if="selectedList" class="d-flex align-items-center overflow-hidden">
                   <i class="bi bi-list-task me-2 text-muted"></i>
                   <span class="text-truncate">{{ selectedList.name }}</span>
@@ -149,10 +149,12 @@
 
         </div>
       </div>
-      <div class="modal-footer theme-border p-3 d-flex justify-content-end gap-2">
+      <div class="modal-footer theme-border p-3 d-flex align-items-center">
         <button class="btn btn-subtle" @click="close">Cancel</button>
-        <button class="btn btn-outline-primary" @click="submit(true)" :disabled="!isFormValid">Create Another</button>
-        <button class="btn btn-primary px-4" @click="submit(false)" :disabled="!isFormValid">Add Task</button>
+        <div class="ms-auto d-flex gap-2">
+          <button class="btn btn-outline-primary" @click="submit(true)" :disabled="!isFormValid">Create Another</button>
+          <button class="btn btn-primary px-4" @click="submit(false)" :disabled="!isFormValid">Add Task</button>
+        </div>
       </div>
     </div>
   </div>
@@ -171,6 +173,7 @@ const emit = defineEmits(['close', 'taskAdded']);
 
 const projects = ref([]);
 const titleInput = ref(null);
+const showValidation = ref(false);
 
 const projectDropdown = ref(null);
 const listDropdown = ref(null);
@@ -322,6 +325,7 @@ const onListChange = () => {
 };
 
 const submit = async (keepOpen = false) => {
+  showValidation.value = true;
   if (!isFormValid.value) return;
   
   try {
@@ -351,6 +355,7 @@ const submit = async (keepOpen = false) => {
     
     if (keepOpen) {
       form.title = '';
+      showValidation.value = false;
       setTimeout(() => {
         if (titleInput.value) titleInput.value.focus();
       }, 100);
@@ -372,8 +377,46 @@ const handleKeyDown = (e) => {
   }
 };
 
+const handleOpenEvent = (e) => {
+  if (e.detail) {
+    const { title, projectId, listId, parentId, statusId, priorityId, start, end, estimateMinutes } = e.detail;
+    
+    // Use a small timeout to ensure fetchProjects completes if needed, 
+    // although fetchProjects is called in watch isOpen
+    setTimeout(async () => {
+      if (title !== undefined) form.title = title;
+      if (projectId !== undefined) {
+        form.projectId = projectId;
+        // Trigger project change logic to populate lists/status/priority
+        onProjectChange();
+        
+        // Then override with specific values if provided
+        if (listId !== undefined) {
+          form.listId = listId;
+          onListChange();
+        }
+        if (parentId !== undefined) form.parentId = parentId;
+        if (statusId !== undefined) form.statusId = statusId;
+        if (priorityId !== undefined) form.priorityId = priorityId;
+      }
+      
+      if (start !== undefined) form.start = start;
+      if (end !== undefined) form.end = end;
+      if (estimateMinutes !== undefined) form.estimateMinutes = estimateMinutes;
+
+      // If prefilled data makes the form valid, don't show validation errors immediately
+      if (form.title && form.projectId && form.listId) {
+        showValidation.value = false;
+      }
+      
+      if (titleInput.value) titleInput.value.focus();
+    }, 100);
+  }
+};
+
 watch(() => props.isOpen, async (newVal) => {
   if (newVal) {
+    showValidation.value = false;
     await fetchProjects();
     
     // Reset form fields
@@ -418,6 +461,11 @@ watch(() => props.isOpen, async (newVal) => {
         } else if (project.lists.length > 0) {
           form.listId = project.lists[0].id;
         }
+
+        // IMPORTANT: Ensure showValidation remains false if we prefilled valid data
+        if (form.title && form.projectId && form.listId) {
+          showValidation.value = false;
+        }
       }
     }
     
@@ -429,10 +477,12 @@ watch(() => props.isOpen, async (newVal) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('open-add-task-modal', handleOpenEvent);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('open-add-task-modal', handleOpenEvent);
 });
 </script>
 
@@ -522,6 +572,15 @@ onBeforeUnmount(() => {
   opacity: 0.6;
 }
 
+.theme-input.is-invalid {
+  border-color: #ff4444 !important;
+  box-shadow: 0 0 0 1px #ff4444 !important;
+}
+
+.theme-input.is-invalid:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 68, 68, 0.25) !important;
+}
+
 .custom-dropdown .btn {
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
@@ -582,6 +641,25 @@ onBeforeUnmount(() => {
 .project-icon-wrapper.mini i {
   color: white;
   font-size: 0.75rem;
+}
+
+.btn-subtle {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn-subtle:hover {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
 }
 
 .custom-dropdown-menu::-webkit-scrollbar {
