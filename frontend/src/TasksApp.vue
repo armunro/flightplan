@@ -1358,6 +1358,8 @@ export default {
       if (newId) {
         localStorage.setItem('selectedProjectId', JSON.stringify(newId));
       }
+      // Clear bulk selection when switching projects
+      selectedTaskIds.value = [];
     });
 
     watch(sidebarCollapsed, (newVal) => {
