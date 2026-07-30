@@ -59,20 +59,21 @@
               </div>
             </div>
 
-            <div v-else class="row g-4 pb-5 content-area">
-              <div class="col-md-12">
-                <SettingsGeneral v-if="activeCategory === 'general'" :config="config" />
-                <SettingsJira v-if="activeCategory === 'jira'" :jira="config.jira" />
-                <SettingsGitHub v-if="activeCategory === 'github'" :gitHub="config.gitHub" />
-                <SettingsMicrosoftGraph v-if="activeCategory === 'msgraph'" :microsoftGraph="config.microsoftGraph" />
-                <SettingsPageVisibility v-if="activeCategory === 'visibility'" 
-                                        :pageVisibilities="config.pageVisibilities" 
-                                        :allPages="allPages" />
-                <SettingsColorSchemes v-if="activeCategory === 'colorschemes'" 
-                                     :colorSchemes="config.colorSchemes"
-                                     :config="config" />
-                <SettingsDebug v-if="activeCategory === 'debug'" 
-                               :debug="config.debug" />
+            <div v-else class="content-area-wrapper">
+              <div class="settings-container p-4">
+                <div class="row g-4 pb-5 content-area">
+                  <div class="col-md-12">
+                    <SettingsGeneral v-if="activeCategory === 'general'" :config="config" :allPages="allPages" />
+                    <SettingsJira v-if="activeCategory === 'jira'" :jira="config.jira" />
+                    <SettingsGitHub v-if="activeCategory === 'github'" :gitHub="config.gitHub" />
+                    <SettingsMicrosoftGraph v-if="activeCategory === 'msgraph'" :microsoftGraph="config.microsoftGraph" />
+                    <div v-if="activeCategory === 'colorschemes'">
+                      <SettingsColorSchemes :colorSchemes="config.colorSchemes" :config="config" />
+                    </div>
+                    <SettingsDebug v-if="activeCategory === 'debug'" 
+                                   :debug="config.debug" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -89,7 +90,6 @@ import SettingsJira from './components/SettingsJira.vue';
 import SettingsGeneral from './components/SettingsGeneral.vue';
 import SettingsGitHub from './components/SettingsGitHub.vue';
 import SettingsMicrosoftGraph from './components/SettingsMicrosoftGraph.vue';
-import SettingsPageVisibility from './components/SettingsPageVisibility.vue';
 import SettingsColorSchemes from './components/SettingsColorSchemes.vue';
 import SettingsDebug from './components/SettingsDebug.vue';
 import { fetchSettings, updateSettings } from './js/dashboard-api';
@@ -134,7 +134,6 @@ const categories = [
   { id: 'jira', name: 'Jira', icon: 'bi bi-kanban text-white', color: '#0052CC' },
   { id: 'github', name: 'GitHub', icon: 'bi bi-github text-white', color: '#333' },
   { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft text-white', color: '#00a4ef' },
-  { id: 'visibility', name: 'Visibility', icon: 'bi bi-eye text-white', color: '#6f42c1' },
   { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette text-white', color: '#e83e8c' },
   { id: 'debug', name: 'Debug', icon: 'bi bi-bug text-white', color: '#ffc107' }
 ];
@@ -374,6 +373,29 @@ const save = async () => {
   width: 100%;
   flex-grow: 1;
   overflow-y: auto;
+}
+
+.content-area-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.settings-content-header {
+  background-color: var(--bg-dark);
+  flex-shrink: 0;
+}
+
+.category-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .card {

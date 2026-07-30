@@ -25,6 +25,7 @@
                  draggable="true"
                  @dragstart="onProjectDragStart($event, project.id)"
                  @dragover.prevent="onProjectDragOver($event, project.id)"
+                 @dragenter.prevent="onProjectDragEnter($event)"
                  @dragleave="onProjectDragLeave($event)"
                  @drop="onProjectDrop($event, project.id)"
                  @contextmenu.prevent="onProjectContextMenu($event, project)"
@@ -56,14 +57,6 @@
               <div class="project-title-area d-flex align-items-center gap-3">
                 <ColorPicker :modelValue="selectedProject.color" @update:modelValue="onUpdateProjectColor($event, selectedProject)" size="sm" />
                 <h2 class="mb-0 text-truncate theme-text" style="max-width: 300px;">{{ selectedProject.name }}</h2>
-                <div class="d-flex align-items-center gap-2">
-                  <button class="btn btn-sm btn-link text-info p-0" @click="onEditProject(selectedProject)" title="Edit Project">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button class="btn btn-sm btn-link text-info p-0" @click.prevent="onAddList(selectedProject.id)" title="Add List">
-                    <i class="bi bi-plus-lg"></i>
-                  </button>
-                </div>
               </div>
               <div v-if="selectedTaskIds.length > 0" class="bulk-action-bar">
                 <div class="bulk-info">
@@ -113,6 +106,9 @@
                     <button class="btn btn-sm theme-btn-outline" @click="onShowMoveDialog()" title="Move Tasks">
                       <i class="bi bi-arrow-right-short"></i>
                     </button>
+                    <button class="btn btn-sm theme-btn-outline" @click="showExportModal = true" title="Export Tasks">
+                      <i class="bi bi-download"></i>
+                    </button>
                     <button class="btn btn-sm btn-danger" @click="onBulkDelete" title="Delete Tasks">
                       <i class="bi bi-trash"></i>
                     </button>
@@ -120,22 +116,41 @@
                 </div>
                 <button class="btn-close btn-close-white" @click="onSelectNone"></button>
               </div>
-              <div class="dropdown">
-                <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-layout-three-columns me-1"></i>View
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
-                  <li>
-                    <a class="dropdown-item" href="#" @click.prevent="autosizeColumns">
-                      <i class="bi bi-arrows-expand-vertical me-2" style="transform: rotate(90deg); display: inline-block;"></i>Autosize Columns
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" @click.prevent="showClosed = !showClosed">
-                      <i class="bi me-2" :class="showClosed ? 'bi-eye-slash' : 'bi-eye'"></i>{{ showClosed ? 'Hide Closed Tasks' : 'Show Closed Tasks' }}
-                    </a>
-                  </li>
-                </ul>
+              <div class="d-flex align-items-center gap-2">
+                <div class="dropdown">
+                  <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear me-1"></i>Project
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                    <li>
+                      <a class="dropdown-item" href="#" @click.prevent="onEditProject(selectedProject)">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" @click.prevent="onAddList(selectedProject.id)">
+                        <i class="bi bi-plus-lg me-2"></i>Add List
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="dropdown">
+                  <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-layout-three-columns me-1"></i>View
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                    <li>
+                      <a class="dropdown-item" href="#" @click.prevent="autosizeColumns">
+                        <i class="bi bi-arrows-expand-vertical me-2" style="transform: rotate(90deg); display: inline-block;"></i>Autosize Columns
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" @click.prevent="showClosed = !showClosed">
+                        <i class="bi me-2" :class="showClosed ? 'bi-eye-slash' : 'bi-eye'"></i>{{ showClosed ? 'Hide Closed Tasks' : 'Show Closed Tasks' }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
@@ -178,10 +193,16 @@
                          @close="showMoveDialog = false"
                          @move="onMoveTask"></move-task-dialog>
 
-            <bulk-date-dialog v-if="showBulkDateDialog"
-                             :task-ids="selectedTaskIds"
-                             @close="showBulkDateDialog = false"
+            <bulk-date-dialog v-if="showBulkDateDialog" 
+                             :task-ids="selectedTaskIds" 
+                             @close="showBulkDateDialog = false" 
                              @apply="onBulkDateUpdate"></bulk-date-dialog>
+
+            <export-tasks-modal v-if="showExportModal"
+                             :tasks="selectedTasksForExport"
+                             :project="selectedProject"
+                             :theme="theme"
+                             @close="showExportModal = false"></export-tasks-modal>
 
             <project-dialog v-if="showProjectDialog"
                             :project="projectDialogData"
@@ -193,7 +214,7 @@
             <div class="project-content">
               <div v-for="list in selectedProject.lists" :key="list.id" class="list"
                    @dragover.prevent="onListDragOver($event, list.id)"
-                   @dragenter.prevent="onListDragOver($event, list.id)"
+                   @dragenter.prevent="onListDragEnter($event)"
                    @dragleave="onListDragLeave($event)"
                    @drop="onListDrop($event, list.id, selectedProject.id)"
                    :class="{
@@ -314,9 +335,10 @@ import TaskRow from './components/TaskRow.vue';
 import TaskDetail from './components/TaskDetail.vue';
 import MoveTaskDialog from './components/MoveTaskDialog.vue';
 import BulkDateDialog from './components/BulkDateDialog.vue';
+import ExportTasksModal from './components/ExportTasksModal.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
 import ColorPicker from './components/ColorPicker.vue';
-import { addTask, moveTask, bulkMoveTasks, addList, updateList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
+import { addTask, moveTask, copyTask, bulkMoveTasks, addList, updateList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
 import { fetchSettings } from './js/dashboard-api';
 import { findTaskInProjects, formatFriendlyDate, formatEstimate } from './js/utils';
 
@@ -328,6 +350,7 @@ export default {
     TaskDetail,
     MoveTaskDialog,
     BulkDateDialog,
+    ExportTasksModal,
     ProjectDialog,
     ColorPicker
   },
@@ -351,16 +374,19 @@ export default {
     const theme = ref('Cosmic');
     const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
     const showClosed = ref(false);
-    const dropListId = ref(null);
-    const dropListPosition = ref(null);
     const dropProjectId = ref(null);
+    const projectDragCounter = ref(0);
     const dropProjectPosition = ref(null);
+    const dropListId = ref(null);
+    const listDragCounter = ref(0);
+    const dropListPosition = ref(null);
     const selectedTask = ref(null);
     const selectedProjectStatuses = ref([]);
     const selectedProjectTaskTypes = ref([]);
     const selectedProjectPriorities = ref([]);
     const showMoveDialog = ref(false);
     const showBulkDateDialog = ref(false);
+    const showExportModal = ref(false);
     const moveDialogTargetTask = ref(null);
     const moveDialogTargetTaskIds = ref(null);
     const showProjectDialog = ref(false);
@@ -807,10 +833,26 @@ export default {
       if (confirm(`Delete ${selectedTaskIds.value.length} tasks?`)) {
         await bulkDeleteTasks(selectedTaskIds.value);
         selectedTaskIds.value = [];
-        lastSelectedTaskId.value = null;
         await fetchProjects();
       }
     };
+
+    const selectedTasksForExport = computed(() => {
+      if (selectedTaskIds.value.length === 0) return [];
+      const allTasks = [];
+      projects.value.forEach(p => {
+        p.lists.forEach(l => {
+          const flatten = (tasks) => {
+            tasks.forEach(t => {
+              if (selectedTaskIds.value.includes(t.id)) allTasks.push(t);
+              if (t.subtasks) flatten(t.subtasks);
+            });
+          };
+          flatten(l.tasks);
+        });
+      });
+      return allTasks;
+    });
 
     const onBulkUpdate = async (data) => {
       await bulkUpdateTasks(selectedTaskIds.value, data);
@@ -945,16 +987,29 @@ export default {
       const types = Array.from(e.dataTransfer.types).map(t => t.toLowerCase());
       if (types.includes('application/x-flightplan-project')) {
         e.preventDefault();
+        
         dropProjectId.value = projectId;
         const rect = e.currentTarget.getBoundingClientRect();
         const y = e.clientY - rect.top;
-        dropProjectPosition.value = y < rect.height / 2 ? 'before' : 'after';
+        const newPosition = y < rect.height / 2 ? 'before' : 'after';
+        if (dropProjectPosition.value !== newPosition) {
+          dropProjectPosition.value = newPosition;
+        }
       }
     };
 
-    const onProjectDragLeave = () => {
-      dropProjectId.value = null;
-      dropProjectPosition.value = null;
+    const onProjectDragEnter = (e) => {
+      const types = Array.from(e.dataTransfer.types).map(t => t.toLowerCase());
+      if (types.includes('application/x-flightplan-project')) {
+        e.preventDefault();
+      }
+    };
+
+    const onProjectDragLeave = (e) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        dropProjectId.value = null;
+        dropProjectPosition.value = null;
+      }
     };
 
     const onProjectDrop = async (e, projectId) => {
@@ -984,20 +1039,36 @@ export default {
 
       if (isDraggingTask) {
         e.preventDefault();
+        e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move';
         e.currentTarget.classList.add('drag-over');
       } else if (isDraggingList) {
         e.preventDefault();
+        
         dropListId.value = listId;
         const rect = e.currentTarget.getBoundingClientRect();
         const y = e.clientY - rect.top;
-        dropListPosition.value = y < rect.height / 2 ? 'before' : 'after';
+        const newPosition = y < rect.height / 2 ? 'before' : 'after';
+        if (dropListPosition.value !== newPosition) {
+          dropListPosition.value = newPosition;
+        }
+      }
+    };
+
+    const onListDragEnter = (e) => {
+      const types = Array.from(e.dataTransfer.types).map(t => t.toLowerCase());
+      const isDraggingTask = types.includes('application/x-flightplan-task');
+      const isDraggingList = types.includes('application/x-flightplan-list');
+      if (isDraggingTask || isDraggingList) {
+        e.preventDefault();
       }
     };
 
     const onListDragLeave = (e) => {
-      e.currentTarget.classList.remove('drag-over');
-      dropListId.value = null;
-      dropListPosition.value = null;
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        e.currentTarget.classList.remove('drag-over');
+        dropListId.value = null;
+        dropListPosition.value = null;
+      }
     };
 
     const onListDrop = async (e, listId, projectId) => {
@@ -1014,7 +1085,11 @@ export default {
 
       if (taskId) {
         if (!e.target.closest('.task-row')) {
-          await moveTask(taskId, listId, null);
+          if (e.ctrlKey) {
+            await copyTask(taskId, listId, null);
+          } else {
+            await moveTask(taskId, listId, null);
+          }
           fetchProjects();
         }
       } else if (draggedListId && draggedListId !== listId) {
@@ -1236,11 +1311,13 @@ export default {
     onMounted(async () => {
       await fetchProjects();
       window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('task-added', fetchProjects);
     });
     onUnmounted(() => {
       document.removeEventListener('click', closeContextMenu);
       document.removeEventListener('click', closeListMenu);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('task-added', fetchProjects);
     });
 
     const toggleListCollapse = (listId) => {
@@ -1370,6 +1447,8 @@ export default {
       onSelectNone,
       onBulkDelete,
       onBulkUpdate,
+      showExportModal,
+      selectedTasksForExport,
       isListAllSelected,
       toggleListSelectAll,
       isAllSelected,
@@ -1474,7 +1553,6 @@ label, .form-label {
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.2s, padding 0.3s ease;
   border-left: 3px solid transparent;
   min-width: 0;
   overflow: hidden;
@@ -1499,11 +1577,9 @@ label, .form-label {
 }
 
 .project-item .project-icon-wrapper {
-  transition: transform 0.2s;
 }
 
 .project-item:hover .project-icon-wrapper {
-  transform: scale(1.1);
 }
 
 .project-icon-wrapper {
@@ -1752,6 +1828,11 @@ label, .form-label {
   transition: all 0.2s;
   display: flex;
   align-items: center;
+  cursor: pointer;
+}
+
+.btn-subtle:not(.dropdown-toggle)::after {
+  display: none;
 }
 
 .btn-subtle:hover, .btn-subtle[aria-expanded="true"] {

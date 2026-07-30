@@ -22,24 +22,24 @@ export async function updateTask(taskId, data) {
     }
 }
 
-export async function addTask(listId, title, statusId = null) {
+export async function addTask(listId, title, statusId = null, priorityId = null, data = {}) {
     try {
         await fetch('/api/tasks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ listId, title, priority: 2, statusId })
+            body: JSON.stringify({ listId, title, priority: 2, statusId, priorityId, ...data })
         });
     } catch (error) {
         console.error('Error adding task:', error);
     }
 }
 
-export async function addSubtask(taskId, title, statusId = null) {
+export async function addSubtask(taskId, title, statusId = null, priorityId = null, data = {}) {
     try {
         const response = await fetch(`/api/tasks/${taskId}/subtasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, priority: 2, statusId })
+            body: JSON.stringify({ title, priority: 2, statusId, priorityId, ...data })
         });
         if (response.ok) return await response.json();
     } catch (error) {
@@ -110,6 +110,23 @@ export async function moveTask(taskId, targetListId, targetTaskId, position = 'I
         }
     } catch (error) {
         console.error('Error moving task:', error);
+    }
+}
+
+export async function copyTask(taskId, targetListId, targetTaskId, position = 'Inside') {
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/copy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetListId, targetTaskId, position })
+        });
+        if (!response.ok) {
+            console.error('Error copying task:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Error details:', errorText);
+        }
+    } catch (error) {
+        console.error('Error copying task:', error);
     }
 }
 

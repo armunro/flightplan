@@ -1,8 +1,8 @@
 ﻿<template>
   <div class="card theme-card border-primary">
     <div class="card-body">
-      <div class="row">
-        <div class="col-md-12 mb-3">
+      <div class="row g-4">
+        <div class="col-md-12">
           <label class="form-label theme-text">Theme</label>
           <div class="d-flex gap-3 mt-2">
             <div 
@@ -23,6 +23,23 @@
             </div>
           </div>
         </div>
+
+        <div class="col-md-12">
+          <hr class="theme-border my-4">
+          <label class="form-label theme-text mb-1">Module Visibility</label>
+          <p class="small theme-text-muted mb-3">Choose which modules are visible in the sidebar and dashboard.</p>
+          <div class="row">
+            <div v-for="page in allPages" :key="page.id" class="col-md-4 col-6 mb-2">
+              <div class="form-check form-switch theme-text">
+                <input class="form-check-input" type="checkbox" 
+                       :id="'vis-' + page.id" 
+                       :checked="getPageVisibility(page.id)"
+                       @change="togglePageVisibility(page.id)">
+                <label class="form-check-label" :for="'vis-' + page.id">{{ page.name }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -33,8 +50,30 @@ const props = defineProps({
   config: {
     type: Object,
     required: true
+  },
+  allPages: {
+    type: Array,
+    required: true
   }
 });
+
+const getPageVisibility = (id) => {
+  if (!props.config.pageVisibilities) return true;
+  const page = props.config.pageVisibilities.find(p => p.id === id);
+  return page ? page.visible : true;
+};
+
+const togglePageVisibility = (id) => {
+  if (!props.config.pageVisibilities) {
+    props.config.pageVisibilities = [];
+  }
+  let page = props.config.pageVisibilities.find(p => p.id === id);
+  if (!page) {
+    page = { id, visible: true };
+    props.config.pageVisibilities.push(page);
+  }
+  page.visible = !page.visible;
+};
 </script>
 
 <style scoped>

@@ -668,6 +668,64 @@ public class ProjectManager
         return null;
     }
 
+    public TaskItem? CopyTask(Guid taskId, Guid? targetListId, Guid? targetTaskId, MovePosition position = MovePosition.Inside)
+    {
+        var sourceTask = FindTaskById(taskId);
+        if (sourceTask == null) return null;
+
+        var newTask = DeepCopyTask(sourceTask);
+
+        if (targetTaskId.HasValue)
+        {
+            var targetTask = FindTaskById(targetTaskId.Value);
+            if (targetTask != null)
+            {
+                if (position == MovePosition.Inside)
+                {
+                    targetTask.Subtasks.Add(newTask);
+                    return newTask;
+                }
+                else
+                {
+                    return InsertNearTask(targetTask, newTask, position);
+                }
+            }
+        }
+
+        if (targetListId.HasValue)
+        {
+            var list = FindListById(targetListId.Value);
+            if (list != null)
+            {
+                list.Tasks.Add(newTask);
+                return newTask;
+            }
+        }
+
+        return null;
+    }
+
+    private TaskItem DeepCopyTask(TaskItem source)
+    {
+        var newTask = new TaskItem
+        {
+            Id = Guid.NewGuid(),
+            Title = source.Title,
+            Description = source.Description,
+            IsCompleted = source.IsCompleted,
+            StatusId = source.StatusId,
+            TaskTypeId = source.TaskTypeId,
+            PriorityId = source.PriorityId,
+            Priority = source.Priority,
+            EstimateMinutes = source.EstimateMinutes,
+            Link = source.Link,
+            Start = source.Start,
+            End = source.End,
+            Subtasks = source.Subtasks.Select(DeepCopyTask).ToList()
+        };
+        return newTask;
+    }
+
     private bool IsDescendant(TaskItem parent, Guid taskId)
     {
         if (parent.Id == taskId) return true;

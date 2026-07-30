@@ -4,6 +4,7 @@
              draggable="true" 
              @dragstart="onDragStart"
              @dragover="onDragOver"
+             @dragenter="onDragEnter"
              @dragleave="onDragLeave"
              @drop="onDrop"
              @contextmenu.prevent="onContextMenu"
@@ -142,7 +143,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import DateTimeSelector from './DateTimeSelector.vue';
-import { updateTask, addSubtask, addSibling, deleteTask, moveTask } from '../js/tasks-api';
+import { updateTask, addSubtask, addSibling, deleteTask, moveTask, copyTask } from '../js/tasks-api';
 import { formatFriendlyDate, formatForInput, formatToISO, formatEstimate, parseEstimate } from '../js/utils';
 
 export default {
@@ -211,6 +212,8 @@ export default {
             return priority ? priority.color : '#ccc';
         };
 
+        const dragCounter = ref(0);
+
         const onDragStart = (e) => {
             console.log('[DEBUG_LOG] Task drag start:', props.task.id);
             // Use unique MIME types to avoid ambiguity during dragover
@@ -218,7 +221,7 @@ export default {
             e.dataTransfer.setData(taskMimeType, props.task.id);
             e.dataTransfer.setData('text/plain', props.task.id);
             e.dataTransfer.setData('taskId', props.task.id); // Keeping for backward compatibility if needed
-            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.effectAllowed = 'copyMove';
             e.stopPropagation();
         };
 
@@ -241,21 +244,38 @@ export default {
             e.preventDefault();
             e.stopPropagation();
             
+            e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move';
+            
             const rect = e.currentTarget.getBoundingClientRect();
             const y = e.clientY - rect.top;
             const threshold = rect.height / 3;
 
+            let newPosition = null;
             if (y < threshold) {
-                dropPosition.value = 'before';
-            } else if (y > rect.height - threshold) {
-                dropPosition.value = 'after';
+                newPosition = 'before';
+            } else if (y > rect.height - threshold && props.isLast) {
+                newPosition = 'after';
             } else {
-                dropPosition.value = 'inside';
+                newPosition = 'inside';
+            }
+
+            if (dropPosition.value !== newPosition) {
+                dropPosition.value = newPosition;
             }
         };
 
+        const onDragEnter = (e) => {
+            const types = Array.from(e.dataTransfer.types);
+            const isDraggingTask = types.some(t => t.toLowerCase() === 'application/x-flightplan-task' || t.toLowerCase() === 'taskid');
+            if (!isDraggingTask) return;
+            
+            e.preventDefault();
+        };
+
         const onDragLeave = (e) => {
-            dropPosition.value = null;
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                dropPosition.value = null;
+            }
         };
 
         const onDrop = async (e) => {
@@ -281,7 +301,11 @@ export default {
 
             if (draggedTaskId && draggedTaskId !== props.task.id) {
                 const positionMap = { 'before': 'Before', 'after': 'After', 'inside': 'Inside' };
-                await moveTask(draggedTaskId, null, props.task.id, positionMap[pos]);
+                if (e.ctrlKey) {
+                    await copyTask(draggedTaskId, null, props.task.id, positionMap[pos]);
+                } else {
+                    await moveTask(draggedTaskId, null, props.task.id, positionMap[pos]);
+                }
                 emit('refresh');
             }
         };
@@ -686,8 +710,6 @@ export default {
     font-size: var(--fs-sm);
 }
 
-.drag-over-before { border-top: 2px solid var(--accent-blue) !important; }
-.drag-over-after { border-bottom: 2px solid var(--accent-blue) !important; }
 .drag-over-inside { background-color: rgba(88, 166, 255, 0.1) !important; }
 
 .action-link-icon {

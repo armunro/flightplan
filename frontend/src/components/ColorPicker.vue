@@ -196,12 +196,12 @@ const swatchStyle = computed(() => ({
   width: swatchSize.value,
   height: swatchSize.value,
   borderRadius: '4px',
-  border: '1px solid var(--bs-border-color)',
+  border: 'none',
   position: 'relative',
   cursor: 'pointer',
   flexShrink: 0,
-  padding: '2px',
-  background: 'var(--bs-dark)'
+  padding: '0',
+  background: 'transparent'
 }));
 </script>
 
@@ -213,7 +213,7 @@ const swatchStyle = computed(() => ({
 .selected-color-indicator {
   width: 100%;
   height: 100%;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .color-text-input {

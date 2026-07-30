@@ -153,7 +153,7 @@
                         <div class="ms-auto d-flex align-items-center gap-3">
                           <span class="date-cell" :class="getDateColorClass(task.end, task.isCompleted)">
                             <i class="bi bi-calendar3 me-1"></i>
-                            {{ formatTaskDate(task.end) }}
+                            {{ formatRelativeTime(task.end) }}
                           </span>
                           <span v-if="task.estimateMinutes" class="estimate-cell text-muted">
                             <i class="bi bi-hourglass-split me-1"></i>
@@ -439,6 +439,11 @@ const completeTask = async (task) => {
 
 onMounted(() => {
   loadData();
+  window.addEventListener('task-added', loadData);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('task-added', loadData);
 });
 </script>
 
@@ -638,9 +643,9 @@ onMounted(() => {
 }
 
 /* Date colors from utils.js logic */
-.date-overdue { color: #f85149 !important; font-weight: bold; }
-.date-today { color: #d29922 !important; font-weight: bold; }
-.date-this-week { color: #3fb950 !important; }
-.date-muted { color: var(--text-muted) !important; }
+.date-overdue { color: #ff4d4d !important; font-weight: 500; }
+.date-today { color: #ffcc00 !important; }
+.date-this-week { color: #3399ff !important; }
+.date-muted { color: var(--text-muted) !important; opacity: 0.7; }
 
 </style>

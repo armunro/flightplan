@@ -42,7 +42,18 @@
         </div>
 
         <div v-if="activeTab === 'statuses'" class="tab-content">
-          <div v-for="(status, index) in form.statuses" :key="status.id || index" class="item-edit-row mb-2">
+          <div v-for="(status, index) in form.statuses" 
+               :key="status.id || index" 
+               class="item-edit-row mb-2"
+               draggable="true"
+               @dragstart="onDragStart($event, index, 'statuses')"
+               @dragover.prevent="onDragOver($event, index)"
+               @dragleave="onDragLeave"
+               @drop="onDrop($event, index, 'statuses')"
+               :class="{ 'drag-over': dragOverIndex === index && dragOverTab === 'statuses' }">
+            <div class="drag-handle">
+              <i class="bi bi-grip-vertical"></i>
+            </div>
             <input v-model="status.name" type="text" class="form-control form-control-sm" placeholder="Status Name">
             <ColorPicker v-model="status.color" size="sm" palette-placement="top-start" />
             <div class="form-check">
@@ -59,7 +70,18 @@
         </div>
 
         <div v-if="activeTab === 'types'" class="tab-content">
-          <div v-for="(type, index) in form.taskTypes" :key="type.id || index" class="item-edit-row mb-2">
+          <div v-for="(type, index) in form.taskTypes" 
+               :key="type.id || index" 
+               class="item-edit-row mb-2"
+               draggable="true"
+               @dragstart="onDragStart($event, index, 'taskTypes')"
+               @dragover.prevent="onDragOver($event, index)"
+               @dragleave="onDragLeave"
+               @drop="onDrop($event, index, 'taskTypes')"
+               :class="{ 'drag-over': dragOverIndex === index && dragOverTab === 'taskTypes' }">
+            <div class="drag-handle">
+              <i class="bi bi-grip-vertical"></i>
+            </div>
             <input v-model="type.name" type="text" class="form-control form-control-sm" placeholder="Type Name">
             <input v-model="type.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-tag)">
             <ColorPicker v-model="type.color" size="sm" palette-placement="top-start" />
@@ -73,7 +95,18 @@
         </div>
 
         <div v-if="activeTab === 'priorities'" class="tab-content">
-          <div v-for="(priority, index) in form.priorities" :key="priority.id || index" class="item-edit-row mb-2">
+          <div v-for="(priority, index) in form.priorities" 
+               :key="priority.id || index" 
+               class="item-edit-row mb-2"
+               draggable="true"
+               @dragstart="onDragStart($event, index, 'priorities')"
+               @dragover.prevent="onDragOver($event, index)"
+               @dragleave="onDragLeave"
+               @drop="onDrop($event, index, 'priorities')"
+               :class="{ 'drag-over': dragOverIndex === index && dragOverTab === 'priorities' }">
+            <div class="drag-handle">
+              <i class="bi bi-grip-vertical"></i>
+            </div>
             <input v-model="priority.name" type="text" class="form-control form-control-sm" placeholder="Priority Name">
             <input v-model="priority.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-dash-lg)">
             <ColorPicker v-model="priority.color" size="sm" palette-placement="top-start" />
@@ -126,6 +159,10 @@ export default {
   setup(props, { emit }) {
     const nameInput = ref(null);
     const activeTab = ref('general');
+    const dragOverIndex = ref(-1);
+    const dragOverTab = ref(null);
+    const draggedIndex = ref(-1);
+
     const form = reactive({
       name: props.project.name || '',
       icon: props.project.icon || 'bi-folder',
@@ -210,10 +247,55 @@ export default {
       return icon.startsWith('bi-') ? `bi ${icon}` : `bi bi-${icon}`;
     });
 
+    const onDragStart = (e, index, tab) => {
+      draggedIndex.value = index;
+      dragOverTab.value = tab;
+      e.dataTransfer.effectAllowed = 'move';
+      // Set a ghost image if needed, or just rely on default
+    };
+
+    const onDragOver = (e, index) => {
+      dragOverIndex.value = index;
+    };
+
+    const onDragLeave = () => {
+      dragOverIndex.value = -1;
+    };
+
+    const onDrop = (e, index, tab) => {
+      if (draggedIndex.value === -1 || draggedIndex.value === index || dragOverTab.value !== tab) {
+        dragOverIndex.value = -1;
+        dragOverTab.value = null;
+        draggedIndex.value = -1;
+        return;
+      }
+
+      const list = form[tab];
+      const item = list.splice(draggedIndex.value, 1)[0];
+      list.splice(index, 0, item);
+
+      // Update orders if they exist
+      list.forEach((item, i) => {
+        if (Object.prototype.hasOwnProperty.call(item, 'order')) {
+          item.order = i;
+        }
+      });
+
+      dragOverIndex.value = -1;
+      dragOverTab.value = null;
+      draggedIndex.value = -1;
+    };
+
     return {
       form,
       nameInput,
       activeTab,
+      dragOverIndex,
+      dragOverTab,
+      onDragStart,
+      onDragOver,
+      onDragLeave,
+      onDrop,
       addStatus,
       removeStatus,
       addTaskType,
@@ -331,6 +413,31 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.item-edit-row.drag-over {
+  background-color: rgba(88, 166, 255, 0.1);
+  outline: 1px dashed var(--accent-blue);
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  padding: 0 4px;
+}
+
+.item-edit-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.item-edit-row[draggable="true"]:active .drag-handle {
+  cursor: grabbing;
 }
 
 .form-color-input-sm {

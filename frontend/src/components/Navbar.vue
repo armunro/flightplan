@@ -1,6 +1,8 @@
 <template>
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
     <Toast />
+    <HelpModal :isOpen="isHelpModalOpen" @close="isHelpModalOpen = false" />
+    <AddTaskModal :isOpen="isAddTaskModalOpen" @close="isAddTaskModalOpen = false" />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
         <i class="bi bi-send brand-icon"></i>
@@ -14,7 +16,7 @@
           <a :href="item.href" 
              class="nav-link" 
              :class="{ active: currentPath === item.id }"
-             :title="isCollapsed ? item.name : ''">
+             :title="isCollapsed ? item.name + ' (Alt+' + item.hotkey.toUpperCase() + ')' : 'Alt+' + item.hotkey.toUpperCase()">
             <i class="bi" :class="item.icon"></i>
             <span v-if="!isCollapsed" class="nav-text">{{ item.name }}</span>
           </a>
@@ -26,10 +28,18 @@
       <div class="footer-links">
         <ul class="nav nav-pills flex-column">
           <li class="nav-item">
+            <button class="nav-link help-link w-100" 
+                    @click="isHelpModalOpen = true"
+                    :title="isCollapsed ? 'Help (Alt+/)' : 'Alt+/'">
+              <i class="bi bi-question-circle"></i>
+              <span v-if="!isCollapsed" class="nav-text">Help</span>
+            </button>
+          </li>
+          <li class="nav-item">
             <a href="/Settings" 
                class="nav-link settings-link" 
                :class="{ active: currentPath === 'settings' }"
-               :title="isCollapsed ? 'Settings' : ''">
+               :title="isCollapsed ? 'Settings (Alt+,)' : 'Alt+,'">
               <i class="bi bi-gear"></i>
               <span v-if="!isCollapsed" class="nav-text">Settings</span>
             </a>
@@ -46,14 +56,57 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import Toast from './Toast.vue';
+import HelpModal from './HelpModal.vue';
+import AddTaskModal from './AddTaskModal.vue';
 import { fetchSettings } from '../js/dashboard-api';
 
 const isCollapsed = ref(localStorage.getItem('navbar-collapsed') === 'true');
 const pageVisibilities = ref([]);
+const isHelpModalOpen = ref(false);
+const isAddTaskModalOpen = ref(false);
+
+const handleHotkeys = (e) => {
+  // Use Alt key for navigation hotkeys to avoid common conflicts
+  if (!e.altKey) return;
+
+  // Ignore if user is typing in an input or textarea
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+    return;
+  }
+
+  const hotkeyMap = {
+    'd': '/Dashboard',
+    'j': '/Jira',
+    'g': '/Github',
+    't': '/Tasks',
+    's': '/ScheduledTasks',
+    'e': '/Email',
+    'c': '/Calendar',
+    'l': '/Links',
+    'n': '/Notepad',
+    'b': '/Debug', // 'b' for debug/bug
+    ',': '/Settings', // Alt + , is a common settings shortcut
+    '/': 'help',
+    'a': 'add-task'
+  };
+
+  const action = hotkeyMap[e.key.toLowerCase()];
+  if (action === 'help') {
+    e.preventDefault();
+    isHelpModalOpen.value = !isHelpModalOpen.value;
+  } else if (action === 'add-task') {
+    e.preventDefault();
+    isAddTaskModalOpen.value = !isAddTaskModalOpen.value;
+  } else if (action) {
+    e.preventDefault();
+    window.location.href = action;
+  }
+};
 
 onMounted(async () => {
+  window.addEventListener('keydown', handleHotkeys);
   try {
     const settings = await fetchSettings();
     pageVisibilities.value = settings.pageVisibilities || [];
@@ -62,22 +115,26 @@ onMounted(async () => {
   }
 });
 
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleHotkeys);
+});
+
 const toggleNavbar = () => {
   isCollapsed.value = !isCollapsed.value;
   localStorage.setItem('navbar-collapsed', isCollapsed.value);
 };
 
 const navItems = [
-  { id: 'dashboard', name: 'Dashboard', href: '/Dashboard', icon: 'bi-speedometer2' },
-  { id: 'jira', name: 'Jira', href: '/Jira', icon: 'bi-kanban' },
-  { id: 'github', name: 'Github', href: '/Github', icon: 'bi-github' },
-  { id: 'tasks', name: 'Tasks', href: '/Tasks', icon: 'bi-check2-square' },
-  { id: 'scheduledtasks', name: 'Schedules', href: '/ScheduledTasks', icon: 'bi-clock-history' },
-  { id: 'email', name: 'Email', href: '/Email', icon: 'bi-envelope' },
-  { id: 'calendar', name: 'Calendar', href: '/Calendar', icon: 'bi-calendar3' },
-  { id: 'links', name: 'Links', href: '/Links', icon: 'bi-link-45deg' },
-  { id: 'notepad', name: 'Notepad', href: '/Notepad', icon: 'bi-sticky' },
-  { id: 'debug', name: 'Debug', href: '/Debug', icon: 'bi-bug' },
+  { id: 'dashboard', name: 'Dashboard', href: '/Dashboard', icon: 'bi-speedometer2', hotkey: 'd' },
+  { id: 'jira', name: 'Jira', href: '/Jira', icon: 'bi-kanban', hotkey: 'j' },
+  { id: 'github', name: 'Github', href: '/Github', icon: 'bi-github', hotkey: 'g' },
+  { id: 'tasks', name: 'Tasks', href: '/Tasks', icon: 'bi-check2-square', hotkey: 't' },
+  { id: 'scheduledtasks', name: 'Schedules', href: '/ScheduledTasks', icon: 'bi-clock-history', hotkey: 's' },
+  { id: 'email', name: 'Email', href: '/Email', icon: 'bi-envelope', hotkey: 'e' },
+  { id: 'calendar', name: 'Calendar', href: '/Calendar', icon: 'bi-calendar3', hotkey: 'c' },
+  { id: 'links', name: 'Links', href: '/Links', icon: 'bi-link-45deg', hotkey: 'l' },
+  { id: 'notepad', name: 'Notepad', href: '/Notepad', icon: 'bi-sticky', hotkey: 'n' },
+  { id: 'debug', name: 'Debug', href: '/Debug', icon: 'bi-bug', hotkey: 'b' },
 ];
 
 const visibleNavItems = computed(() => {
@@ -259,6 +316,18 @@ const currentPath = computed(() => {
 
 .settings-link {
   margin: 0;
+}
+
+.help-link {
+  background: none;
+  border: none;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.help-link:focus {
+  outline: none;
 }
 
 /* Hide scrollbar for nav-sections */
