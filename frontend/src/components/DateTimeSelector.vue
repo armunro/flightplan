@@ -408,7 +408,6 @@ const parseDate = (input) => {
 
 .display-value.placeholder {
   color: var(--text-muted);
-  font-style: italic;
   opacity: 0.7;
 }
 
@@ -482,7 +481,6 @@ const parseDate = (input) => {
 .preview-date {
   color: var(--text-muted);
   font-size: 0.75rem;
-  font-style: italic;
 }
 
 .input-group .form-control {
