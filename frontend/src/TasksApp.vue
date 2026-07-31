@@ -328,37 +328,37 @@
                       <div v-if="colId === 'type'" class="tasks-header sortable type-column" @click="toggleSort('taskTypeId')">
                         Type
                         <span v-if="sortBy === 'taskTypeId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(0, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(0, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'name'" class="tasks-header sortable name-column" @click="toggleSort('title')">
                         Task Name
                         <span v-if="sortBy === 'title'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(1, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(1, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'status'" class="tasks-header sortable status-column" @click="toggleSort('statusId')">
                         Status
                         <span v-if="sortBy === 'statusId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(2, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(2, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'priority'" class="tasks-header sortable priority-column" @click="toggleSort('priority')">
                         Priority
                         <span v-if="sortBy === 'priority'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(3, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(3, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'start'" class="tasks-header sortable start-column" @click="toggleSort('start')">
                         Start
                         <span v-if="sortBy === 'start'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(4, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(4, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'end'" class="tasks-header sortable end-column" @click="toggleSort('end')">
                         End
                         <span v-if="sortBy === 'end'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(5, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(5, $event)" @click.stop></div>
                       </div>
                       <div v-else-if="colId === 'estimate'" class="tasks-header sortable estimate-column" @click="toggleSort('estimateMinutes')">
                         Est
                         <span v-if="sortBy === 'estimateMinutes'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                        <div class="resizer" @mousedown.stop="startResize(6, $event)"></div>
+                        <div class="resizer" @mousedown.stop="startResize(6, $event)" @click.stop></div>
                       </div>
                       <div v-else><!-- Fallback for unknown columns --></div>
                     </template>
@@ -654,7 +654,7 @@ export default {
       };
 
       const padding = 16; // Padding and extra space (8px left + 8px right)
-      const datePadding = 32; // Extra padding for date columns
+      const datePadding = 48; // Increased padding for date columns to prevent "..." truncation
       const newWidths = [...columnWidths.value];
 
       // 0: Type
@@ -726,8 +726,8 @@ export default {
         selectedProject.value.lists.forEach(l => {
           if (l.tasks) checkDates(l.tasks);
         });
-        if (isColumnVisible('start')) newWidths[4] = Math.ceil(maxDateWidth + datePadding);
-        if (isColumnVisible('end')) newWidths[5] = Math.ceil(maxDateWidth + datePadding);
+        if (isColumnVisible('start')) newWidths[4] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
+        if (isColumnVisible('end')) newWidths[5] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
       }
 
       // 6: Est
