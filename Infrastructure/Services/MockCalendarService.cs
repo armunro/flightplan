@@ -35,7 +35,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddHours(9).AddMinutes(15), TimeSpan.Zero),
                 "Microsoft Teams",
                 "https://example.com/teams/meeting1",
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-2",
@@ -44,7 +45,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddHours(15), TimeSpan.Zero),
                 "Conference Room A",
                 "https://example.com/teams/meeting2",
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-3",
@@ -53,7 +55,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(1).AddHours(11).AddMinutes(30), TimeSpan.Zero),
                 "Office",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-4",
@@ -62,7 +65,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(2).AddHours(11), TimeSpan.Zero),
                 "Remote",
                 "https://example.com/zoom/meeting3",
-                "cal-2"
+                "cal-2",
+                false
             ),
             new CalendarEventDto(
                 "ev-5",
@@ -71,7 +75,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(3).AddHours(9), TimeSpan.Zero),
                 "Smile Clinic",
                 null,
-                "cal-3"
+                "cal-3",
+                false
             ),
             new CalendarEventDto(
                 "ev-6",
@@ -80,7 +85,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddHours(12), TimeSpan.Zero),
                 "Meeting Room 4",
                 "https://example.com/teams/meeting-review",
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-7",
@@ -89,7 +95,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(1).AddHours(18), TimeSpan.Zero),
                 "City Gym",
                 null,
-                "cal-3"
+                "cal-3",
+                false
             ),
             new CalendarEventDto(
                 "ev-8",
@@ -98,7 +105,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(4).AddHours(13).AddMinutes(30), TimeSpan.Zero),
                 "The Italian Place",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-9",
@@ -107,16 +115,28 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(5).AddHours(16), TimeSpan.Zero),
                 "Online",
                 "https://example.com/training/js",
-                "cal-6"
+                "cal-6",
+                false
             ),
             new CalendarEventDto(
                 "ev-10",
                 "Sarah's Birthday",
-                new DateTimeOffset(today.AddDays(6), TimeSpan.Zero),
-                new DateTimeOffset(today.AddDays(6).AddHours(23).AddMinutes(59), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(1), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(2), TimeSpan.Zero),
                 "All Day",
                 null,
-                "cal-7"
+                "cal-7",
+                true
+            ),
+            new CalendarEventDto(
+                "ev-10.1",
+                "Multi-day All Day Event",
+                new DateTimeOffset(today.AddDays(2), TimeSpan.Zero),
+                new DateTimeOffset(today.AddDays(5), TimeSpan.Zero),
+                "Everywhere",
+                null,
+                "cal-7",
+                true
             ),
             new CalendarEventDto(
                 "ev-11",
@@ -125,7 +145,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(2).AddHours(15), TimeSpan.Zero),
                 "Teams",
                 "https://example.com/interview/123",
-                "cal-5"
+                "cal-5",
+                false
             ),
             new CalendarEventDto(
                 "ev-12",
@@ -134,7 +155,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(1).AddHours(10).AddMinutes(30), TimeSpan.Zero),
                 "Room 2",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-13",
@@ -143,7 +165,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(3).AddHours(17), TimeSpan.Zero),
                 "Boardroom",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-14",
@@ -152,7 +175,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(2).AddHours(9), TimeSpan.Zero),
                 "Local Garage",
                 null,
-                "cal-3"
+                "cal-3",
+                false
             ),
             new CalendarEventDto(
                 "ev-15",
@@ -161,7 +185,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(7).AddHours(17), TimeSpan.Zero),
                 "Offsite Location",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             ),
             new CalendarEventDto(
                 "ev-16",
@@ -170,7 +195,8 @@ public class MockCalendarService : ICalendarService
                 new DateTimeOffset(today.AddDays(3).AddHours(22), TimeSpan.Zero),
                 "Production Environment",
                 null,
-                "cal-1"
+                "cal-1",
+                false
             )
         };
     }
@@ -192,13 +218,13 @@ public class MockCalendarService : ICalendarService
         if (start.HasValue)
         {
             var startOffset = new DateTimeOffset(start.Value);
-            query = query.Where(e => e.Start >= startOffset);
+            query = query.Where(e => e.End >= startOffset);
         }
 
         if (end.HasValue)
         {
             var endOffset = new DateTimeOffset(end.Value);
-            query = query.Where(e => e.End <= endOffset);
+            query = query.Where(e => e.Start <= endOffset);
         }
 
         return Task.FromResult(query.OrderBy(e => e.Start).Take(top).ToList().AsEnumerable());

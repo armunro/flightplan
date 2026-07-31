@@ -156,13 +156,27 @@ public class DashboardController : ControllerBase
                 // Today's events
                 var events = await _graphService.GetNextEventsAsync(null, 20, today, tomorrow);
                 todaysEvents = events.Select(e => new CalendarEventResponseDto(
-                    e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId
+                    e.Id, 
+                    e.Subject, 
+                    e.IsAllDay ? e.Start.ToString("yyyy-MM-dd") : e.Start.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                    e.IsAllDay ? e.End.ToString("yyyy-MM-dd") : e.End.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                    e.Location ?? "", 
+                    e.WebLink, 
+                    e.CalendarId, 
+                    e.IsAllDay
                 )).ToList();
 
                 // Upcoming events (starting from tomorrow)
                 var upcoming = await _graphService.GetNextEventsAsync(null, 20, tomorrow, tomorrow.AddDays(7));
                 upcomingEvents = upcoming.Select(e => new CalendarEventResponseDto(
-                    e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId
+                    e.Id, 
+                    e.Subject, 
+                    e.IsAllDay ? e.Start.ToString("yyyy-MM-dd") : e.Start.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                    e.IsAllDay ? e.End.ToString("yyyy-MM-dd") : e.End.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                    e.Location ?? "", 
+                    e.WebLink, 
+                    e.CalendarId, 
+                    e.IsAllDay
                 )).ToList();
             }
             catch (Exception ex)

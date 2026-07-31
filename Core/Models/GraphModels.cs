@@ -25,4 +25,5 @@ public record CalendarEventDto(
     DateTimeOffset End,
     string? Location,
     string? WebLink = null,
-    string? CalendarId = null);
+    string? CalendarId = null,
+    bool IsAllDay = false);

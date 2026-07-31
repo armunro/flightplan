@@ -49,7 +49,7 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
                     {
                         config.Headers.Add("Prefer", "outlook.timezone=\"UTC\"");
                         config.QueryParameters.Top = top;
-                        config.QueryParameters.Select = new[] { "id", "subject", "start", "end", "location", "webLink" };
+                        config.QueryParameters.Select = new[] { "id", "subject", "start", "end", "location", "webLink", "isAllDay" };
                         config.QueryParameters.StartDateTime = startDateTime;
                         config.QueryParameters.EndDateTime = endDateTime;
                     });
@@ -63,7 +63,8 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
                         e.End?.DateTime != null ? DateTimeOffset.Parse(e.End.DateTime) : DateTimeOffset.MinValue,
                         e.Location?.DisplayName ?? "",
                         e.WebLink,
-                        calendarId
+                        calendarId,
+                        e.IsAllDay ?? false
                     )));
                 }
             }
@@ -81,7 +82,7 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
                                 {
                                     config.Headers.Add("Prefer", "outlook.timezone=\"UTC\"");
                                     config.QueryParameters.Top = top;
-                                    config.QueryParameters.Select = new[] { "id", "subject", "start", "end", "location", "webLink" };
+                                    config.QueryParameters.Select = new[] { "id", "subject", "start", "end", "location", "webLink", "isAllDay" };
                                     config.QueryParameters.StartDateTime = startDateTime;
                                     config.QueryParameters.EndDateTime = endDateTime;
                                 });
@@ -95,7 +96,8 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
                                     e.End?.DateTime != null ? DateTimeOffset.Parse(e.End.DateTime) : DateTimeOffset.MinValue,
                                     e.Location?.DisplayName ?? "",
                                     e.WebLink,
-                                    cal.Id
+                                    cal.Id,
+                                    e.IsAllDay ?? false
                                 )));
                             }
                         }

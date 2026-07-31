@@ -4,7 +4,7 @@ using FlightPlan.Services;
 
 namespace FlightPlan.Controllers;
 
-public record CalendarEventResponseDto(string Id, string Subject, DateTimeOffset Start, DateTimeOffset End, string Location, string? WebLink, string? CalendarId);
+public record CalendarEventResponseDto(string Id, string Subject, string Start, string End, string Location, string? WebLink, string? CalendarId, bool IsAllDay);
 
 [ApiController]
 [Route("api/[controller]")]
@@ -23,7 +23,15 @@ public class CalendarController : ControllerBase
     public async Task<IActionResult> GetEvents([FromQuery] string? calendarId = null, [FromQuery] int top = 20, [FromQuery] DateTime? start = null, [FromQuery] DateTime? end = null)
     {
         var events = await _graphService.GetNextEventsAsync(calendarId, top, start, end);
-        var result = events.Select(e => new CalendarEventResponseDto(e.Id, e.Subject, e.Start, e.End, e.Location ?? "", e.WebLink, e.CalendarId));
+        var result = events.Select(e => new CalendarEventResponseDto(
+            e.Id, 
+            e.Subject, 
+            e.IsAllDay ? e.Start.ToString("yyyy-MM-dd") : e.Start.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+            e.IsAllDay ? e.End.ToString("yyyy-MM-dd") : e.End.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+            e.Location ?? "", 
+            e.WebLink, 
+            e.CalendarId, 
+            e.IsAllDay));
         return Ok(result);
     }
 

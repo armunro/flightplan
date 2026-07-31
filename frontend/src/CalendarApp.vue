@@ -162,7 +162,10 @@ const calendarOptions = computed(() => ({
   firstDay: 1, // Monday
   editable: false,
   selectable: true,
-  dayMaxEvents: true
+  dayMaxEvents: true,
+  allDaySlot: true,
+  allDayMaintainDuration: true,
+  timeZone: 'local',
 }));
 
 const sidebarStyle = computed(() => {
@@ -276,11 +279,32 @@ async function fetchEventsForFullCalendar(info, successCallback, failureCallback
         const data = await response.json();
         const mappedEvents = data.map(ev => {
           const calendarId = ev.calendarId || 'default';
+          let start = ev.start;
+          let end = ev.end;
+          
+          if (ev.isAllDay) {
+            // FullCalendar all-day events are exclusive of the end date.
+            // MS Graph all-day events typically end at midnight of the day AFTER the last day.
+            // For example, a one-day all-day event on July 30: Start=2024-07-30T00:00, End=2024-07-31T00:00.
+            // If MS Graph provides these, FullCalendar should handle them correctly as-is.
+            // However, if the dates are not exactly midnight, or if MS Graph is giving the last day's midnight, 
+            // we might need to adjust.
+            // Let's ensure they are treated as simple date strings to avoid timezone shifts.
+            
+            // We expect ev.start and ev.end to be 'yyyy-MM-dd' from the backend for all-day events.
+            start = ev.start;
+            end = ev.end;
+            
+            // Log for debugging (optional in production but helpful now)
+            // console.log(`All-day event: ${ev.subject}, Start: ${start}, End: ${end}`);
+          }
+          
           return {
             id: ev.id,
             title: ev.subject,
-            start: ev.start,
-            end: ev.end,
+            start: start,
+            end: end,
+            allDay: ev.isAllDay,
             url: ev.webLink,
             extendedProps: {
               location: ev.location,
