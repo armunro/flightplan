@@ -5,8 +5,8 @@ using System.Text.Json;
 
 namespace FlightPlan.Controllers;
 
-public record TaskCreateRequest(Guid ListId, string Title, string? Description, TaskPriority Priority, Guid? StatusId, int EstimateMinutes = 0, DateTime? Start = null, DateTime? End = null, string? Link = null, Guid? TaskTypeId = null, Guid? PriorityId = null);
-public record TaskUpdateRequest(string? Title, string? Description, TaskPriority? Priority, Guid? StatusId, bool? IsCompleted, int? EstimateMinutes = null, DateTime? Start = null, DateTime? End = null, string? Link = null, Guid? TaskTypeId = null, Guid? PriorityId = null);
+public record TaskCreateRequest(Guid ListId, string Title, string? Description, TaskPriority Priority, Guid? StatusId, int EstimateMinutes = 0, DateTime? Start = null, DateTime? End = null, string? Link = null, Guid? TaskTypeId = null, Guid? PriorityId = null, List<CustomFieldValue>? CustomFieldValues = null);
+public record TaskUpdateRequest(string? Title, string? Description, TaskPriority? Priority, Guid? StatusId, bool? IsCompleted, int? EstimateMinutes = null, DateTime? Start = null, DateTime? End = null, string? Link = null, Guid? TaskTypeId = null, Guid? PriorityId = null, List<CustomFieldValue>? CustomFieldValues = null);
 public record TaskBulkUpdateRequest(List<Guid> TaskIds);
 public record TaskBulkDeleteRequest(List<Guid> TaskIds);
 public record TaskMoveRequest(Guid? TargetListId, Guid? TargetTaskId, ProjectManager.MovePosition? Position);
@@ -171,6 +171,11 @@ public class TasksController : ControllerBase
 
         var task = _pm.AddTaskToList(list, request.Title, request.Description, request.Priority, request.StatusId, request.EstimateMinutes, request.Start, request.End, request.Link, request.TaskTypeId);
         if (request.PriorityId.HasValue) task.PriorityId = request.PriorityId;
+        if (request.CustomFieldValues != null)
+        {
+            task.CustomFieldValues.Clear();
+            task.CustomFieldValues.AddRange(request.CustomFieldValues);
+        }
         
         _pm.SaveProjectsToYaml(_storageService.GetProjectsPath());
         return Ok(task);
@@ -184,6 +189,11 @@ public class TasksController : ControllerBase
 
         var subtask = _pm.AddSubtaskToTask(parentTask, request.Title, request.Description, request.Priority, request.StatusId, request.EstimateMinutes, request.Start, request.End, request.Link, request.TaskTypeId);
         if (request.PriorityId.HasValue) subtask.PriorityId = request.PriorityId;
+        if (request.CustomFieldValues != null)
+        {
+            subtask.CustomFieldValues.Clear();
+            subtask.CustomFieldValues.AddRange(request.CustomFieldValues);
+        }
 
         _pm.SaveProjectsToYaml(_storageService.GetProjectsPath());
         return Ok(subtask);
@@ -215,7 +225,8 @@ public class TasksController : ControllerBase
                     EstimateMinutes = request.EstimateMinutes, 
                     Start = request.Start, 
                     End = request.End, 
-                    Link = request.Link 
+                    Link = request.Link,
+                    CustomFieldValues = request.CustomFieldValues ?? new List<CustomFieldValue>()
                 };
                     list.Tasks.Insert(index + 1, sibling);
                     break;
@@ -250,7 +261,8 @@ public class TasksController : ControllerBase
                     EstimateMinutes = request.EstimateMinutes, 
                     Start = request.Start, 
                     End = request.End, 
-                    Link = request.Link 
+                    Link = request.Link,
+                    CustomFieldValues = request.CustomFieldValues ?? new List<CustomFieldValue>()
                 };
                 task.Subtasks.Insert(index + 1, sibling);
                 return sibling;
@@ -262,36 +274,25 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{taskId:guid}")]
-    public IActionResult Update(Guid taskId, [FromBody] JsonElement requestBody)
+    public IActionResult Update(Guid taskId, TaskUpdateRequest request)
     {
         var existing = _pm.FindTaskById(taskId);
         if (existing == null) return NotFound("Task not found");
 
-        string title = requestBody.TryGetProperty("title", out var titleProp) && titleProp.ValueKind != JsonValueKind.Null ? titleProp.GetString() ?? existing.Title : existing.Title;
-        string? description = requestBody.TryGetProperty("description", out var descProp) ? (descProp.ValueKind == JsonValueKind.Null ? null : descProp.GetString()) : existing.Description;
-        TaskPriority priority = requestBody.TryGetProperty("priority", out var prioProp) && prioProp.ValueKind == JsonValueKind.Number ? (TaskPriority)prioProp.GetInt32() : existing.Priority;
-        Guid? statusId = requestBody.TryGetProperty("statusId", out var statusProp) ? (statusProp.ValueKind == JsonValueKind.Null ? null : (statusProp.TryGetGuid(out var sId) ? sId : null)) : existing.StatusId;
-        bool isCompleted = requestBody.TryGetProperty("isCompleted", out var compProp) && (compProp.ValueKind == JsonValueKind.True || compProp.ValueKind == JsonValueKind.False) ? compProp.GetBoolean() : existing.IsCompleted;
-        int estimateMinutes = requestBody.TryGetProperty("estimateMinutes", out var estProp) && estProp.ValueKind == JsonValueKind.Number ? estProp.GetInt32() : existing.EstimateMinutes;
-        DateTime? start = requestBody.TryGetProperty("start", out var startProp) ? (startProp.ValueKind == JsonValueKind.Null ? null : (startProp.TryGetDateTime(out var st) ? st : null)) : existing.Start;
-        DateTime? end = requestBody.TryGetProperty("end", out var endProp) ? (endProp.ValueKind == JsonValueKind.Null ? null : (endProp.TryGetDateTime(out var en) ? en : null)) : existing.End;
-        string? link = requestBody.TryGetProperty("link", out var linkProp) ? (linkProp.ValueKind == JsonValueKind.Null ? null : linkProp.GetString()) : existing.Link;
-        Guid? taskTypeId = requestBody.TryGetProperty("taskTypeId", out var typeProp) ? (typeProp.ValueKind == JsonValueKind.Null ? null : (typeProp.TryGetGuid(out var ttId) ? ttId : null)) : existing.TaskTypeId;
-        Guid? priorityId = requestBody.TryGetProperty("priorityId", out var prioIdProp) ? (prioIdProp.ValueKind == JsonValueKind.Null ? null : (prioIdProp.TryGetGuid(out var pId) ? pId : null)) : existing.PriorityId;
-
         var task = _pm.UpdateTask(
             taskId,
-            title,
-            description,
-            priority,
-            statusId,
-            isCompleted,
-            estimateMinutes,
-            start,
-            end,
-            link,
-            taskTypeId,
-            priorityId);
+            request.Title ?? existing.Title,
+            request.Description ?? existing.Description,
+            request.Priority ?? existing.Priority,
+            request.StatusId ?? existing.StatusId,
+            request.IsCompleted ?? existing.IsCompleted,
+            request.EstimateMinutes ?? existing.EstimateMinutes,
+            request.Start ?? existing.Start,
+            request.End ?? existing.End,
+            request.Link ?? existing.Link,
+            request.TaskTypeId ?? existing.TaskTypeId,
+            request.PriorityId ?? existing.PriorityId,
+            request.CustomFieldValues ?? existing.CustomFieldValues);
 
         if (task == null) return NotFound("Task not found");
 
@@ -330,6 +331,36 @@ public class TasksController : ControllerBase
             Guid? taskTypeId = requestBody.TryGetProperty("taskTypeId", out var typeProp) ? (typeProp.ValueKind == JsonValueKind.Null ? null : (typeProp.TryGetGuid(out var ttId) ? ttId : null)) : existing.TaskTypeId;
             Guid? priorityId = requestBody.TryGetProperty("priorityId", out var prioIdProp) ? (prioIdProp.ValueKind == JsonValueKind.Null ? null : (prioIdProp.TryGetGuid(out var pId) ? pId : null)) : existing.PriorityId;
 
+            List<CustomFieldValue>? customFieldValues = null;
+            if (requestBody.TryGetProperty("customFieldValues", out var cfvProp) && cfvProp.ValueKind == JsonValueKind.Array)
+            {
+                customFieldValues = new List<CustomFieldValue>();
+                foreach (var item in cfvProp.EnumerateArray())
+                {
+                    if (item.TryGetProperty("definitionId", out var defIdProp) && defIdProp.TryGetGuid(out var defId))
+                    {
+                        var valObj = new CustomFieldValue { DefinitionId = defId };
+                        if (item.TryGetProperty("value", out var valProp))
+                        {
+                            valObj.Value = valProp.ValueKind == JsonValueKind.Null ? null : valProp.GetString();
+                        }
+                        if (item.TryGetProperty("values", out var valsProp) && valsProp.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var v in valsProp.EnumerateArray())
+                            {
+                                var s = v.GetString();
+                                if (s != null) valObj.Values.Add(s);
+                            }
+                        }
+                        customFieldValues.Add(valObj);
+                    }
+                }
+            }
+            else
+            {
+                customFieldValues = existing.CustomFieldValues;
+            }
+
             _pm.UpdateTask(
                 taskId,
                 title,
@@ -342,7 +373,8 @@ public class TasksController : ControllerBase
                 end,
                 link,
                 taskTypeId,
-                priorityId);
+                priorityId,
+                customFieldValues);
         }
 
         _pm.SaveProjectsToYaml(_storageService.GetProjectsPath());

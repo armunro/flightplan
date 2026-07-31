@@ -25,4 +25,5 @@ public class TaskItem
     public DateTime? Start { get; set; }
     public DateTime? End { get; set; }
     public List<TaskItem> Subtasks { get; set; } = new();
+    public List<CustomFieldValue> CustomFieldValues { get; set; } = new();
 }

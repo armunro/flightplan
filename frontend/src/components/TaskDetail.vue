@@ -114,7 +114,51 @@
             @blur="onUpdateDescription" 
             class="form-control description-textarea"
             placeholder="Enter description..."
+            rows="3"
           ></textarea>
+        </div>
+
+        <!-- Custom Fields -->
+        <div v-if="projectCustomFields && projectCustomFields.length > 0" class="custom-fields-section mt-4">
+          <h4 class="theme-text-muted small text-uppercase fw-bold mb-3 border-bottom pb-2">Custom Fields</h4>
+          <div class="row g-3">
+            <div v-for="field in projectCustomFields" :key="field.id" class="col-md-6">
+              <div class="detail-field mb-0">
+                <label>{{ field.name }}</label>
+                <!-- <div class="small text-muted mb-1">Type: {{ field.type }} | ID: {{ field.id }}</div> -->
+                
+                <!-- Text Field -->
+                <input v-if="field.type === 0 || field.type === 'Text'" 
+                       type="text" 
+                       :value="getCustomFieldValue(field.id)"
+                       @input="e => onUpdateLocalText(field.id, e.target.value)"
+                       @blur="saveTask"
+                       class="form-control" 
+                       placeholder="Enter text...">
+                
+                <!-- Single Select -->
+                <select v-else-if="field.type === 1 || field.type === 'SingleSelect'" 
+                        :value="getCustomFieldValue(field.id)"
+                        @change="e => updateCustomFieldValue(field.id, e.target.value)"
+                        class="form-select custom-field-select">
+                  <option value="">-- Select --</option>
+                  <option v-for="opt in (field.options || [])" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+
+                <!-- Multi Select -->
+                <div v-else-if="field.type === 2 || field.type === 'MultiSelect'" class="multi-select-container p-2 border rounded custom-field-multi-select">
+                  <div v-for="opt in (field.options || [])" :key="opt" class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           :id="field.id + '-' + opt"
+                           :checked="isMultiSelectChecked(field.id, opt)"
+                           @change="e => toggleMultiSelectValue(field.id, opt, e.target.checked)">
+                    <label class="form-check-label" :for="field.id + '-' + opt">{{ opt }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -133,7 +177,7 @@ export default {
   components: {
     DateTimeSelector
   },
-  props: ['task', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'theme'],
+  props: ['task', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'projectCustomFields', 'theme'],
   emits: ['close', 'refresh'],
   setup(props, { emit }) {
     const localTask = ref({ 
@@ -148,6 +192,12 @@ export default {
 
     onMounted(() => {
       window.addEventListener('keydown', onKeyDown);
+      /*
+      console.log('[DEBUG_LOG] TaskDetail mounted', {
+        task: props.task,
+        projectCustomFields: props.projectCustomFields
+      });
+      */
     });
 
     onUnmounted(() => {
@@ -213,7 +263,57 @@ export default {
       await saveTask();
     };
 
+    const onUpdateLocalText = async (definitionId, value) => {
+      // Just update local state, don't save yet to avoid spamming
+      if (!localTask.value.customFieldValues) localTask.value.customFieldValues = [];
+      let valObj = localTask.value.customFieldValues.find(v => v.definitionId === definitionId);
+      if (valObj) {
+        valObj.value = value;
+      } else {
+        localTask.value.customFieldValues.push({ definitionId, value, values: [] });
+      }
+    };
+
     const onUpdateField = async () => {
+      await saveTask();
+    };
+
+    const getCustomFieldValue = (definitionId) => {
+      if (!localTask.value.customFieldValues) return '';
+      const valObj = localTask.value.customFieldValues.find(v => v.definitionId === definitionId);
+      return valObj ? valObj.value : '';
+    };
+
+    const updateCustomFieldValue = async (definitionId, value) => {
+      if (!localTask.value.customFieldValues) localTask.value.customFieldValues = [];
+      let valObj = localTask.value.customFieldValues.find(v => v.definitionId === definitionId);
+      if (valObj) {
+        valObj.value = value;
+      } else {
+        localTask.value.customFieldValues.push({ definitionId, value, values: [] });
+      }
+      await saveTask();
+    };
+
+    const isMultiSelectChecked = (definitionId, opt) => {
+      if (!localTask.value.customFieldValues) return false;
+      const valObj = localTask.value.customFieldValues.find(v => v.definitionId === definitionId);
+      return valObj ? valObj.values.includes(opt) : false;
+    };
+
+    const toggleMultiSelectValue = async (definitionId, opt, checked) => {
+      if (!localTask.value.customFieldValues) localTask.value.customFieldValues = [];
+      let valObj = localTask.value.customFieldValues.find(v => v.definitionId === definitionId);
+      if (!valObj) {
+        valObj = { definitionId, value: null, values: [] };
+        localTask.value.customFieldValues.push(valObj);
+      }
+      
+      if (checked) {
+        if (!valObj.values.includes(opt)) valObj.values.push(opt);
+      } else {
+        valObj.values = valObj.values.filter(v => v !== opt);
+      }
       await saveTask();
     };
 
@@ -302,12 +402,17 @@ export default {
       onUpdatePriorityId,
       onUpdateStatus,
       onUpdateTaskType,
+      onUpdateLocalText,
       getTaskTypeName,
       getTaskTypeColor,
       getTaskTypeIcon,
       onUpdateField,
       copyLink,
-      launchLink
+      launchLink,
+      getCustomFieldValue,
+      updateCustomFieldValue,
+      isMultiSelectChecked,
+      toggleMultiSelectValue
     };
   }
 };
@@ -374,6 +479,37 @@ export default {
 .task-detail-body {
   padding: 20px;
   overflow-y: auto;
+}
+
+.custom-field-select {
+  background: var(--bg-darker);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.custom-field-multi-select {
+  background: var(--bg-darker);
+  border-color: var(--border-primary) !important;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.custom-field-multi-select .form-check-label {
+  color: var(--text-primary);
+}
+
+.multi-select-container {
+  background: var(--bg-darker);
+  border-color: var(--border-primary) !important;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.multi-select-container .form-check-label {
+  text-transform: none;
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: var(--text-primary);
 }
 
 .detail-field {
@@ -492,7 +628,7 @@ export default {
 .priority-Highest { }
 .priority-Critical { background-color: #ff0000; color: #fff; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 .description-textarea {
-  min-height: 200px;
+  min-height: 100px;
   resize: vertical;
 }
 </style>

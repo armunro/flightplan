@@ -11,4 +11,5 @@ public class Project
     public List<TaskType> TaskTypes { get; set; } = new();
     public List<ProjectPriority> Priorities { get; set; } = new();
     public List<TaskList> Lists { get; set; } = new();
+    public List<CustomFieldDefinition> CustomFields { get; set; } = new();
 }

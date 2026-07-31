@@ -11,6 +11,7 @@
           <button v-if="!isNew" class="tab-btn" :class="{ active: activeTab === 'statuses' }" @click="activeTab = 'statuses'">Statuses</button>
           <button v-if="!isNew" class="tab-btn" :class="{ active: activeTab === 'types' }" @click="activeTab = 'types'">Task Types</button>
           <button v-if="!isNew" class="tab-btn" :class="{ active: activeTab === 'priorities' }" @click="activeTab = 'priorities'">Priorities</button>
+          <button v-if="!isNew" class="tab-btn" :class="{ active: activeTab === 'customFields' }" @click="activeTab = 'customFields'">Custom Fields</button>
         </div>
 
         <div v-if="activeTab === 'general'" class="tab-content">
@@ -118,6 +119,51 @@
             <i class="bi bi-plus-lg"></i> Add Priority
           </button>
         </div>
+
+        <div v-if="activeTab === 'customFields'" class="tab-content">
+          <div v-for="(field, index) in form.customFields" 
+               :key="field.id || index" 
+               class="custom-field-edit-block mb-3 p-2 border rounded border-secondary">
+            <div class="d-flex gap-2 mb-2 align-items-center">
+              <div class="drag-handle" 
+                   draggable="true"
+                   @dragstart="onDragStart($event, index, 'customFields')"
+                   @dragover.prevent="onDragOver($event, index)"
+                   @dragleave="onDragLeave"
+                   @drop="onDrop($event, index, 'customFields')"
+                   :class="{ 'drag-over': dragOverIndex === index && dragOverTab === 'customFields' }">
+                <i class="bi bi-grip-vertical"></i>
+              </div>
+              <input v-model="field.name" type="text" class="form-control form-control-sm" placeholder="Field Name">
+              <select v-model="field.type" class="form-select form-select-sm w-auto" @change="onFieldTypeChange(field)">
+                <option :value="0">Text</option>
+                <option :value="1">Single Select</option>
+                <option :value="2">Multi Select</option>
+                <option value="Text" hidden>Text</option>
+                <option value="SingleSelect" hidden>Single Select</option>
+                <option value="MultiSelect" hidden>Multi Select</option>
+              </select>
+              <button class="btn btn-sm btn-outline-danger" @click="removeCustomField(index)" title="Remove Field">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            
+            <div v-if="field.type === 1 || field.type === 2" class="ms-4 mt-2">
+              <label class="form-label small text-muted">Options (one per line)</label>
+              <textarea 
+                v-model="field.optionsText"
+                @input="field.options = field.optionsText.split('\n')"
+                @blur="onBlurOptions(field)"
+                class="form-control form-control-sm" 
+                rows="3" 
+                placeholder="Option 1&#10;Option 2">
+              </textarea>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-primary mt-2" @click="addCustomField">
+            <i class="bi bi-plus-lg"></i> Add Custom Field
+          </button>
+        </div>
       </div>
       <div class="modal-footer">
         <div class="footer-left">
@@ -170,7 +216,17 @@ export default {
       description: props.project.description || '',
       statuses: props.project.statuses ? JSON.parse(JSON.stringify(props.project.statuses)) : [],
       taskTypes: props.project.taskTypes ? JSON.parse(JSON.stringify(props.project.taskTypes)) : [],
-      priorities: props.project.priorities ? JSON.parse(JSON.stringify(props.project.priorities)) : []
+      priorities: props.project.priorities ? JSON.parse(JSON.stringify(props.project.priorities)) : [],
+      customFields: (props.project.customFields || []).map(f => {
+        const type = typeof f.type === 'string' 
+          ? (f.type === 'Text' ? 0 : f.type === 'SingleSelect' ? 1 : f.type === 'MultiSelect' ? 2 : parseInt(f.type, 10) || 0)
+          : f.type;
+        return {
+          ...JSON.parse(JSON.stringify(f)),
+          type,
+          optionsText: (f.options || []).join('\n')
+        };
+      })
     });
 
     const onKeyDown = (e) => {
@@ -229,9 +285,76 @@ export default {
       form.priorities.splice(index, 1);
     };
 
+    const addCustomField = () => {
+      form.customFields.push({
+        id: crypto.randomUUID(),
+        name: 'New Field',
+        type: 0, // Text
+        options: [],
+        optionsText: ''
+      });
+    };
+
+    const removeCustomField = (index) => {
+      form.customFields.splice(index, 1);
+    };
+
+    const onFieldTypeChange = (field) => {
+      // Convert string types to numbers if they come from the select
+      if (field.type === 'Text') field.type = 0;
+      else if (field.type === 'SingleSelect') field.type = 1;
+      else if (field.type === 'MultiSelect') field.type = 2;
+
+      if (field.type === 0) {
+        field.options = [];
+        field.optionsText = '';
+      } else if (!field.options) {
+        field.options = [];
+        field.optionsText = '';
+      }
+    };
+
+    const onBlurOptions = (field) => {
+      field.options = field.optionsText.split('\n').filter(o => o.trim());
+      field.optionsText = field.options.join('\n');
+    };
+
     const onSave = () => {
       if (form.name.trim()) {
+        // Ensure options are correctly synchronized and initialized
+        form.customFields.forEach(f => {
+          if (f.type === 1 || f.type === 2 || f.type === 'SingleSelect' || f.type === 'MultiSelect') {
+            if (f.optionsText !== undefined) {
+              f.options = f.optionsText.split('\n').filter(o => o.trim());
+            }
+          }
+          if (!f.options) f.options = [];
+          
+          // Ensure type is a number for the backend DTO
+          if (typeof f.type === 'string') {
+            if (f.type === 'Text') f.type = 0;
+            else if (f.type === 'SingleSelect') f.type = 1;
+            else if (f.type === 'MultiSelect') f.type = 2;
+            else f.type = parseInt(f.type, 10) || 0;
+          }
+        });
+        
+        // Strip out frontend-only properties like optionsText before sending
         const data = JSON.parse(JSON.stringify(form));
+        if (data.customFields) {
+          data.customFields.forEach(f => {
+            delete f.optionsText;
+          });
+        }
+        
+        // Final sanity check for backend expectation
+        data.customFields = data.customFields.map(f => ({
+          ...f,
+          type: typeof f.type === 'string' 
+            ? (f.type === 'Text' ? 0 : f.type === 'SingleSelect' ? 1 : f.type === 'MultiSelect' ? 2 : parseInt(f.type, 10) || 0)
+            : f.type
+        }));
+        
         emit('save', data);
       }
     };
@@ -302,6 +425,10 @@ export default {
       removeTaskType,
       addPriority,
       removePriority,
+      addCustomField,
+      removeCustomField,
+      onFieldTypeChange,
+      onBlurOptions,
       onSave,
       onDelete,
       displayIconClass
@@ -328,8 +455,8 @@ export default {
   background: #161b22;
   border: 1px solid var(--border-primary);
   border-radius: 8px;
-  width: 450px;
-  max-width: 90vw;
+  width: 700px;
+  max-width: 95vw;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;

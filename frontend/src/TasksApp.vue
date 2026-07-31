@@ -182,6 +182,7 @@
                          :project-statuses="selectedProjectStatuses" 
                          :project-task-types="selectedProjectTaskTypes" 
                          :project-priorities="selectedProjectPriorities" 
+                         :project-custom-fields="selectedProject.customFields"
                          :theme="theme"
                          @close="selectedTask = null" 
                          @refresh="fetchProjects"></task-detail>
@@ -888,8 +889,9 @@ export default {
           const result = findTaskInProjects(projects.value, selectedTask.value.id);
           if (result) {
             selectedTask.value = result.task;
-            selectedProjectStatuses.value = result.statuses;
-            selectedProjectTaskTypes.value = result.taskTypes;
+            selectedProjectStatuses.value = result.project.statuses;
+            selectedProjectTaskTypes.value = result.project.taskTypes;
+            selectedProjectPriorities.value = result.project.priorities;
           } else {
             selectedTask.value = null;
           }
@@ -941,7 +943,8 @@ export default {
             description: formData.description,
             statuses: formData.statuses,
             taskTypes: formData.taskTypes,
-            priorities: formData.priorities
+            priorities: formData.priorities,
+            customFields: formData.customFields
           });
           showToast('Project updated successfully', 'success');
         }
@@ -961,7 +964,8 @@ export default {
         description: project.description,
         statuses: project.statuses,
         taskTypes: project.taskTypes,
-        priorities: project.priorities
+        priorities: project.priorities,
+        customFields: project.customFields
       });
     };
 
@@ -973,7 +977,8 @@ export default {
         description: project.description,
         statuses: project.statuses,
         taskTypes: project.taskTypes,
-        priorities: project.priorities
+        priorities: project.priorities,
+        customFields: project.customFields
       });
       fetchProjects();
     };

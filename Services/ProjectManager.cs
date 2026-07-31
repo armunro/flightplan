@@ -236,7 +236,7 @@ public class ProjectManager
         return projects;
     }
 
-    public Project CreateProject(string name, string? description = null, string? icon = null, string? color = null, List<TaskStatus>? statuses = null, List<TaskType>? taskTypes = null, List<ProjectPriority>? priorities = null)
+    public Project CreateProject(string name, string? description = null, string? icon = null, string? color = null, List<TaskStatus>? statuses = null, List<TaskType>? taskTypes = null, List<ProjectPriority>? priorities = null, List<CustomFieldDefinition>? customFields = null)
     {
         var project = new Project 
         { 
@@ -271,6 +271,11 @@ public class ProjectManager
         else
         {
             project.Priorities.AddRange(GetDefaultPriorities());
+        }
+
+        if (customFields != null)
+        {
+            project.CustomFields.AddRange(customFields);
         }
 
         _projects.Add(project);
@@ -369,7 +374,7 @@ public class ProjectManager
         return subtask;
     }
 
-    public Project? UpdateProject(Guid projectId, string name, string? description, string? icon = null, string? color = null, List<TaskStatus>? statuses = null, List<TaskType>? taskTypes = null, List<ProjectPriority>? priorities = null)
+    public Project? UpdateProject(Guid projectId, string name, string? description, string? icon = null, string? color = null, List<TaskStatus>? statuses = null, List<TaskType>? taskTypes = null, List<ProjectPriority>? priorities = null, List<CustomFieldDefinition>? customFields = null)
     {
         var project = FindProjectById(projectId);
         if (project == null) return null;
@@ -397,10 +402,16 @@ public class ProjectManager
             project.Priorities.AddRange(priorities);
         }
 
+        if (customFields != null)
+        {
+            project.CustomFields.Clear();
+            project.CustomFields.AddRange(customFields);
+        }
+
         return project;
     }
 
-    public TaskItem? UpdateTask(Guid taskId, string title, string? description, TaskPriority priority, Guid? statusId = null, bool? isCompleted = null, int estimateMinutes = 0, DateTime? start = null, DateTime? end = null, string? link = null, Guid? taskTypeId = null, Guid? priorityId = null)
+    public TaskItem? UpdateTask(Guid taskId, string title, string? description, TaskPriority priority, Guid? statusId = null, bool? isCompleted = null, int estimateMinutes = 0, DateTime? start = null, DateTime? end = null, string? link = null, Guid? taskTypeId = null, Guid? priorityId = null, List<CustomFieldValue>? customFieldValues = null)
     {
         var task = FindTaskById(taskId);
         if (task == null) return null;
@@ -429,6 +440,12 @@ public class ProjectManager
         }
             
         if (isCompleted.HasValue) task.IsCompleted = isCompleted.Value;
+
+        if (customFieldValues != null)
+        {
+            task.CustomFieldValues.Clear();
+            task.CustomFieldValues.AddRange(customFieldValues);
+        }
 
         return task;
     }
@@ -559,6 +576,18 @@ public class ProjectManager
                 if (project.Priorities == null || project.Priorities.Count == 0)
                 {
                     project.Priorities = GetDefaultPriorities();
+                }
+
+                if (project.CustomFields == null)
+                {
+                    project.CustomFields = new List<CustomFieldDefinition>();
+                }
+                else
+                {
+                    foreach (var cf in project.CustomFields)
+                    {
+                        cf.Options ??= new List<string>();
+                    }
                 }
 
                 // Assign status to tasks that don't have one

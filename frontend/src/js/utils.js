@@ -28,7 +28,7 @@ export function findTaskInProjects(projects, taskId) {
   for (const project of projects) {
     for (const list of project.lists) {
       const task = findTaskInList(list.tasks, taskId);
-      if (task) return { task, statuses: project.statuses, taskTypes: project.taskTypes };
+      if (task) return { task, project };
     }
   }
   return null;
