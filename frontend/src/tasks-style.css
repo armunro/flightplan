@@ -446,6 +446,7 @@
     border-right: none; 
     box-sizing: border-box; 
     overflow: visible;
+    width: 100%;
 }
 .tasks-cell.type-column {
     padding-right: 0px;
@@ -466,6 +467,7 @@
     box-sizing: border-box; 
     overflow: hidden;
     position: relative;
+    width: 100%;
 }
 .tasks-header.type-column {
     padding-right: 0px;
@@ -646,9 +648,18 @@
     border: 1px solid var(--border-primary);
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 20000 !important;
     min-width: 150px;
     padding: 4px 0;
+}
+
+
+.dropdown-menu.show-on-hover {
+    z-index: 20001 !important;
+}
+
+.tasks-header-row {
+    cursor: context-menu;
 }
 
 .context-menu-item {
@@ -979,4 +990,20 @@ textarea::placeholder,
 .calendar-sidebar.collapsed .sidebar-loading span,
 .email-sidebar.collapsed .sidebar-loading span {
     display: none;
+}
+
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+.dropdown-item .btn-xs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
 }

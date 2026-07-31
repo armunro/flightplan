@@ -118,13 +118,13 @@
               </div>
               <div class="d-flex align-items-center gap-2">
                 <div class="dropdown">
-                  <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <button class="btn btn-sm btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Project Settings">
                     <i class="bi bi-gear me-1"></i>Project
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" style="z-index: 10001;">
                     <li>
                       <a class="dropdown-item" href="#" @click.prevent="onEditProject(selectedProject)">
-                        <i class="bi bi-pencil me-2"></i>Edit
+                        <i class="bi bi-pencil me-2"></i>Edit Project
                       </a>
                     </li>
                     <li>
@@ -135,15 +135,51 @@
                   </ul>
                 </div>
                 <div class="dropdown">
-                  <button class="btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-layout-three-columns me-1"></i>View
+                  <button class="btn btn-sm btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Customize Columns">
+                    <i class="bi bi-layout-three-columns me-1"></i>Columns
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow show-on-hover" style="z-index: 10001; min-width: 250px;">
+                    <li class="dropdown-header">Visible Columns</li>
+                    <li v-for="(col, index) in allColumns.filter(c => c.id !== 'filler')" :key="col.id">
+                      <div class="dropdown-item d-flex align-items-center justify-content-between py-1">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none flex-grow-1" @click.prevent="toggleColumnVisibility(col.id)">
+                          <i class="bi me-2" :class="isColumnVisible(col.id) ? 'bi-check-square' : 'bi-square'"></i>
+                          {{ col.name }}
+                        </a>
+                        <div class="ms-2 d-flex gap-1" v-if="isColumnVisible(col.id)">
+                          <button class="btn btn-xs btn-outline-light py-0 px-1" 
+                                  :disabled="visibleColumnIds.indexOf(col.id) === 0"
+                                  @click.prevent.stop="moveColumn(col.id, -1)"
+                                  title="Move Left">
+                            <i class="bi bi-chevron-left" style="font-size: 0.7rem;"></i>
+                          </button>
+                          <button class="btn btn-xs btn-outline-light py-0 px-1" 
+                                  :disabled="visibleColumnIds.indexOf(col.id) === visibleColumnIds.length - 1"
+                                  @click.prevent.stop="moveColumn(col.id, 1)"
+                                  title="Move Right">
+                            <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="dropdown-divider"></li>
                     <li>
                       <a class="dropdown-item" href="#" @click.prevent="autosizeColumns">
-                        <i class="bi bi-arrows-expand-vertical me-2" style="transform: rotate(90deg); display: inline-block;"></i>Autosize Columns
+                        <i class="bi bi-arrows-expand-vertical me-2" style="transform: rotate(90deg); display: inline-block;"></i>Autosize All
                       </a>
                     </li>
+                    <li>
+                      <a class="dropdown-item text-warning" href="#" @click.prevent="resetColumns">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset to Default
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-subtle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="View Options">
+                    <i class="bi bi-eye me-1"></i>View
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" style="z-index: 10001;">
                     <li>
                       <a class="dropdown-item" href="#" @click.prevent="showClosed = !showClosed">
                         <i class="bi me-2" :class="showClosed ? 'bi-eye-slash' : 'bi-eye'"></i>{{ showClosed ? 'Hide Closed Tasks' : 'Show Closed Tasks' }}
@@ -174,6 +210,33 @@
               <template v-else-if="contextMenu.project">
                 <div class="context-menu-item" @click="onAddList(contextMenu.project.id)">Add List</div>
                 <div class="context-menu-item" @click="onEditProject(contextMenu.project)">Edit Project</div>
+              </template>
+              <template v-else-if="contextMenu.header">
+                <div class="context-menu-header">Show Columns</div>
+                <div v-for="col in allColumns.filter(c => c.id !== 'filler')" :key="col.id" 
+                     class="context-menu-item d-flex align-items-center justify-content-between" 
+                     @click="toggleColumnVisibility(col.id)">
+                  <div class="d-flex align-items-center">
+                    <i class="bi me-2" :class="isColumnVisible(col.id) ? 'bi-check-square' : 'bi-square'"></i>
+                    {{ col.name }}
+                  </div>
+                  <div class="ms-2 d-flex gap-1" v-if="isColumnVisible(col.id)">
+                    <button class="btn btn-xs btn-outline-light py-0 px-1" 
+                            :disabled="visibleColumnIds.indexOf(col.id) === 0"
+                            @click.prevent.stop="moveColumn(col.id, -1)"
+                            title="Move Left">
+                      <i class="bi bi-chevron-left" style="font-size: 0.7rem;"></i>
+                    </button>
+                    <button class="btn btn-xs btn-outline-light py-0 px-1" 
+                            :disabled="visibleColumnIds.indexOf(col.id) === visibleColumnIds.length - 1"
+                            @click.prevent.stop="moveColumn(col.id, 1)"
+                            title="Move Right">
+                      <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="context-menu-separator"></div>
+                <div class="context-menu-item" @click="autosizeColumns">Autosize All</div>
               </template>
             </div>
 
@@ -256,45 +319,51 @@
                 </div>
                 
                 <div class="tasks-grid" v-if="!collapsedLists.has(list.id)">
-                  <div class="tasks-header-row" :class="{ 'is-empty': getSortedTasks(list.tasks).length === 0 }" :style="gridStyle">
+                  <div class="tasks-header-row" :class="{ 'is-empty': getSortedTasks(list.tasks).length === 0 }" :style="gridStyle" @contextmenu.prevent="onHeaderContextMenu($event)">
                     <div class="tasks-header selection-header">
                       <input type="checkbox" :checked="isListAllSelected(list)" @change="toggleListSelectAll(list)">
                     </div>
-                    <div class="tasks-header sortable type-column" @click="toggleSort('taskTypeId')">
-                      Type
-                      <span v-if="sortBy === 'taskTypeId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(0, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable name-column" @click="toggleSort('title')">
-                      Task Name
-                      <span v-if="sortBy === 'title'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(1, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('statusId')">
-                      Status
-                      <span v-if="sortBy === 'statusId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(2, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('priority')">
-                      Priority
-                      <span v-if="sortBy === 'priority'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(3, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('start')">
-                      Start
-                      <span v-if="sortBy === 'start'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(4, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('end')">
-                      End
-                      <span v-if="sortBy === 'end'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(5, $event)"></div>
-                    </div>
-                    <div class="tasks-header sortable" @click="toggleSort('estimateMinutes')">
-                      Est
-                      <span v-if="sortBy === 'estimateMinutes'" class="sort-icon" :class="{ desc: sortDesc }"></span>
-                      <div class="resizer" @mousedown.stop="startResize(6, $event)"></div>
-                    </div>
+
+                    <template v-for="colId in visibleColumnIds" :key="colId">
+                      <div v-if="colId === 'type'" class="tasks-header sortable type-column" @click="toggleSort('taskTypeId')">
+                        Type
+                        <span v-if="sortBy === 'taskTypeId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(0, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'name'" class="tasks-header sortable name-column" @click="toggleSort('title')">
+                        Task Name
+                        <span v-if="sortBy === 'title'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(1, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'status'" class="tasks-header sortable status-column" @click="toggleSort('statusId')">
+                        Status
+                        <span v-if="sortBy === 'statusId'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(2, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'priority'" class="tasks-header sortable priority-column" @click="toggleSort('priority')">
+                        Priority
+                        <span v-if="sortBy === 'priority'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(3, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'start'" class="tasks-header sortable start-column" @click="toggleSort('start')">
+                        Start
+                        <span v-if="sortBy === 'start'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(4, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'end'" class="tasks-header sortable end-column" @click="toggleSort('end')">
+                        End
+                        <span v-if="sortBy === 'end'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(5, $event)"></div>
+                      </div>
+                      <div v-else-if="colId === 'estimate'" class="tasks-header sortable estimate-column" @click="toggleSort('estimateMinutes')">
+                        Est
+                        <span v-if="sortBy === 'estimateMinutes'" class="sort-icon" :class="{ desc: sortDesc }"></span>
+                        <div class="resizer" @mousedown.stop="startResize(6, $event)"></div>
+                      </div>
+                      <div v-else><!-- Fallback for unknown columns --></div>
+                    </template>
+                    
+                    <div class="tasks-header"></div>
                   </div>
 
                     <template v-for="(task, index) in getSortedTasks(list.tasks)" :key="task.id">
@@ -310,6 +379,7 @@
                               :is-last="index === getSortedTasks(list.tasks).length - 1"
                               :selected-task-ids="selectedTaskIds"
                               :theme="theme"
+                              :visible-column-ids="visibleColumnIds"
                               @refresh="fetchProjects" 
                               @open-task="onOpenTask($event, selectedProject.statuses, selectedProject.taskTypes, selectedProject.priorities)"
                               @toggle-select="onToggleSelect"
@@ -463,12 +533,81 @@ export default {
       x: 0,
       y: 0,
       task: null,
-      project: null
+      project: null,
+      header: false
     });
 
     // Resizing state
     const selectionColumnWidth = ref(40);
-    const columnWidths = ref(loadSetting('columnWidths', [100, 400, 150, 150, 180, 180, 120, 0])); // Type, Task Name, Status, Priority, Start, End, Est, Dead
+    const columnWidths = ref(loadSetting('columnWidths', [100, 400, 150, 150, 180, 180, 80, 0])); // Type, Task Name, Status, Priority, Start, End, Est, Dead
+    const allColumns = [
+      { id: 'type', name: 'Type', field: 'taskTypeId', widthIndex: 0 },
+      { id: 'name', name: 'Task Name', field: 'title', widthIndex: 1 },
+      { id: 'status', name: 'Status', field: 'statusId', widthIndex: 2 },
+      { id: 'priority', name: 'Priority', field: 'priorityId', widthIndex: 3 },
+      { id: 'start', name: 'Start', field: 'start', widthIndex: 4 },
+      { id: 'end', name: 'End', field: 'end', widthIndex: 5 },
+      { id: 'estimate', name: 'Est', field: 'estimateMinutes', widthIndex: 6 },
+      { id: 'filler', name: '', field: null, widthIndex: 7 }
+    ];
+
+    const projectVisibleColumns = ref(loadSetting('projectVisibleColumns', {})); // { projectId: ['type', 'name', ...] }
+
+    const visibleColumnIds = computed({
+      get: () => {
+        const defaultVisible = allColumns.filter(c => c.id !== 'filler').map(c => c.id);
+        if (!selectedProjectId.value) return defaultVisible;
+        const saved = projectVisibleColumns.value[selectedProjectId.value];
+        // Ensure it's an array and not empty
+        if (!saved || !Array.isArray(saved) || saved.length === 0) return defaultVisible;
+        
+        // Return saved order, but filter out 'filler' and any IDs that might not exist anymore
+        return saved.filter(id => id !== 'filler' && allColumns.some(c => c.id === id));
+      },
+      set: (val) => {
+        if (!selectedProjectId.value) return;
+        projectVisibleColumns.value[selectedProjectId.value] = val;
+        localStorage.setItem('projectVisibleColumns', JSON.stringify(projectVisibleColumns.value));
+      }
+    });
+
+    const resetColumns = () => {
+      if (!selectedProjectId.value) return;
+      delete projectVisibleColumns.value[selectedProjectId.value];
+      localStorage.setItem('projectVisibleColumns', JSON.stringify(projectVisibleColumns.value));
+      showToast('Columns reset to default', 'info');
+    };
+
+    const isColumnVisible = (columnId) => {
+      if (!visibleColumnIds.value) return true;
+      return visibleColumnIds.value.includes(columnId);
+    };
+
+    const toggleColumnVisibility = (columnId) => {
+      const current = [...visibleColumnIds.value];
+      const index = current.indexOf(columnId);
+      if (index > -1) {
+        current.splice(index, 1);
+      } else {
+        current.push(columnId);
+      }
+      visibleColumnIds.value = current;
+    };
+
+    const moveColumn = (columnId, direction) => {
+      const current = [...visibleColumnIds.value];
+      const index = current.indexOf(columnId);
+      if (index === -1) return;
+
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= current.length) return;
+
+      const temp = current[index];
+      current[index] = current[newIndex];
+      current[newIndex] = temp;
+
+      visibleColumnIds.value = current;
+    };
     const isResizing = ref(false);
     const activeResizer = ref(-1);
     const startX = ref(0);
@@ -479,11 +618,23 @@ export default {
     });
 
     const gridStyle = computed(() => {
-      const widths = [...columnWidths.value];
-      const template = [`${selectionColumnWidth.value}px`, ...widths.map((w, i) => i === widths.length - 1 ? '1fr' : `${w}px`)].join(' ');
+      const widths = [];
+      widths.push(`${selectionColumnWidth.value}px`);
+      
+      visibleColumnIds.value.forEach((id) => {
+        const col = allColumns.find(c => c.id === id);
+        if (col) {
+          const w = columnWidths.value[col.widthIndex];
+          widths.push(`${w}px`);
+        }
+      });
+      
+      // Always add the filler column at the end to take up remaining space
+      widths.push('1fr');
+
       return {
         display: 'grid',
-        gridTemplateColumns: template
+        gridTemplateColumns: widths.join(' ')
       };
     });
 
@@ -507,83 +658,95 @@ export default {
       const newWidths = [...columnWidths.value];
 
       // 0: Type
-      let maxTypeWidth = getTextWidth('Type');
-      selectedProject.value.taskTypes.forEach(t => {
-        const w = getTextWidth(t.name);
-        if (w > maxTypeWidth) maxTypeWidth = w;
-      });
-      // 8px left padding + 16px badge padding + 12px for icon/spacing (since right padding is 0)
-      newWidths[0] = Math.ceil(maxTypeWidth + 8 + 16 + 12); 
+      if (isColumnVisible('type')) {
+        let maxTypeWidth = getTextWidth('Type');
+        selectedProject.value.taskTypes.forEach(t => {
+          const w = getTextWidth(t.name);
+          if (w > maxTypeWidth) maxTypeWidth = w;
+        });
+        // 8px left padding + 16px badge padding + 12px for icon/spacing (since right padding is 0)
+        newWidths[0] = Math.ceil(maxTypeWidth + 8 + 16 + 12); 
+      }
 
       // 1: Task Name
-      let maxNameWidth = getTextWidth('Task Name');
-      const checkTasks = (tasks, depth) => {
-        tasks.forEach(t => {
-          const w = getTextWidth(t.title) + (depth * 20) + 24; // Indent + icon space
-          if (w > maxNameWidth) maxNameWidth = w;
-          if (t.subtasks) checkTasks(t.subtasks, depth + 1);
+      if (isColumnVisible('name')) {
+        let maxNameWidth = getTextWidth('Task Name');
+        const checkTasks = (tasks, depth) => {
+          tasks.forEach(t => {
+            const w = getTextWidth(t.title) + (depth * 20) + 24; // Indent + icon space
+            if (w > maxNameWidth) maxNameWidth = w;
+            if (t.subtasks) checkTasks(t.subtasks, depth + 1);
+          });
+        };
+        selectedProject.value.lists.forEach(l => {
+          if (l.tasks) checkTasks(l.tasks, 0);
         });
-      };
-      selectedProject.value.lists.forEach(l => {
-        if (l.tasks) checkTasks(l.tasks, 0);
-      });
-      // 4px left padding + 8px right padding + maxNameWidth
-      newWidths[1] = Math.max(200, Math.ceil(maxNameWidth + 4 + 8));
+        // 4px left padding + 8px right padding + maxNameWidth
+        newWidths[1] = Math.max(200, Math.ceil(maxNameWidth + 4 + 8));
+      }
 
       // 2: Status
-      let maxStatusWidth = getTextWidth('Status');
-      selectedProject.value.statuses.forEach(s => {
-        const w = getTextWidth(s.name);
-        if (w > maxStatusWidth) maxStatusWidth = w;
-      });
-      newWidths[2] = Math.ceil(maxStatusWidth + padding + 32); // Extra for badge padding and non-wrapping
+      if (isColumnVisible('status')) {
+        let maxStatusWidth = getTextWidth('Status');
+        selectedProject.value.statuses.forEach(s => {
+          const w = getTextWidth(s.name);
+          if (w > maxStatusWidth) maxStatusWidth = w;
+        });
+        newWidths[2] = Math.ceil(maxStatusWidth + padding + 32); // Extra for badge padding and non-wrapping
+      }
 
       // 3: Priority
-      let maxPriorityWidth = getTextWidth('Priority');
-      selectedProject.value.priorities.forEach(p => {
-        const w = getTextWidth(p.name);
-        if (w > maxPriorityWidth) maxPriorityWidth = w;
-      });
-      newWidths[3] = Math.ceil(maxPriorityWidth + padding + 32);
+      if (isColumnVisible('priority')) {
+        let maxPriorityWidth = getTextWidth('Priority');
+        selectedProject.value.priorities.forEach(p => {
+          const w = getTextWidth(p.name);
+          if (w > maxPriorityWidth) maxPriorityWidth = w;
+        });
+        newWidths[3] = Math.ceil(maxPriorityWidth + padding + 32);
+      }
 
       // 4: Start
       // 5: End
-      const dateHeaderWidth = getTextWidth('Start'); // Both are similar
-      let maxDateWidth = dateHeaderWidth;
-      const checkDates = (tasks) => {
-        tasks.forEach(t => {
-          if (t.start) {
-            const w = getTextWidth(formatFriendlyDate(t.start, false, true));
-            if (w > maxDateWidth) maxDateWidth = w;
-          }
-          if (t.end) {
-            const w = getTextWidth(formatFriendlyDate(t.end, false, true));
-            if (w > maxDateWidth) maxDateWidth = w;
-          }
-          if (t.subtasks) checkDates(t.subtasks);
+      if (isColumnVisible('start') || isColumnVisible('end')) {
+        const dateHeaderWidth = getTextWidth('Start'); // Both are similar
+        let maxDateWidth = dateHeaderWidth;
+        const checkDates = (tasks) => {
+          tasks.forEach(t => {
+            if (t.start) {
+              const w = getTextWidth(formatFriendlyDate(t.start, false, true));
+              if (w > maxDateWidth) maxDateWidth = w;
+            }
+            if (t.end) {
+              const w = getTextWidth(formatFriendlyDate(t.end, false, true));
+              if (w > maxDateWidth) maxDateWidth = w;
+            }
+            if (t.subtasks) checkDates(t.subtasks);
+          });
+        };
+        selectedProject.value.lists.forEach(l => {
+          if (l.tasks) checkDates(l.tasks);
         });
-      };
-      selectedProject.value.lists.forEach(l => {
-        if (l.tasks) checkDates(l.tasks);
-      });
-      newWidths[4] = Math.ceil(maxDateWidth + datePadding);
-      newWidths[5] = Math.ceil(maxDateWidth + datePadding);
+        if (isColumnVisible('start')) newWidths[4] = Math.ceil(maxDateWidth + datePadding);
+        if (isColumnVisible('end')) newWidths[5] = Math.ceil(maxDateWidth + datePadding);
+      }
 
       // 6: Est
-      let maxEstWidth = getTextWidth('Est');
-      const checkEst = (tasks) => {
-        tasks.forEach(t => {
-          if (t.estimateMinutes) {
-            const w = getTextWidth(formatEstimate(t.estimateMinutes));
-            if (w > maxEstWidth) maxEstWidth = w;
-          }
-          if (t.subtasks) checkEst(t.subtasks);
+      if (isColumnVisible('estimate')) {
+        let maxEstWidth = getTextWidth('Est');
+        const checkEst = (tasks) => {
+          tasks.forEach(t => {
+            if (t.estimateMinutes) {
+              const w = getTextWidth(formatEstimate(t.estimateMinutes));
+              if (w > maxEstWidth) maxEstWidth = w;
+            }
+            if (t.subtasks) checkEst(t.subtasks);
+          });
+        };
+        selectedProject.value.lists.forEach(l => {
+          if (l.tasks) checkEst(l.tasks);
         });
-      };
-      selectedProject.value.lists.forEach(l => {
-        if (l.tasks) checkEst(l.tasks);
-      });
-      newWidths[6] = Math.max(80, Math.ceil(maxEstWidth + padding));
+        newWidths[6] = Math.max(80, Math.ceil(maxEstWidth + padding));
+      }
 
       // 7: Deadline (represented as 0 in columnWidths, meaning it takes 1fr)
       // No fixed width for the last column in this logic.
@@ -609,7 +772,10 @@ export default {
     };
 
     const startResize = (index, event) => {
-      if (index >= columnWidths.value.length - 1) return; // Don't resize the last column as it's 1fr
+      // Find the column by widthIndex
+      const col = allColumns.find(c => c.widthIndex === index);
+      if (col && !isColumnVisible(col.id)) return;
+      
       isResizing.value = true;
       activeResizer.value = index;
       startX.value = event.pageX;
@@ -652,7 +818,7 @@ export default {
       const visibleTasks = showClosed.value ? tasks : tasks.filter(t => !t.isCompleted);
       if (!sortBy.value) return visibleTasks;
 
-      return [...visibleTasks].sort((a, b) => {
+      const sorted = [...visibleTasks].sort((a, b) => {
         let valA = a[sortBy.value];
         let valB = b[sortBy.value];
 
@@ -660,17 +826,21 @@ export default {
           valA = (valA || '').toString().trim().toLowerCase();
           valB = (valB || '').toString().trim().toLowerCase();
         } else if (sortBy.value === 'taskTypeId') {
-          valA = valA === null || valA === undefined ? -1 : valA;
-          valB = valB === null || valB === undefined ? -1 : valB;
+          valA = a.taskTypeId === null || a.taskTypeId === undefined ? -1 : a.taskTypeId;
+          valB = b.taskTypeId === null || b.taskTypeId === undefined ? -1 : b.taskTypeId;
+        } else if (sortBy.value === 'statusId') {
+          valA = a.statusId === null || a.statusId === undefined ? -1 : a.statusId;
+          valB = b.statusId === null || b.statusId === undefined ? -1 : b.statusId;
         } else if (sortBy.value === 'priority' || sortBy.value === 'estimateMinutes') {
           if (sortBy.value === 'priority') {
-            const pA = selectedProject.value.priorities.find(p => p.id === a.priorityId);
-            const pB = selectedProject.value.priorities.find(p => p.id === b.priorityId);
+            const priorities = selectedProject.value?.priorities || [];
+            const pA = priorities.find(p => p.id === a.priorityId);
+            const pB = priorities.find(p => p.id === b.priorityId);
             valA = pA ? pA.order : -1;
             valB = pB ? pB.order : -1;
           } else {
-            valA = valA === null || valA === undefined ? -1 : valA;
-            valB = valB === null || valB === undefined ? -1 : valB;
+            valA = a.estimateMinutes === null || a.estimateMinutes === undefined ? -1 : a.estimateMinutes;
+            valB = b.estimateMinutes === null || b.estimateMinutes === undefined ? -1 : b.estimateMinutes;
           }
         } else if (sortBy.value === 'start' || sortBy.value === 'end') {
           valA = valA ? new Date(valA).getTime() : 0;
@@ -684,6 +854,9 @@ export default {
         let result = valA < valB ? -1 : 1;
         return sortDesc.value ? -result : result;
       });
+
+      // Maintain subtasks if any (sorting top level doesn't automatically sort subtasks)
+      return sorted;
     };
 
     const getProjectIconClass = (project) => {
@@ -1120,7 +1293,8 @@ export default {
         x: e.pageX,
         y: e.pageY,
         task: task,
-        project: null
+        project: null,
+        header: false
       };
       setTimeout(() => {
         document.addEventListener('click', closeContextMenu);
@@ -1133,14 +1307,34 @@ export default {
         x: e.pageX,
         y: e.pageY,
         task: null,
-        project: project
+        project: project,
+        header: false
       };
       setTimeout(() => {
         document.addEventListener('click', closeContextMenu);
       }, 0);
     };
 
-    const closeContextMenu = () => {
+    const onHeaderContextMenu = (e) => {
+      console.log('Header context menu triggered at', e.pageX, e.pageY);
+      contextMenu.value = {
+        visible: true,
+        x: e.pageX,
+        y: e.pageY,
+        task: null,
+        project: null,
+        header: true
+      };
+      setTimeout(() => {
+        document.addEventListener('click', closeContextMenu);
+      }, 0);
+    };
+
+    const closeContextMenu = (e) => {
+      // Don't close if clicking inside the context menu itself
+      if (e && e.target && e.target.closest && e.target.closest('.context-menu')) {
+        return;
+      }
       contextMenu.value.visible = false;
       document.removeEventListener('click', closeContextMenu);
     };
@@ -1314,7 +1508,10 @@ export default {
     };
 
     onMounted(async () => {
+      console.log('TasksApp mounted. Column customization initialized.');
+      console.log('Available columns:', allColumns.map(c => c.id));
       await fetchProjects();
+      console.log('Projects fetched:', projects.value.length);
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('task-added', fetchProjects);
     });
@@ -1433,6 +1630,8 @@ export default {
       contextMenu,
       onTaskContextMenu,
       onProjectContextMenu,
+      onHeaderContextMenu,
+      resetColumns,
       onSetTaskDueDate,
       onUpdateTask,
       onDeleteTaskFromMenu,
@@ -1462,6 +1661,11 @@ export default {
       toggleSelectAll,
       listMenu,
       onListMenu,
+      isColumnVisible,
+      toggleColumnVisibility,
+      moveColumn,
+      allColumns,
+      visibleColumnIds,
       onDeleteListFromMenu,
       startEditingList,
       cancelEditingList,

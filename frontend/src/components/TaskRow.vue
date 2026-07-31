@@ -14,111 +14,123 @@
             <div class="tasks-cell selection-cell">
                 <input type="checkbox" :checked="isSelected" @mousedown="onCheckboxMouseDown($event)" @click.stop="onCheckboxClick($event)">
             </div>
-            <div class="tasks-cell type-column" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[1] }">
-                <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
-                    <span class="type-badge dropdown-toggle" 
-                          data-bs-toggle="dropdown"
-                          data-bs-auto-close="outside"
-                          :style="{ color: getTaskTypeColor(task.taskTypeId) }">
-                        <i :class="getTaskTypeIcon(task.taskTypeId)"></i>
-                        <span class="ms-1">{{ getTaskTypeName(task.taskTypeId) }}</span>
-                    </span>
-                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                        <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
-                        <li v-for="t in projectTaskTypes" :key="t.id">
-                            <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
-                                <i :class="t.icon" class="me-2"></i>{{ t.name }}
-                            </a>
-                        </li>
-                    </ul>
+            
+            <template v-for="colId in visibleColumnIds" :key="colId">
+                <div v-if="colId === 'type'" class="tasks-cell type-column">
+                    <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
+                        <span class="type-badge dropdown-toggle" 
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            :style="{ color: getTaskTypeColor(task.taskTypeId) }">
+                            <i :class="getTaskTypeIcon(task.taskTypeId)"></i>
+                            <span class="ms-1">{{ getTaskTypeName(task.taskTypeId) }}</span>
+                        </span>
+                        <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                            <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
+                            <li v-for="t in projectTaskTypes" :key="t.id">
+                                <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
+                                    <i :class="t.icon" class="me-2"></i>{{ t.name }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="tasks-cell task-title-container name-column" 
-                 :style="depth > 0 ? { paddingLeft: (depth * 20) + 24 + 'px' } : { width: gridStyle.gridTemplateColumns.split(' ')[2] }">
-                <span v-if="depth > 0" class="subtask-indent"></span>
-                <span class="task-title"
-                      ref="titleElement"
-                      contenteditable="true" 
-                      tabindex="0"
-                      @blur="onUpdateTitle"
-                      @keydown.enter="onTitleKeyDown"
-                      @keydown.tab="onTitleTabKeyDown"
-                      @keydown.esc="onTitleEsc"
-                      @keydown="onGeneralKeyDown"
-                      @paste="onPaste">{{ task?.title || '' }}</span>
-                <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon ms-1" title="Open link">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                </a>
-                <span v-if="task?.description" class="description-indicator ms-1" title="Task has description">
-                    <i class="bi bi-text-paragraph"></i>
-                </span>
-            </div>
-            <div class="tasks-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[3] }">
-                <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
-                    <span class="status-badge dropdown-toggle" 
-                          data-bs-toggle="dropdown"
-                          data-bs-auto-close="outside"
-                          :style="{ color: getStatusColor(task.statusId) }">
-                        <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
-                        <span>{{ getStatusName(task.statusId) }}</span>
+                
+                <div v-else-if="colId === 'name'" class="tasks-cell task-title-container name-column" 
+                    :style="depth > 0 ? { paddingLeft: (depth * 20) + 24 + 'px' } : {}">
+                    <span v-if="depth > 0" class="subtask-indent"></span>
+                    <span class="task-title"
+                        ref="titleElement"
+                        contenteditable="true" 
+                        tabindex="0"
+                        @blur="onUpdateTitle"
+                        @keydown.enter="onTitleKeyDown"
+                        @keydown.tab="onTitleTabKeyDown"
+                        @keydown.esc="onTitleEsc"
+                        @keydown="onGeneralKeyDown"
+                        @paste="onPaste">{{ task?.title || '' }}</span>
+                    <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon ms-1" title="Open link">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <span v-if="task?.description" class="description-indicator ms-1" title="Task has description">
+                        <i class="bi bi-text-paragraph"></i>
                     </span>
-                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                        <li v-for="s in projectStatuses" :key="s.id">
-                            <a class="dropdown-item" href="#" @click.prevent="onUpdateStatus({ target: { value: s.id } })" :style="{ color: s.color }">
-                                <i class="bi bi-circle-fill me-2" style="font-size: 8px;"></i>{{ s.name }}
-                            </a>
-                        </li>
-                    </ul>
                 </div>
-            </div>
-            <div class="tasks-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[4] }">
-                <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
-                    <span class="priority priority-badge dropdown-toggle" 
-                          data-bs-toggle="dropdown"
-                          data-bs-auto-close="outside"
-                          :style="{ color: getPriorityColor(task.priorityId) }">
-                        <i :class="getPriorityIcon(task.priorityId)" style="margin-right: 4px;"></i>
-                        <span>{{ getPriorityName(task.priorityId) }}</span>
-                    </span>
-                    <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                        <li v-for="p in projectPriorities" :key="p.id">
-                            <a class="dropdown-item" href="#" @click.prevent="onUpdatePriorityId(p.id)" :style="{ color: p.color }">
-                                <i :class="p.icon" class="me-2"></i>{{ p.name }}
-                            </a>
-                        </li>
-                    </ul>
+
+                <div v-else-if="colId === 'status'" class="tasks-cell status-column">
+                    <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
+                        <span class="status-badge dropdown-toggle" 
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            :style="{ color: getStatusColor(task.statusId) }">
+                            <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
+                            <span>{{ getStatusName(task.statusId) }}</span>
+                        </span>
+                        <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                            <li v-for="s in projectStatuses" :key="s.id">
+                                <a class="dropdown-item" href="#" @click.prevent="onUpdateStatus({ target: { value: s.id } })" :style="{ color: s.color }">
+                                    <i class="bi bi-circle-fill me-2" style="font-size: 8px;"></i>{{ s.name }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="tasks-cell date-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[5] }">
-                <date-time-selector 
-                    :model-value="task?.start" 
-                    placeholder="Start"
-                    :is-closed="task?.isCompleted"
-                    @update:model-value="onUpdateDate('start', $event)"
-                    size="small"
-                />
-            </div>
-            <div class="tasks-cell date-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[6] }">
-                <date-time-selector 
-                    :model-value="task?.end" 
-                    placeholder="End"
-                    :is-closed="task?.isCompleted"
-                    @update:model-value="onUpdateDate('end', $event)"
-                    size="small"
-                />
-            </div>
-            <div class="tasks-cell estimate-cell clickable" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[7] }" @click="startEditingEstimate">
-                <template v-if="!isEditingEstimate">
-                    {{ formatEstimate(task?.estimateMinutes) }}
-                </template>
-                <input v-else
-                       type="text"
-                       class="estimate-input"
-                       v-focus
-                       :value="task?.estimateMinutes"
-                       @blur="onUpdateEstimate"
-                       @keyup.enter="$event.target.blur()">
-            </div>
+
+                <div v-else-if="colId === 'priority'" class="tasks-cell priority-column">
+                    <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
+                        <span class="priority priority-badge dropdown-toggle" 
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            :style="{ color: getPriorityColor(task.priorityId) }">
+                            <i :class="getPriorityIcon(task.priorityId)" style="margin-right: 4px;"></i>
+                            <span>{{ getPriorityName(task.priorityId) }}</span>
+                        </span>
+                        <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                            <li v-for="p in projectPriorities" :key="p.id">
+                                <a class="dropdown-item" href="#" @click.prevent="onUpdatePriorityId(p.id)" :style="{ color: p.color }">
+                                    <i :class="p.icon" class="me-2"></i>{{ p.name }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div v-else-if="colId === 'start'" class="tasks-cell date-cell start-column">
+                    <date-time-selector 
+                        :model-value="task?.start" 
+                        placeholder="Start"
+                        :is-closed="task?.isCompleted"
+                        @update:model-value="onUpdateDate('start', $event)"
+                        size="small"
+                    />
+                </div>
+
+                <div v-else-if="colId === 'end'" class="tasks-cell date-cell end-column">
+                    <date-time-selector 
+                        :model-value="task?.end" 
+                        placeholder="End"
+                        :is-closed="task?.isCompleted"
+                        @update:model-value="onUpdateDate('end', $event)"
+                        size="small"
+                    />
+                </div>
+
+                <div v-else-if="colId === 'estimate'" class="tasks-cell estimate-cell clickable estimate-column" @click="startEditingEstimate">
+                    <template v-if="!isEditingEstimate">
+                        {{ formatEstimate(task?.estimateMinutes) }}
+                    </template>
+                    <input v-else
+                        type="text"
+                        class="estimate-input"
+                        v-focus
+                        :value="task?.estimateMinutes"
+                        @blur="onUpdateEstimate"
+                        @keyup.enter="$event.target.blur()">
+                </div>
+                <div v-else><!-- Fallback for unknown columns --></div>
+            </template>
+
+            <div class="tasks-cell"></div>
         </div>
         <template v-if="task && task.subtasks">
             <template v-for="(sub, index) in getSortedSubtasks(task.subtasks)" :key="sub.id">
@@ -134,6 +146,7 @@
                           :is-last="isLast && index === getSortedSubtasks(task.subtasks).length - 1"
                           :selected-task-ids="selectedTaskIds"
                           :theme="theme"
+                          :visible-column-ids="visibleColumnIds"
                           @refresh="$emit('refresh')" 
                           @open-task="$emit('open-task', $event)"
                           @toggle-select="$emit('toggle-select', $event)"
@@ -154,9 +167,15 @@ export default {
     components: {
         DateTimeSelector
     },
-    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds', 'parentTaskId', 'previousTaskId', 'theme'],
+    props: ['task', 'depth', 'projectStatuses', 'projectTaskTypes', 'projectPriorities', 'showClosed', 'gridStyle', 'isLast', 'selectedTaskIds', 'parentTaskId', 'previousTaskId', 'theme', 'visibleColumnIds'],
     emits: ['refresh', 'open-task', 'context-menu', 'toggle-select'],
     setup(props, { emit }) {
+        const isColumnVisible = (columnId) => {
+            if (!props.visibleColumnIds) return true;
+            return props.visibleColumnIds.includes(columnId);
+        };
+
+        const visibleColumnIds = computed(() => props.visibleColumnIds);
         const themeClass = computed(() => `theme-${(props.theme || 'Cosmic').toLowerCase()}`);
         const dropPosition = ref(null); // 'before', 'after', 'inside'
         const isEditingEstimate = ref(false);
@@ -561,6 +580,8 @@ export default {
             getTaskTypeName,
             getTaskTypeColor,
             getTaskTypeIcon,
+            isColumnVisible,
+            visibleColumnIds,
             onOpenTask,
             onContextMenu,
             onTitleEsc,
