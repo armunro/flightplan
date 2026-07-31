@@ -4,7 +4,18 @@ public enum CustomFieldType
 {
     Text,
     SingleSelect,
-    MultiSelect
+    MultiSelect,
+    Date,
+    Link,
+    Money,
+    Boolean
+}
+
+public class CustomFieldOption
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Color { get; set; }
+    public string? Icon { get; set; }
 }
 
 public class CustomFieldDefinition
@@ -12,7 +23,7 @@ public class CustomFieldDefinition
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public CustomFieldType Type { get; set; }
-    public List<string> Options { get; set; } = new();
+    public List<CustomFieldOption> Options { get; set; } = new();
 }
 
 public class CustomFieldValue

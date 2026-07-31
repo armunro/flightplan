@@ -22,67 +22,72 @@
         >
       </div>
 
-      <div v-if="showPalette" class="color-palette-popover card bg-dark border-secondary shadow p-2" :style="paletteStyle">
-        <!-- Tabs for Standard vs Schemes -->
-        <div v-if="effectiveSchemes && effectiveSchemes.length > 0" class="picker-tabs sticky-top bg-dark mb-2" style="z-index: 10;">
-          <div class="nav nav-pills nav-fill bg-secondary bg-opacity-10 rounded-1 p-1 gap-1">
-            <button 
-              class="nav-link py-1 px-2" 
-              :class="{ 'active': activeTab === 'standard' }"
-              @click="activeTab = 'standard'"
-            >Standard</button>
-            <button 
-              class="nav-link py-1 px-2" 
-              :class="{ 'active': activeTab === 'schemes' }"
-              @click="activeTab = 'schemes'"
-            >Schemes</button>
-          </div>
-        </div>
-
-        <div v-if="activeTab === 'standard'" class="color-grid px-1">
-          <button
-            v-for="color in standardColors"
-            :key="color"
-            class="color-cell"
-            :class="{ active: modelValue.toLowerCase() === color.toLowerCase() }"
-            :style="{ backgroundColor: color }"
-            @click="selectColor(color)"
-            :title="color"
-          ></button>
-        </div>
-
-        <div v-else-if="activeTab === 'schemes'" class="schemes-container px-1">
-          <div v-if="effectiveSchemes.length === 0" class="p-2 text-center text-muted" style="font-size: 0.75rem;">
-            No color schemes found. 
-            <div class="mt-1">Add them in Settings.</div>
-          </div>
-          <div v-for="scheme in effectiveSchemes" :key="scheme.name" class="scheme-group mb-2">
-            <div class="scheme-name mb-1">{{ scheme.name }}</div>
-            <div class="color-grid">
-              <button
-                v-for="c in scheme.colors"
-                :key="c.name + c.color"
-                class="color-cell"
-                :class="{ active: modelValue.toLowerCase() === c.color.toLowerCase() }"
-                :style="{ backgroundColor: c.color }"
-                @click="selectColor(c.color)"
-                :title="c.name + ': ' + c.color"
-              ></button>
+      <Teleport to="body" :disabled="!useTeleport">
+        <div v-if="showPalette" 
+             class="color-palette-popover card bg-dark border-secondary shadow p-2" 
+             :style="paletteStyle"
+             ref="paletteRef">
+          <!-- Tabs for Standard vs Schemes -->
+          <div v-if="effectiveSchemes && effectiveSchemes.length > 0" class="picker-tabs sticky-top bg-dark mb-2" style="z-index: 10;">
+            <div class="nav nav-pills nav-fill bg-secondary bg-opacity-10 rounded-1 p-1 gap-1">
+              <button 
+                class="nav-link py-1 px-2" 
+                :class="{ 'active': activeTab === 'standard' }"
+                @click="activeTab = 'standard'"
+              >Standard</button>
+              <button 
+                class="nav-link py-1 px-2" 
+                :class="{ 'active': activeTab === 'schemes' }"
+                @click="activeTab = 'schemes'"
+              >Schemes</button>
             </div>
           </div>
-        </div>
 
-        <div class="palette-footer mt-2 pt-2 border-top border-secondary d-flex justify-content-between align-items-center px-1">
-          <small class="text-muted">{{ activeTab === 'standard' ? 'Standard Colors' : 'Color Schemes' }}</small>
-          <button class="btn btn-sm btn-link text-info p-0" @click="showPalette = false">Close</button>
+          <div v-if="activeTab === 'standard'" class="color-grid px-1">
+            <button
+              v-for="color in standardColors"
+              :key="color"
+              class="color-cell"
+              :class="{ active: modelValue.toLowerCase() === color.toLowerCase() }"
+              :style="{ backgroundColor: color }"
+              @click="selectColor(color)"
+              :title="color"
+            ></button>
+          </div>
+
+          <div v-else-if="activeTab === 'schemes'" class="schemes-container px-1">
+            <div v-if="effectiveSchemes.length === 0" class="p-2 text-center text-muted" style="font-size: 0.75rem;">
+              No color schemes found. 
+              <div class="mt-1">Add them in Settings.</div>
+            </div>
+            <div v-for="scheme in effectiveSchemes" :key="scheme.name" class="scheme-group mb-2">
+              <div class="scheme-name mb-1">{{ scheme.name }}</div>
+              <div class="color-grid">
+                <button
+                  v-for="c in scheme.colors"
+                  :key="c.name + c.color"
+                  class="color-cell"
+                  :class="{ active: modelValue.toLowerCase() === c.color.toLowerCase() }"
+                  :style="{ backgroundColor: c.color }"
+                  @click="selectColor(c.color)"
+                  :title="c.name + ': ' + c.color"
+                ></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="palette-footer mt-2 pt-2 border-top border-secondary d-flex justify-content-between align-items-center px-1">
+            <small class="text-muted">{{ activeTab === 'standard' ? 'Standard Colors' : 'Color Schemes' }}</small>
+            <button class="btn btn-sm btn-link text-info p-0" @click="showPalette = false">Close</button>
+          </div>
         </div>
-      </div>
+      </Teleport>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { watch, nextTick, ref, computed, onMounted, onUnmounted } from 'vue';
 import { fetchSettings } from '../js/dashboard-api';
 
 const props = defineProps({
@@ -109,6 +114,10 @@ const props = defineProps({
   colorSchemes: {
     type: Array,
     default: null
+  },
+  useTeleport: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -116,6 +125,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const showPalette = ref(false);
 const pickerRef = ref(null);
+const paletteRef = ref(null);
 const activeTab = ref('standard');
 const fetchedSchemes = ref([]);
 
@@ -123,14 +133,42 @@ const effectiveSchemes = computed(() => {
   return props.colorSchemes || fetchedSchemes.value;
 });
 
+const updatePalettePosition = () => {
+  if (!showPalette.value || !pickerRef.value || !paletteRef.value || !props.useTeleport) return;
+
+  const rect = pickerRef.value.getBoundingClientRect();
+  const palette = paletteRef.value;
+  
+  // Basic positioning logic for Teleport
+  if (props.palettePlacement.startsWith('top')) {
+    palette.style.bottom = `${window.innerHeight - rect.top + 5}px`;
+    palette.style.top = 'auto';
+  } else {
+    palette.style.top = `${rect.bottom + 5}px`;
+    palette.style.bottom = 'auto';
+  }
+
+  if (props.palettePlacement.endsWith('end')) {
+    palette.style.right = `${window.innerWidth - rect.right}px`;
+    palette.style.left = 'auto';
+  } else {
+    palette.style.left = `${rect.left}px`;
+    palette.style.right = 'auto';
+  }
+};
+
 const handleClickOutside = (event) => {
   if (showPalette.value && pickerRef.value && !pickerRef.value.contains(event.target)) {
+    // Also check if click is inside the teleported palette
+    if (paletteRef.value && paletteRef.value.contains(event.target)) return;
     showPalette.value = false;
   }
 };
 
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
+  window.addEventListener('scroll', updatePalettePosition, true);
+  window.addEventListener('resize', updatePalettePosition);
   
   if (!props.colorSchemes) {
     try {
@@ -144,28 +182,47 @@ onMounted(async () => {
   }
 });
 
-onUnmounted(() => document.removeEventListener('click', handleClickOutside));
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('scroll', updatePalettePosition, true);
+  window.removeEventListener('resize', updatePalettePosition);
+});
 
 const paletteStyle = computed(() => {
   const style = {};
-  if (props.palettePlacement.startsWith('top')) {
-    style.bottom = '100%';
-    style.top = 'auto';
-    style.marginBottom = '5px';
-  } else {
-    style.top = '100%';
-    style.bottom = 'auto';
-    style.marginTop = '5px';
-  }
   
-  if (props.palettePlacement.endsWith('end')) {
-    style.right = '0';
-    style.left = 'auto';
+  if (!props.useTeleport) {
+    if (props.palettePlacement.startsWith('top')) {
+      style.bottom = '100%';
+      style.top = 'auto';
+      style.marginBottom = '5px';
+    } else {
+      style.top = '100%';
+      style.bottom = 'auto';
+      style.marginTop = '5px';
+    }
+    
+    if (props.palettePlacement.endsWith('end')) {
+      style.right = '0';
+      style.left = 'auto';
+    } else {
+      style.left = '0';
+      style.right = 'auto';
+    }
   } else {
-    style.left = '0';
-    style.right = 'auto';
+    // Initial hidden or fixed positioning for Teleport
+    style.position = 'fixed';
+    style.zIndex = '2000'; // Higher than modal
   }
+
   return style;
+});
+
+watch(showPalette, async (val) => {
+  if (val) {
+    await nextTick();
+    updatePalettePosition();
+  }
 });
 
 const standardColors = [

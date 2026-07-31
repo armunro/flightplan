@@ -142,24 +142,76 @@
                          placeholder="Enter text...">
                   
                   <!-- Single Select -->
-                  <select v-else-if="field.type === 1 || field.type === 'SingleSelect'" 
-                          :value="getCustomFieldValue(field.id)"
-                          @change="e => updateCustomFieldValue(field.id, e.target.value)"
-                          class="form-select custom-field-select">
-                    <option value="">-- Select --</option>
-                    <option v-for="opt in (field.options || [])" :key="opt" :value="opt">{{ opt }}</option>
-                  </select>
+                  <div v-else-if="field.type === 1 || field.type === 'SingleSelect'" class="position-relative d-flex align-items-center">
+                    <i v-if="getSelectedOptionIcon(field, getCustomFieldValue(field.id))" 
+                       :class="['bi', getSelectedOptionIcon(field, getCustomFieldValue(field.id)), 'me-2']"
+                       :style="{ color: getSelectedOptionColor(field, getCustomFieldValue(field.id)) }"></i>
+                    <select :value="getCustomFieldValue(field.id)"
+                            @change="e => updateCustomFieldValue(field.id, e.target.value)"
+                            class="form-select custom-field-select"
+                            :style="{ borderLeft: getSelectedOptionColor(field, getCustomFieldValue(field.id)) ? '3px solid ' + getSelectedOptionColor(field, getCustomFieldValue(field.id)) : '' }">
+                      <option value="">-- Select --</option>
+                      <option v-for="opt in (field.options || [])" :key="opt.name" :value="opt.name">{{ opt.name }}</option>
+                    </select>
+                  </div>
 
                   <!-- Multi Select -->
                   <div v-else-if="field.type === 2 || field.type === 'MultiSelect'" class="multi-select-container p-2 border rounded custom-field-multi-select">
-                    <div v-for="opt in (field.options || [])" :key="opt" class="form-check">
+                    <div v-for="opt in (field.options || [])" :key="opt.name" class="form-check d-flex align-items-center gap-2">
                       <input class="form-check-input" 
                              type="checkbox" 
-                             :id="field.id + '-' + opt"
-                             :checked="isMultiSelectChecked(field.id, opt)"
-                             @change="e => toggleMultiSelectValue(field.id, opt, e.target.checked)">
-                      <label class="form-check-label" :for="field.id + '-' + opt">{{ opt }}</label>
+                             :id="field.id + '-' + opt.name"
+                             :checked="isMultiSelectChecked(field.id, opt.name)"
+                             @change="e => toggleMultiSelectValue(field.id, opt.name, e.target.checked)">
+                      <i v-if="opt.icon" :class="['bi', opt.icon]" :style="{ color: opt.color }"></i>
+                      <label class="form-check-label" :for="field.id + '-' + opt.name" :style="{ color: opt.color }">{{ opt.name }}</label>
                     </div>
+                  </div>
+
+                  <!-- Date -->
+                  <date-time-selector 
+                    v-else-if="field.type === 3 || field.type === 'Date'"
+                    :model-value="getCustomFieldValue(field.id)"
+                    placeholder="Select date..."
+                    @update:model-value="val => updateCustomFieldValue(field.id, val)"
+                  />
+
+                  <!-- Link -->
+                  <div v-else-if="field.type === 4 || field.type === 'Link'" class="input-with-actions has-actions">
+                    <input type="text" 
+                           :value="getCustomFieldValue(field.id)"
+                           @input="e => onUpdateLocalText(field.id, e.target.value)"
+                           @blur="saveTask"
+                           class="form-control" 
+                           placeholder="https://...">
+                    <div class="input-actions">
+                      <button class="action-btn" @click="copyCustomLink(getCustomFieldValue(field.id))" title="Copy Link" v-if="getCustomFieldValue(field.id)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      </button>
+                      <button class="action-btn" @click="launchCustomLink(getCustomFieldValue(field.id))" title="Launch Link" v-if="getCustomFieldValue(field.id)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Money -->
+                  <div v-else-if="field.type === 5 || field.type === 'Money'" class="input-group input-group-sm money-input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" 
+                           step="0.01"
+                           :value="getCustomFieldValue(field.id)"
+                           @input="e => onUpdateLocalText(field.id, e.target.value)"
+                           @blur="saveTask"
+                           class="form-control" 
+                           placeholder="0.00">
+                  </div>
+
+                  <!-- True/False -->
+                  <div v-else-if="field.type === 6 || field.type === 'Boolean'" class="form-check form-switch mt-1">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           :checked="getCustomFieldValue(field.id) === 'true'"
+                           @change="e => updateCustomFieldValue(field.id, e.target.checked ? 'true' : 'false')">
                   </div>
                 </td>
               </tr>
@@ -360,6 +412,34 @@ export default {
       window.open(url, '_blank');
     };
 
+    const copyCustomLink = (link) => {
+      if (!link) return;
+      const url = link.startsWith('http') ? link : 'https://' + link;
+      const text = link;
+      if (window.ClipboardItem) {
+        const html = `<a href="${url}">${text}</a>`;
+        const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
+        const plainText = new Blob([text], { type: 'text/plain' });
+        const htmlText = new Blob([fullHtml], { type: 'text/html' });
+        const clipboardItem = new ClipboardItem({ 'text/plain': plainText, 'text/html': htmlText });
+        navigator.clipboard.write([clipboardItem]).catch(err => {
+          navigator.clipboard.writeText(text);
+        });
+      } else {
+        navigator.clipboard.writeText(text);
+      }
+      showToast('Link copied to clipboard');
+    };
+
+    const launchCustomLink = (link) => {
+      if (!link) return;
+      let url = link;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      window.open(url, '_blank');
+    };
+
     const onUpdatePriorityId = async (priorityId) => {
       localTask.value.priorityId = priorityId;
       await saveTask();
@@ -396,6 +476,18 @@ export default {
       emit('refresh');
     };
 
+    const getSelectedOptionColor = (field, value) => {
+      if (!value || !field.options) return null;
+      const opt = field.options.find(o => o.name === value);
+      return opt ? opt.color : null;
+    };
+
+    const getSelectedOptionIcon = (field, value) => {
+      if (!value || !field.options) return null;
+      const opt = field.options.find(o => o.name === value);
+      return opt ? opt.icon : null;
+    };
+
     return {
       localTask,
       getPriorityName,
@@ -415,10 +507,14 @@ export default {
       onUpdateField,
       copyLink,
       launchLink,
+      copyCustomLink,
+      launchCustomLink,
       getCustomFieldValue,
       updateCustomFieldValue,
       isMultiSelectChecked,
-      toggleMultiSelectValue
+      toggleMultiSelectValue,
+      getSelectedOptionColor,
+      getSelectedOptionIcon
     };
   }
 };
@@ -591,8 +687,34 @@ export default {
 }
 
 .action-btn:hover {
-  background: var(--bg-card);
   color: var(--text-primary);
+}
+
+.money-input-group {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch;
+  width: 100%;
+}
+
+.money-input-group .input-group-text {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-right: none;
+  color: var(--text-muted);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  white-space: nowrap;
+}
+
+.money-input-group .form-control {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  flex: 1 1 auto;
+  width: 1%;
 }
 
 .status-badge, .priority-badge, .type-badge {

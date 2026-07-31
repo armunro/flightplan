@@ -10,7 +10,8 @@ public record ListMoveRequest(Guid? TargetListId, ProjectManager.MovePosition? P
 public record TaskStatusDto(Guid? Id, string Name, string Color, bool IsCompletedState, int Order);
 public record TaskTypeDto(Guid? Id, string Name, string Color, string Icon);
 public record ProjectPriorityDto(Guid? Id, string Name, string Color, string Icon, int Order);
-public record CustomFieldDefinitionDto(Guid? Id, string Name, int Type, List<string>? Options);
+public record CustomFieldOptionDto(string Name, string? Color, string? Icon);
+public record CustomFieldDefinitionDto(Guid? Id, string Name, int Type, List<CustomFieldOptionDto>? Options);
 
 public record ProjectCreateRequest(string Name, string? Description, string? Icon, string? Color, List<TaskStatusDto>? Statuses = null, List<TaskTypeDto>? TaskTypes = null, List<ProjectPriorityDto>? Priorities = null, List<CustomFieldDefinitionDto>? CustomFields = null);
 public record ProjectUpdateRequest(string Name, string? Description, string? Icon, string? Color, List<TaskStatusDto>? Statuses = null, List<TaskTypeDto>? TaskTypes = null, List<ProjectPriorityDto>? Priorities = null, List<CustomFieldDefinitionDto>? CustomFields = null);
@@ -69,7 +70,12 @@ public class ProjectsController : ControllerBase
             Id = f.Id ?? Guid.NewGuid(),
             Name = f.Name,
             Type = (CustomFieldType)f.Type,
-            Options = f.Options ?? new List<string>()
+            Options = f.Options?.Select(o => new CustomFieldOption 
+            { 
+                Name = o.Name, 
+                Color = o.Color, 
+                Icon = o.Icon 
+            }).ToList() ?? new List<CustomFieldOption>()
         }).ToList();
 
         var project = _projectManager.CreateProject(request.Name, request.Description, request.Icon, request.Color, statuses, taskTypes, priorities, customFields);
@@ -111,7 +117,12 @@ public class ProjectsController : ControllerBase
             Id = f.Id ?? Guid.NewGuid(),
             Name = f.Name,
             Type = (CustomFieldType)f.Type,
-            Options = f.Options ?? new List<string>()
+            Options = f.Options?.Select(o => new CustomFieldOption 
+            { 
+                Name = o.Name, 
+                Color = o.Color, 
+                Icon = o.Icon 
+            }).ToList() ?? new List<CustomFieldOption>()
         }).ToList();
 
         var project = _projectManager.UpdateProject(projectId, request.Name, request.Description, request.Icon, request.Color, statuses, taskTypes, priorities, customFields);

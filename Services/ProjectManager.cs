@@ -1,5 +1,7 @@
 ﻿using FlightPlan.Models;
 using FlightPlan.Models.Config;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using TaskStatus = FlightPlan.Models.TaskStatus;
@@ -554,6 +556,7 @@ public class ProjectManager
 
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new CustomFieldOptionConverter())
                 .Build();
 
             var projects = deserializer.Deserialize<List<Project>>(yaml);
@@ -586,7 +589,7 @@ public class ProjectManager
                 {
                     foreach (var cf in project.CustomFields)
                     {
-                        cf.Options ??= new List<string>();
+                        cf.Options ??= new List<CustomFieldOption>();
                     }
                 }
 
@@ -644,6 +647,56 @@ public class ProjectManager
     public IEnumerable<Project> GetAllProjects() => ActiveProjects;
     
     public enum MovePosition { Before, After, Inside }
+
+    public class CustomFieldOptionConverter : IYamlTypeConverter
+    {
+        public bool Accepts(Type type) => type == typeof(CustomFieldOption);
+
+        public object? ReadYaml(IParser parser, Type type, ObjectDeserializer nestedObjectDeserializer)
+        {
+            if (parser.TryConsume<Scalar>(out var scalar))
+            {
+                return new CustomFieldOption { Name = scalar.Value, Color = "#6e7681", Icon = "" };
+            }
+
+            if (parser.Current is MappingStart)
+            {
+                var option = new CustomFieldOption();
+                parser.Consume<MappingStart>();
+                while (!parser.TryConsume<MappingEnd>(out _))
+                {
+                    var key = parser.Consume<Scalar>().Value;
+                    var value = parser.Consume<Scalar>().Value;
+
+                    if (key == "name") option.Name = value;
+                    else if (key == "color") option.Color = value;
+                    else if (key == "icon") option.Icon = value;
+                }
+                return option;
+            }
+
+            return null;
+        }
+
+        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
+        {
+            var option = (CustomFieldOption)value!;
+            emitter.Emit(new MappingStart());
+            emitter.Emit(new Scalar("name"));
+            emitter.Emit(new Scalar(option.Name));
+            if (!string.IsNullOrEmpty(option.Color))
+            {
+                emitter.Emit(new Scalar("color"));
+                emitter.Emit(new Scalar(option.Color));
+            }
+            if (!string.IsNullOrEmpty(option.Icon))
+            {
+                emitter.Emit(new Scalar("icon"));
+                emitter.Emit(new Scalar(option.Icon));
+            }
+            emitter.Emit(new MappingEnd());
+        }
+    }
 
     public bool DeleteProject(Guid projectId)
     {

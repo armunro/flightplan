@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal-content project-dialog">
       <div class="modal-header">
-        <h3>{{ isNew ? 'Add Project' : 'Edit Project' }}</h3>
+        <h3>{{ isNew ? 'Add Project' : 'Edit Project' }} <small class="text-muted fs-6" style="font-size: 0.6em">v2</small></h3>
         <button class="close-btn" @click="$emit('close')">&times;</button>
       </div>
       <div class="modal-body">
@@ -123,8 +123,8 @@
         <div v-if="activeTab === 'customFields'" class="tab-content">
           <div v-for="(field, index) in form.customFields" 
                :key="field.id || index" 
-               class="custom-field-edit-block mb-3 p-2 border rounded border-secondary">
-            <div class="d-flex gap-2 mb-2 align-items-center">
+               class="custom-field-edit-block p-2 border rounded border-secondary">
+            <div class="d-flex gap-2 align-items-center">
               <div class="drag-handle" 
                    draggable="true"
                    @dragstart="onDragStart($event, index, 'customFields')"
@@ -135,29 +135,50 @@
                 <i class="bi bi-grip-vertical"></i>
               </div>
               <input v-model="field.name" type="text" class="form-control form-control-sm" placeholder="Field Name">
-              <select v-model="field.type" class="form-select form-select-sm w-auto" @change="onFieldTypeChange(field)">
-                <option :value="0">Text</option>
-                <option :value="1">Single Select</option>
-                <option :value="2">Multi Select</option>
-                <option value="Text" hidden>Text</option>
-                <option value="SingleSelect" hidden>Single Select</option>
-                <option value="MultiSelect" hidden>Multi Select</option>
-              </select>
+              <div class="field-type-selector">
+                <i class="bi" :class="getFieldTypeIcon(field.type)"></i>
+                <select v-model="field.type" class="form-select form-select-sm" @change="onFieldTypeChange(field)">
+                  <option v-for="ft in fieldTypes" :key="ft.value" :value="ft.value">
+                    {{ ft.label }}
+                  </option>
+                  <option value="Text" hidden>Text</option>
+                  <option value="SingleSelect" hidden>Single Select</option>
+                  <option value="MultiSelect" hidden>Multi Select</option>
+                  <option value="Date" hidden>Date</option>
+                  <option value="Link" hidden>Link</option>
+                  <option value="Money" hidden>Money</option>
+                  <option value="Boolean" hidden>True/False</option>
+                </select>
+              </div>
               <button class="btn btn-sm btn-outline-danger" @click="removeCustomField(index)" title="Remove Field">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
             
-            <div v-if="field.type === 1 || field.type === 2" class="ms-4 mt-2">
-              <label class="form-label small text-muted">Options (one per line)</label>
-              <textarea 
-                v-model="field.optionsText"
-                @input="field.options = field.optionsText.split('\n')"
-                @blur="onBlurOptions(field)"
-                class="form-control form-control-sm" 
-                rows="3" 
-                placeholder="Option 1&#10;Option 2">
-              </textarea>
+            <div v-if="field.type === 1 || field.type === 2" class="ms-4 mt-1">
+              <label class="form-label small text-muted mb-1">Options</label>
+              <div v-for="(opt, optIndex) in field.options" 
+                   :key="optIndex" 
+                   class="item-edit-row mb-1"
+                   draggable="true"
+                   @dragstart="onDragStart($event, optIndex, 'customFieldOptions', index)"
+                   @dragover.prevent="onDragOver($event, optIndex)"
+                   @dragleave="onDragLeave"
+                   @drop="onDrop($event, optIndex, 'customFieldOptions')"
+                   :class="{ 'drag-over': dragOverIndex === optIndex && dragOverTab === 'customFieldOptions' }">
+                <div class="drag-handle">
+                  <i class="bi bi-grip-vertical"></i>
+                </div>
+                <input v-model="opt.name" type="text" class="form-control form-control-sm" placeholder="Option Name">
+                <input v-model="opt.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-tag)">
+                <ColorPicker v-model="opt.color" size="sm" palette-placement="top-start" :use-teleport="true" />
+                <button class="btn btn-sm btn-outline-danger" @click="removeCustomFieldOption(field, optIndex)" title="Remove Option">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+              <button class="btn btn-sm btn-link text-info p-0 mt-1" @click="addCustomFieldOption(field)">
+                <i class="bi bi-plus-lg"></i> Add Option
+              </button>
             </div>
           </div>
           <button class="btn btn-sm btn-outline-primary mt-2" @click="addCustomField">
@@ -218,13 +239,37 @@ export default {
       taskTypes: props.project.taskTypes ? JSON.parse(JSON.stringify(props.project.taskTypes)) : [],
       priorities: props.project.priorities ? JSON.parse(JSON.stringify(props.project.priorities)) : [],
       customFields: (props.project.customFields || []).map(f => {
-        const type = typeof f.type === 'string' 
-          ? (f.type === 'Text' ? 0 : f.type === 'SingleSelect' ? 1 : f.type === 'MultiSelect' ? 2 : parseInt(f.type, 10) || 0)
-          : f.type;
+        let type;
+        if (typeof f.type === 'string') {
+          switch (f.type) {
+            case 'Text': type = 0; break;
+            case 'SingleSelect': type = 1; break;
+            case 'MultiSelect': type = 2; break;
+            case 'Date': type = 3; break;
+            case 'Link': type = 4; break;
+            case 'Money': type = 5; break;
+            case 'Boolean': type = 6; break;
+            default: type = parseInt(f.type, 10) || 0;
+          }
+        } else {
+          type = f.type;
+        }
+        
+        const options = (f.options || []).map(opt => {
+          if (typeof opt === 'string') {
+            return { name: opt, color: '#6e7681', icon: '' };
+          }
+          return {
+            name: opt.name || '',
+            color: opt.color || '#6e7681',
+            icon: opt.icon || ''
+          };
+        });
+
         return {
           ...JSON.parse(JSON.stringify(f)),
           type,
-          optionsText: (f.options || []).join('\n')
+          options
         };
       })
     });
@@ -290,8 +335,7 @@ export default {
         id: crypto.randomUUID(),
         name: 'New Field',
         type: 0, // Text
-        options: [],
-        optionsText: ''
+        options: []
       });
     };
 
@@ -299,18 +343,33 @@ export default {
       form.customFields.splice(index, 1);
     };
 
+    const addCustomFieldOption = (field) => {
+      if (!field.options) field.options = [];
+      field.options.push({
+        name: 'New Option',
+        color: '#6e7681',
+        icon: ''
+      });
+    };
+
+    const removeCustomFieldOption = (field, optIndex) => {
+      field.options.splice(optIndex, 1);
+    };
+
     const onFieldTypeChange = (field) => {
       // Convert string types to numbers if they come from the select
       if (field.type === 'Text') field.type = 0;
       else if (field.type === 'SingleSelect') field.type = 1;
       else if (field.type === 'MultiSelect') field.type = 2;
+      else if (field.type === 'Date') field.type = 3;
+      else if (field.type === 'Link') field.type = 4;
+      else if (field.type === 'Money') field.type = 5;
+      else if (field.type === 'Boolean') field.type = 6;
 
-      if (field.type === 0) {
+      if (field.type === 0 || field.type === 3 || field.type === 4 || field.type === 5 || field.type === 6) {
         field.options = [];
-        field.optionsText = '';
-      } else if (!field.options) {
-        field.options = [];
-        field.optionsText = '';
+      } else if (!field.options || field.options.length === 0) {
+        field.options = [{ name: 'Option 1', color: '#6e7681', icon: '' }];
       }
     };
 
@@ -348,12 +407,24 @@ export default {
         }
         
         // Final sanity check for backend expectation
-        data.customFields = data.customFields.map(f => ({
-          ...f,
-          type: typeof f.type === 'string' 
-            ? (f.type === 'Text' ? 0 : f.type === 'SingleSelect' ? 1 : f.type === 'MultiSelect' ? 2 : parseInt(f.type, 10) || 0)
-            : f.type
-        }));
+        data.customFields = data.customFields.map(f => {
+          let type;
+          if (typeof f.type === 'string') {
+            switch (f.type) {
+              case 'Text': type = 0; break;
+              case 'SingleSelect': type = 1; break;
+              case 'MultiSelect': type = 2; break;
+              case 'Date': type = 3; break;
+              case 'Link': type = 4; break;
+              case 'Money': type = 5; break;
+              case 'Boolean': type = 6; break;
+              default: type = parseInt(f.type, 10) || 0;
+            }
+          } else {
+            type = f.type;
+          }
+          return { ...f, type };
+        });
         
         emit('save', data);
       }
@@ -370,11 +441,13 @@ export default {
       return icon.startsWith('bi-') ? `bi ${icon}` : `bi bi-${icon}`;
     });
 
-    const onDragStart = (e, index, tab) => {
+    const onDragStart = (e, index, tab, parentIndex = null) => {
       draggedIndex.value = index;
       dragOverTab.value = tab;
       e.dataTransfer.effectAllowed = 'move';
-      // Set a ghost image if needed, or just rely on default
+      if (parentIndex !== null) {
+        e.dataTransfer.setData('parentIndex', parentIndex);
+      }
     };
 
     const onDragOver = (e, index) => {
@@ -386,6 +459,9 @@ export default {
     };
 
     const onDrop = (e, index, tab) => {
+      const parentIndexStr = e.dataTransfer.getData('parentIndex');
+      const parentIndex = parentIndexStr !== '' ? parseInt(parentIndexStr, 10) : null;
+
       if (draggedIndex.value === -1 || draggedIndex.value === index || dragOverTab.value !== tab) {
         dragOverIndex.value = -1;
         dragOverTab.value = null;
@@ -393,7 +469,15 @@ export default {
         return;
       }
 
-      const list = form[tab];
+      let list;
+      if (tab === 'customFieldOptions' && parentIndex !== null) {
+        list = form.customFields[parentIndex].options;
+      } else {
+        list = form[tab];
+      }
+
+      if (!list) return;
+
       const item = list.splice(draggedIndex.value, 1)[0];
       list.splice(index, 0, item);
 
@@ -407,6 +491,34 @@ export default {
       dragOverIndex.value = -1;
       dragOverTab.value = null;
       draggedIndex.value = -1;
+    };
+
+    const fieldTypes = [
+      { value: 0, label: 'Text', icon: 'bi-text-paragraph' },
+      { value: 1, label: 'Single Select', icon: 'bi-list-ul' },
+      { value: 2, label: 'Multi Select', icon: 'bi-check-all' },
+      { value: 3, label: 'Date', icon: 'bi-calendar3' },
+      { value: 4, label: 'Link', icon: 'bi-link-45deg' },
+      { value: 5, label: 'Money', icon: 'bi-currency-dollar' },
+      { value: 6, label: 'True/False', icon: 'bi-toggle-on' }
+    ];
+
+    const getFieldTypeIcon = (type) => {
+      const typeNum = typeof type === 'string' ? parseInt(type, 10) : type;
+      const ft = fieldTypes.find(f => f.value === typeNum);
+      if (ft) return ft.icon;
+      
+      // Fallback for string keys if they were passed
+      switch (type) {
+        case 'Text': return 'bi-text-paragraph';
+        case 'SingleSelect': return 'bi-list-ul';
+        case 'MultiSelect': return 'bi-check-all';
+        case 'Date': return 'bi-calendar3';
+        case 'Link': return 'bi-link-45deg';
+        case 'Money': return 'bi-currency-dollar';
+        case 'Boolean': return 'bi-toggle-on';
+        default: return 'bi-question-circle';
+      }
     };
 
     return {
@@ -427,11 +539,14 @@ export default {
       removePriority,
       addCustomField,
       removeCustomField,
+      addCustomFieldOption,
+      removeCustomFieldOption,
       onFieldTypeChange,
-      onBlurOptions,
       onSave,
       onDelete,
-      displayIconClass
+      displayIconClass,
+      fieldTypes,
+      getFieldTypeIcon
     };
   }
 };
@@ -457,6 +572,7 @@ export default {
   border-radius: 8px;
   width: 700px;
   max-width: 95vw;
+  max-height: 90vh;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -466,6 +582,7 @@ export default {
   padding: 16px;
   border-bottom: 1px solid var(--border-primary);
   display: flex;
+  flex: 0 0 auto;
   justify-content: space-between;
   align-items: center;
 }
@@ -485,7 +602,14 @@ export default {
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 12px 20px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.custom-field-edit-block {
+  margin-bottom: 0.5rem !important;
+  padding: 0.5rem !important;
 }
 
 .form-label {
@@ -495,7 +619,7 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.form-control {
+.form-control, .form-select {
   background: var(--bg-dark) !important;
   border: 1px solid var(--border-primary);
   color: var(--text-primary) !important;
@@ -505,11 +629,32 @@ export default {
   color: #6e7681;
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
   background: var(--bg-dark);
   border-color: var(--accent-blue);
   color: var(--text-primary);
   box-shadow: none;
+}
+
+.field-type-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.field-type-selector i {
+  position: absolute;
+  left: 8px;
+  pointer-events: none;
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+}
+
+.field-type-selector .form-select {
+  padding-left: 28px;
+  width: auto;
+  min-width: 140px;
 }
 
 .tabs {
@@ -540,7 +685,7 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
-  padding: 4px;
+  padding: 2px 4px;
   border-radius: 4px;
   transition: background-color 0.2s;
 }
@@ -602,6 +747,7 @@ export default {
   padding: 16px;
   border-top: 1px solid var(--border-primary);
   display: flex;
+  flex: 0 0 auto;
   justify-content: space-between;
   align-items: center;
 }
