@@ -46,9 +46,12 @@
                       @keydown.esc="onTitleEsc"
                       @keydown="onGeneralKeyDown"
                       @paste="onPaste">{{ task?.title || '' }}</span>
-                <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon" title="Open link">
+                <a v-if="task?.link" :href="task.link" target="_blank" class="action-link-icon ms-1" title="Open link">
                     <i class="bi bi-box-arrow-up-right"></i>
                 </a>
+                <span v-if="task?.description" class="description-indicator ms-1" title="Task has description">
+                    <i class="bi bi-text-paragraph"></i>
+                </span>
             </div>
             <div class="tasks-cell" :style="{ width: gridStyle.gridTemplateColumns.split(' ')[3] }">
                 <div class="dropdown" v-if="task" :class="{ 'dropup': isLast }">
@@ -712,11 +715,14 @@ export default {
 
 .drag-over-inside { background-color: rgba(88, 166, 255, 0.1) !important; }
 
-.action-link-icon {
+.action-link-icon, .description-indicator {
     opacity: 0.7;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
 
-.action-link-icon:hover {
+.action-link-icon:hover, .description-indicator:hover {
     opacity: 1;
 }
 </style>

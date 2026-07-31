@@ -7,29 +7,29 @@
       </div>
       
       <div class="task-detail-body" v-if="localTask">
-        <div class="detail-row">
-            <div class="detail-field flex-1">
-              <label>Type</label>
-              <div class="dropdown">
-                <span class="type-badge dropdown-toggle" 
-                      data-bs-toggle="dropdown"
-                      :style="{ color: getTaskTypeColor(localTask.taskTypeId) }">
-                  <i :class="getTaskTypeIcon(localTask.taskTypeId)"></i>
-                  {{ getTaskTypeName(localTask.taskTypeId) }}
-                </span>
-                <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                  <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
-                  <li v-for="t in projectTaskTypes" :key="t.id">
-                    <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
-                      <i :class="t.icon" class="me-2"></i>{{ t.name }}
-                    </a>
-                  </li>
-                </ul>
-              </div>
+        <div class="detail-row mb-2">
+          <div class="detail-field flex-1">
+            <label>Type</label>
+            <div class="dropdown">
+              <span class="type-badge dropdown-toggle" 
+                    data-bs-toggle="dropdown"
+                    :style="{ color: getTaskTypeColor(localTask.taskTypeId) }">
+                <i :class="getTaskTypeIcon(localTask.taskTypeId)"></i>
+                {{ getTaskTypeName(localTask.taskTypeId) }}
+              </span>
+              <ul class="dropdown-menu border-secondary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                <li><a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: null } })">-- Type --</a></li>
+                <li v-for="t in projectTaskTypes" :key="t.id">
+                  <a class="dropdown-item" href="#" @click.prevent="onUpdateTaskType({ target: { value: t.id } })" :style="{ color: t.color }">
+                    <i :class="t.icon" class="me-2"></i>{{ t.name }}
+                  </a>
+                </li>
+              </ul>
             </div>
+          </div>
 
-            <div class="detail-field flex-1">
-              <label>Status</label>
+          <div class="detail-field flex-1">
+            <label>Status</label>
             <div class="dropdown">
               <span class="status-badge dropdown-toggle" 
                     data-bs-toggle="dropdown"
@@ -65,14 +65,12 @@
               </ul>
             </div>
           </div>
-        </div>
-
-        <div class="detail-row">
+          
           <div class="detail-field flex-1">
             <label>Start</label>
             <date-time-selector 
               v-model="localTask.start" 
-              placeholder="e.g. tomorrow 10am"
+              placeholder="Start..."
               :is-closed="localTask.isCompleted"
               @update:model-value="onUpdateField"
             />
@@ -81,33 +79,39 @@
             <label>End</label>
             <date-time-selector 
               v-model="localTask.end" 
-              placeholder="e.g. Next Week"
+              placeholder="End..."
               :is-closed="localTask.isCompleted"
               @update:model-value="onUpdateField"
             />
           </div>
-          <div class="detail-field flex-1">
-            <label>Estimate (min)</label>
-            <input type="number" v-model.number="localTask.estimateMinutes" @blur="onUpdateField" class="form-control">
-          </div>
         </div>
 
-        <div class="detail-field">
-          <label>Link</label>
-          <div class="input-with-actions has-actions">
-            <input type="text" v-model="localTask.link" @blur="onUpdateField" class="form-control" placeholder="https://...">
-            <div class="input-actions">
-              <button class="action-btn" @click="copyLink" title="Copy Link" v-if="localTask.link">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-              <button class="action-btn" @click="launchLink" title="Launch Link" v-if="localTask.link">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-              </button>
+        <div class="row g-2">
+          <div class="col-md-9">
+            <div class="detail-field">
+              <label>Link</label>
+              <div class="input-with-actions has-actions">
+                <input type="text" v-model="localTask.link" @blur="onUpdateField" class="form-control" placeholder="https://...">
+                <div class="input-actions">
+                  <button class="action-btn" @click="copyLink" title="Copy Link" v-if="localTask.link">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                  <button class="action-btn" @click="launchLink" title="Launch Link" v-if="localTask.link">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="detail-field">
+              <label>Estimate (min)</label>
+              <input type="number" v-model.number="localTask.estimateMinutes" @blur="onUpdateField" class="form-control">
             </div>
           </div>
         </div>
         
-        <div class="detail-field">
+        <div class="detail-field mb-3">
           <label>Description</label>
           <textarea 
             v-model="localTask.description" 
@@ -119,46 +123,48 @@
         </div>
 
         <!-- Custom Fields -->
-        <div v-if="projectCustomFields && projectCustomFields.length > 0" class="custom-fields-section mt-4">
-          <h4 class="theme-text-muted small text-uppercase fw-bold mb-3 border-bottom pb-2">Custom Fields</h4>
-          <div class="row g-3">
-            <div v-for="field in projectCustomFields" :key="field.id" class="col-md-6">
-              <div class="detail-field mb-0">
-                <label>{{ field.name }}</label>
-                <!-- <div class="small text-muted mb-1">Type: {{ field.type }} | ID: {{ field.id }}</div> -->
-                
-                <!-- Text Field -->
-                <input v-if="field.type === 0 || field.type === 'Text'" 
-                       type="text" 
-                       :value="getCustomFieldValue(field.id)"
-                       @input="e => onUpdateLocalText(field.id, e.target.value)"
-                       @blur="saveTask"
-                       class="form-control" 
-                       placeholder="Enter text...">
-                
-                <!-- Single Select -->
-                <select v-else-if="field.type === 1 || field.type === 'SingleSelect'" 
-                        :value="getCustomFieldValue(field.id)"
-                        @change="e => updateCustomFieldValue(field.id, e.target.value)"
-                        class="form-select custom-field-select">
-                  <option value="">-- Select --</option>
-                  <option v-for="opt in (field.options || [])" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
+        <div v-if="projectCustomFields && projectCustomFields.length > 0" class="custom-fields-section mt-2">
+          <h4 class="theme-text-muted small text-uppercase fw-bold mb-2 border-bottom pb-1">Custom Fields</h4>
+          <table class="table table-sm custom-fields-table">
+            <tbody>
+              <tr v-for="field in projectCustomFields" :key="field.id">
+                <td class="field-label-cell align-middle">
+                  <label class="mb-0">{{ field.name }}</label>
+                </td>
+                <td class="field-value-cell">
+                  <!-- Text Field -->
+                  <input v-if="field.type === 0 || field.type === 'Text'" 
+                         type="text" 
+                         :value="getCustomFieldValue(field.id)"
+                         @input="e => onUpdateLocalText(field.id, e.target.value)"
+                         @blur="saveTask"
+                         class="form-control" 
+                         placeholder="Enter text...">
+                  
+                  <!-- Single Select -->
+                  <select v-else-if="field.type === 1 || field.type === 'SingleSelect'" 
+                          :value="getCustomFieldValue(field.id)"
+                          @change="e => updateCustomFieldValue(field.id, e.target.value)"
+                          class="form-select custom-field-select">
+                    <option value="">-- Select --</option>
+                    <option v-for="opt in (field.options || [])" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
 
-                <!-- Multi Select -->
-                <div v-else-if="field.type === 2 || field.type === 'MultiSelect'" class="multi-select-container p-2 border rounded custom-field-multi-select">
-                  <div v-for="opt in (field.options || [])" :key="opt" class="form-check">
-                    <input class="form-check-input" 
-                           type="checkbox" 
-                           :id="field.id + '-' + opt"
-                           :checked="isMultiSelectChecked(field.id, opt)"
-                           @change="e => toggleMultiSelectValue(field.id, opt, e.target.checked)">
-                    <label class="form-check-label" :for="field.id + '-' + opt">{{ opt }}</label>
+                  <!-- Multi Select -->
+                  <div v-else-if="field.type === 2 || field.type === 'MultiSelect'" class="multi-select-container p-2 border rounded custom-field-multi-select">
+                    <div v-for="opt in (field.options || [])" :key="opt" class="form-check">
+                      <input class="form-check-input" 
+                             type="checkbox" 
+                             :id="field.id + '-' + opt"
+                             :checked="isMultiSelectChecked(field.id, opt)"
+                             @change="e => toggleMultiSelectValue(field.id, opt, e.target.checked)">
+                      <label class="form-check-label" :for="field.id + '-' + opt">{{ opt }}</label>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -436,7 +442,7 @@ export default {
   background: var(--bg-dark);
   width: 900px;
   max-width: 95%;
-  max-height: 90vh;
+  max-height: 95vh;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -446,7 +452,7 @@ export default {
 }
 
 .task-detail-header {
-  padding: 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border-primary);
   display: flex;
   justify-content: space-between;
@@ -477,7 +483,7 @@ export default {
 }
 
 .task-detail-body {
-  padding: 20px;
+  padding: 15px 20px;
   overflow-y: auto;
 }
 
@@ -513,13 +519,13 @@ export default {
 }
 
 .detail-field {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .detail-field label {
   display: block;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: var(--text-muted);
   font-size: 0.85em;
   text-transform: uppercase;
@@ -528,7 +534,7 @@ export default {
 
 .detail-row {
   display: flex;
-  gap: 15px;
+  gap: 12px;
 }
 
 .flex-1 {
@@ -537,7 +543,7 @@ export default {
 
 .form-control {
   width: 100%;
-  padding: 8px;
+  padding: 6px 10px;
   border: 1px solid var(--border-primary);
   background: var(--bg-darker);
   color: var(--text-primary);
@@ -630,5 +636,39 @@ export default {
 .description-textarea {
   min-height: 100px;
   resize: vertical;
+}
+
+.custom-fields-table {
+  border-collapse: separate;
+  border-spacing: 0 4px;
+  background: transparent;
+  color: inherit;
+}
+
+.custom-fields-table tr {
+  background: transparent;
+}
+
+.custom-fields-table td {
+  border: none;
+  padding: 4px 8px;
+  background: transparent;
+  color: inherit;
+}
+
+.field-label-cell {
+  width: 30%;
+}
+
+.field-label-cell label {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+}
+
+.field-value-cell {
+  width: 70%;
 }
 </style>
