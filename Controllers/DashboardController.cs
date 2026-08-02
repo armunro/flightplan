@@ -9,6 +9,7 @@ namespace FlightPlan.Controllers;
 
 public record DashboardTaskDto(
     Guid Id,
+    Guid ProjectId,
     string Title,
     bool IsCompleted,
     DateTime? End,
@@ -92,6 +93,7 @@ public class DashboardController : ControllerBase
 
                         return new DashboardTaskDto(
                             t.Id,
+                            project.Id,
                             t.Title,
                             t.IsCompleted,
                             t.End,

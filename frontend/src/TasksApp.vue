@@ -1512,6 +1512,25 @@ export default {
       console.log('Available columns:', allColumns.map(c => c.id));
       await fetchProjects();
       console.log('Projects fetched:', projects.value.length);
+
+      // Handle deep linking from Dashboard
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get('projectId');
+      const taskId = urlParams.get('taskId');
+
+      if (projectId) {
+        selectedProjectId.value = projectId;
+        if (taskId) {
+          // Wait for next tick to ensure project is selected and tasks are loaded
+          nextTick(() => {
+            const result = findTaskInProjects(projects.value, taskId);
+            if (result && result.task) {
+              selectedTask.value = result.task;
+            }
+          });
+        }
+      }
+
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('task-added', fetchProjects);
     });

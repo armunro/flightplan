@@ -19,4 +19,5 @@ public interface ICalendarService
     Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto);
     Task DeleteEventAsync(string eventId, string? calendarId = null);
     Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto);
+    Task<CalendarEventDto?> GetEventAsync(string eventId, string? calendarId = null);
 }

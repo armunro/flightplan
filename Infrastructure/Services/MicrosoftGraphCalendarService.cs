@@ -255,4 +255,31 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
             throw;
         }
     }
+
+    public async Task<CalendarEventDto?> GetEventAsync(string eventId, string? calendarId = null)
+    {
+        try
+        {
+            var client = await GetClientAsync();
+            var ev = await client.Me.Calendars[calendarId ?? "default"].Events[eventId].GetAsync();
+            
+            if (ev == null) return null;
+
+            return new CalendarEventDto(
+                ev.Id,
+                ev.Subject ?? "",
+                DateTimeOffset.Parse(ev.Start?.DateTime ?? DateTimeOffset.Now.ToString()),
+                DateTimeOffset.Parse(ev.End?.DateTime ?? DateTimeOffset.Now.ToString()),
+                ev.Location?.DisplayName,
+                ev.WebLink,
+                calendarId ?? "default",
+                ev.IsAllDay ?? false
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error fetching calendar event {EventId}", eventId);
+            return null;
+        }
+    }
 }

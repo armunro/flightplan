@@ -17,6 +17,7 @@ public interface IGraphService
     Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto);
     Task DeleteEventAsync(string eventId, string? calendarId = null);
     Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto);
+    Task<CalendarEventDto?> GetEventAsync(string eventId, string? calendarId = null);
 }
 
 public class GraphService : IGraphService
@@ -95,5 +96,10 @@ public class GraphService : IGraphService
     public Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto)
     {
         return CurrentCalendarService.UpdateEventAsync(eventId, eventDto);
+    }
+
+    public Task<CalendarEventDto?> GetEventAsync(string eventId, string? calendarId = null)
+    {
+        return CurrentCalendarService.GetEventAsync(eventId, calendarId);
     }
 }

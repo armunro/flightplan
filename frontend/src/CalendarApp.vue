@@ -517,6 +517,38 @@ onMounted(async () => {
   fetchPreferences();
   fetchCalendars();
   loadSettings();
+
+  // Handle deep linking from Dashboard
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get('eventId');
+  const calendarId = urlParams.get('calendarId');
+
+  if (eventId) {
+    // We need to fetch the event specifically to open the modal
+    // If it's not in the current view of FullCalendar, we might need a separate API call
+    try {
+      const response = await fetch(`/api/calendar/event/${eventId}?calendarId=${calendarId || ''}`);
+      if (response.ok) {
+        const ev = await response.json();
+        selectedEvent.value = {
+          id: ev.id,
+          title: ev.subject,
+          start: ev.start,
+          end: ev.end,
+          allDay: ev.isAllDay,
+          url: ev.webLink,
+          backgroundColor: folderPreferences.value[ev.calendarId || 'default']?.color || 'var(--accent-blue)',
+          extendedProps: {
+            location: ev.location,
+            calendarId: ev.calendarId || 'default'
+          }
+        };
+        isEventDetailsModalOpen.value = true;
+      }
+    } catch (e) {
+      console.error('Error fetching event for deep link:', e);
+    }
+  }
 });
 
 const loadSettings = async () => {

@@ -105,4 +105,29 @@ public class CalendarController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    [HttpGet("event/{id}")]
+    public async Task<IActionResult> GetEvent(string id, [FromQuery] string? calendarId = null)
+    {
+        try
+        {
+            var e = await _graphService.GetEventAsync(id, calendarId);
+            if (e == null) return NotFound();
+            
+            var result = new CalendarEventResponseDto(
+                e.Id, 
+                e.Subject, 
+                e.IsAllDay ? e.Start.ToString("yyyy-MM-dd") : e.Start.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                e.IsAllDay ? e.End.ToString("yyyy-MM-dd") : e.End.ToString("yyyy-MM-ddTHH:mm:ssZ"), 
+                e.Location ?? "", 
+                e.WebLink, 
+                e.CalendarId, 
+                e.IsAllDay);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }

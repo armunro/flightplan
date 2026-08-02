@@ -286,4 +286,9 @@ public class MockCalendarService : ICalendarService
         }
         return Task.FromResult(eventDto);
     }
+    public Task<CalendarEventDto?> GetEventAsync(string eventId, string? calendarId = null)
+    {
+        var ev = _mockEvents.FirstOrDefault(e => e.Id == eventId);
+        return Task.FromResult(ev);
+    }
 }

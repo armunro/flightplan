@@ -157,7 +157,7 @@
               </div>
             </div>
             <div v-else class="email-list">
-              <div v-for="email in getSortedEmails(emails)" :key="email.id" class="email-item" :class="{ 'unread': !email.isRead }">
+              <div v-for="email in getSortedEmails(emails)" :key="email.id" class="email-item" :class="{ 'unread': !email.isRead, 'highlighted': email.id === highlightedEmailId }">
                 <div class="email-item-content">
                   <div class="email-item-top">
                     <div class="d-flex align-items-center gap-2">
@@ -368,6 +368,7 @@ const loadSetting = (key, defaultValue) => {
 };
 
 const emails = ref([]);
+const highlightedEmailId = ref(null);
 const theme = ref('Cosmic');
 const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 const pageSize = ref(loadSetting('emailPageSize', 50));
@@ -1025,6 +1026,9 @@ onMounted(() => {
   fetchFolders();
   fetchEmails();
   fetchRules();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  highlightedEmailId.value = urlParams.get('messageId');
 });
 </script>
 
@@ -1287,6 +1291,11 @@ label, .form-label {
   transition: background-color 0.1s;
   position: relative;
   min-height: 54px;
+}
+
+.email-item.highlighted {
+  background-color: rgba(88, 166, 255, 0.1) !important;
+  border-left: 3px solid var(--accent-blue);
 }
 
 .email-item:hover {

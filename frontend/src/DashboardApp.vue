@@ -38,7 +38,7 @@
                 <div v-else class="list-group list-group-flush">
                   <div v-for="event in data.todaysEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-2 px-3 event-item">
                     <div class="d-flex justify-content-between align-items-start">
-                      <div class="event-details min-width-0 d-flex gap-2">
+                      <div class="event-details min-width-0 d-flex gap-2" @click="navigateToEvent(event)" style="cursor: pointer;">
                         <div class="event-icon-wrapper mt-1" :style="{ color: getCalendarPref(event.calendarId).color || 'var(--accent-blue)' }">
                           <i class="bi" :class="getCalendarPref(event.calendarId).icon || 'bi-calendar3'"></i>
                         </div>
@@ -50,7 +50,7 @@
                           </div>
                         </div>
                       </div>
-                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2">
+                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2" title="Open in Outlook">
                         <i class="bi bi-box-arrow-up-right fs-xs"></i>
                       </a>
                     </div>
@@ -76,7 +76,7 @@
                 <div v-else class="list-group list-group-flush">
                   <div v-for="event in data.upcomingEvents" :key="event.id" class="list-group-item bg-transparent border-secondary py-2 px-3 event-item">
                     <div class="d-flex justify-content-between align-items-start">
-                      <div class="event-details min-width-0 d-flex gap-2">
+                      <div class="event-details min-width-0 d-flex gap-2" @click="navigateToEvent(event)" style="cursor: pointer;">
                         <div class="event-icon-wrapper mt-1" :style="{ color: getCalendarPref(event.calendarId).color || 'var(--accent-blue)' }">
                           <i class="bi" :class="getCalendarPref(event.calendarId).icon || 'bi-calendar3'"></i>
                         </div>
@@ -88,7 +88,7 @@
                           </div>
                         </div>
                       </div>
-                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2">
+                      <a v-if="event.webLink" :href="event.webLink" target="_blank" class="btn btn-link btn-sm p-0 text-accent-blue ms-2" title="Open in Outlook">
                         <i class="bi bi-box-arrow-up-right fs-xs"></i>
                       </a>
                     </div>
@@ -113,7 +113,7 @@
                 No upcoming deadlines.
               </div>
               <div v-else class="dashboard-tasks-grid">
-                <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2">
+                <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2" @click="navigateToTask(task)" style="cursor: pointer;">
                   <div class="d-flex align-items-center w-100 px-3">
                     <div class="flex-grow-1 min-width-0">
                       <!-- First Line: Project & List -->
@@ -186,36 +186,34 @@
                 No recent emails.
               </div>
               <div v-else class="list-group list-group-flush">
-                <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2 px-3">
-                  <a :href="email.webLink" target="_blank" class="text-decoration-none text-reset">
-                    <div class="d-flex flex-column">
-                      <!-- First Line: Subject -->
-                      <div class="d-flex align-items-center mb-1">
-                        <span class="fs-sm fw-bold text-primary text-truncate">{{ email.subject }}</span>
-                      </div>
+                <div v-for="email in data.recentEmails" :key="email.id" class="list-group-item bg-transparent border-secondary email-item py-2 px-3" @click="navigateToEmail(email)" style="cursor: pointer;">
+                  <div class="d-flex flex-column">
+                    <!-- First Line: Subject -->
+                    <div class="d-flex align-items-center mb-1">
+                      <span class="fs-sm fw-bold text-primary text-truncate">{{ email.subject }}</span>
+                    </div>
+                    
+                    <!-- Second Line: Metadata -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                      <span class="fw-bold fs-xs text-truncate text-muted" style="max-width: 150px;">{{ email.from }}</span>
                       
-                      <!-- Second Line: Metadata -->
-                      <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <span class="fw-bold fs-xs text-truncate text-muted" style="max-width: 150px;">{{ email.from }}</span>
-                        
-                        <div class="d-flex align-items-center gap-1 flex-wrap">
-                          <span v-for="rule in email.matchingRules" :key="rule.name" 
-                                class="badge rounded-pill x-small" 
-                                :style="{ backgroundColor: rule.color || 'var(--accent-blue)', color: 'white' }">
-                            {{ rule.name }}
-                          </span>
-                        </div>
-
-                        <span class="text-muted fs-xs whitespace-nowrap ms-auto">
-                          <i class="bi bi-clock me-1"></i>
-                          {{ formatRelativeTime(email.receivedDateTime) }}
+                      <div class="d-flex align-items-center gap-1 flex-wrap">
+                        <span v-for="rule in email.matchingRules" :key="rule.name" 
+                              class="badge rounded-pill x-small" 
+                              :style="{ backgroundColor: rule.color || 'var(--accent-blue)', color: 'white' }">
+                          {{ rule.name }}
                         </span>
                       </div>
 
-                      <!-- Third Line: Preview -->
-                      <div class="fs-xs text-muted text-truncate">{{ email.bodyPreview }}</div>
+                      <span class="text-muted fs-xs whitespace-nowrap ms-auto">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ formatRelativeTime(email.receivedDateTime) }}
+                      </span>
                     </div>
-                  </a>
+
+                    <!-- Third Line: Preview -->
+                    <div class="fs-xs text-muted text-truncate">{{ email.bodyPreview }}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -435,6 +433,18 @@ const completeTask = async (task) => {
   } catch (e) {
     console.error('Failed to complete task:', e);
   }
+};
+
+const navigateToTask = (task) => {
+  window.location.href = `/Tasks?projectId=${task.projectId}&taskId=${task.id}`;
+};
+
+const navigateToEmail = (email) => {
+  window.location.href = `/Email?messageId=${email.id}`;
+};
+
+const navigateToEvent = (event) => {
+  window.location.href = `/Calendar?eventId=${event.id}&calendarId=${event.calendarId}`;
 };
 
 onMounted(() => {
