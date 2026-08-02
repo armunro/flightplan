@@ -170,12 +170,13 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { addTask, addSubtask } from '../js/tasks-api';
 import DateTimeSelector from './DateTimeSelector.vue';
+import { showToast } from './Toast.vue';
 
 const props = defineProps({
   isOpen: Boolean
 });
 
-const emit = defineEmits(['close', 'taskAdded']);
+const emit = defineEmits(['close', 'taskAdded', 'update:isOpen']);
 
 const projects = ref([]);
 const titleInput = ref(null);
@@ -369,6 +370,11 @@ const submit = async (keepOpen = false) => {
     emit('taskAdded');
     window.dispatchEvent(new CustomEvent('task-added'));
     
+    const message = titlesToCreate.length > 1 
+      ? `Successfully created ${titlesToCreate.length} tasks` 
+      : 'Task created successfully';
+    showToast(message, 'success');
+    
     if (keepOpen) {
       form.title = '';
       form.titles = [];
@@ -398,9 +404,19 @@ const handleOpenEvent = (e) => {
   if (e.detail) {
     const { title, titles, projectId, listId, parentId, statusId, priorityId, start, end, estimateMinutes } = e.detail;
     
+    // If the modal isn't open, open it first
+    if (!props.isOpen) {
+      emit('update:isOpen', true);
+      // Wait a bit for the watch isOpen to run and fetch projects
+    }
+
     // Use a small timeout to ensure fetchProjects completes if needed, 
     // although fetchProjects is called in watch isOpen
     setTimeout(async () => {
+      // Clear any existing titles before setting new ones
+      form.title = '';
+      form.titles = [];
+      
       if (title !== undefined) form.title = title;
       if (titles !== undefined && Array.isArray(titles)) form.titles = titles;
       if (projectId !== undefined) {

@@ -1,7 +1,6 @@
 ﻿<template>
   <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
-    <Toast />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column theme-bg-darker" style="position: relative; z-index: 1;">
       <div class="flex-grow-1 overflow-hidden d-flex flex-row">
 
@@ -94,7 +93,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
-import Toast, { showToast } from './components/Toast.vue';
+import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import { MdEditor, NormalToolbar } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';

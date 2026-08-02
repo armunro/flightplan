@@ -1,7 +1,8 @@
 <template>
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
+    <Toast />
     <HelpModal :isOpen="isHelpModalOpen" @close="isHelpModalOpen = false" />
-    <AddTaskModal :isOpen="isAddTaskModalOpen" @close="isAddTaskModalOpen = false" />
+    <AddTaskModal v-model:isOpen="isAddTaskModalOpen" @close="isAddTaskModalOpen = false" />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
         <i class="bi bi-send brand-icon"></i>
@@ -56,6 +57,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import Toast from './Toast.vue';
 import HelpModal from './HelpModal.vue';
 import AddTaskModal from './AddTaskModal.vue';
 import { fetchSettings } from '../js/dashboard-api';
@@ -96,6 +98,21 @@ const handleHotkeys = (e) => {
     isHelpModalOpen.value = !isHelpModalOpen.value;
   } else if (action === 'add-task') {
     e.preventDefault();
+    
+    // Check for selection if we're on the Notepad page
+    const isNotepad = window.location.pathname.toLowerCase().includes('/notepad');
+    let selection = window.getSelection().toString();
+    
+    if (isNotepad && selection) {
+      const lines = selection.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length > 0) {
+        window.dispatchEvent(new CustomEvent('open-add-task-modal', {
+          detail: lines.length === 1 ? { title: lines[0] } : { titles: lines }
+        }));
+        return;
+      }
+    }
+    
     isAddTaskModalOpen.value = !isAddTaskModalOpen.value;
   } else if (action) {
     e.preventDefault();

@@ -498,7 +498,7 @@ onUnmounted(() => {
   cursor: row-resize;
   background: transparent;
   transition: background 0.2s;
-  z-index: 10;
+  z-index: 5;
   margin-top: -2px;
   margin-bottom: -2px;
   position: relative;
