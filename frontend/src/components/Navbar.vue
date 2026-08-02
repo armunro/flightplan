@@ -1,6 +1,5 @@
 <template>
   <div class="main-navbar d-flex flex-column flex-shrink-0" :class="{ 'collapsed': isCollapsed }">
-    <Toast />
     <HelpModal :isOpen="isHelpModalOpen" @close="isHelpModalOpen = false" />
     <AddTaskModal :isOpen="isAddTaskModalOpen" @close="isAddTaskModalOpen = false" />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
@@ -57,7 +56,6 @@
 
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
-import Toast from './Toast.vue';
 import HelpModal from './HelpModal.vue';
 import AddTaskModal from './AddTaskModal.vue';
 import { fetchSettings } from '../js/dashboard-api';
@@ -175,7 +173,7 @@ const currentPath = computed(() => {
   border-right: 1px solid var(--border-primary);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
-  z-index: 100;
+  z-index: 10;
 }
 
 .main-navbar.collapsed {

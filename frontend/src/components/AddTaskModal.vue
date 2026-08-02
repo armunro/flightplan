@@ -11,7 +11,11 @@
         <div class="row g-3">
           <div class="col-12">
             <label class="form-label theme-text-muted small text-uppercase fw-bold">Title <span class="text-danger">*</span></label>
-            <input v-model="form.title" type="text" class="form-control theme-input" :class="{ 'is-invalid': showValidation && !form.title.trim() }" placeholder="What needs to be done?" ref="titleInput" @keydown.enter="submit">
+            <input v-if="!isMultiple" v-model="form.title" type="text" class="form-control theme-input" :class="{ 'is-invalid': showValidation && !form.title.trim() }" placeholder="What needs to be done?" ref="titleInput" @keydown.enter="submit(false)">
+            <div v-else class="form-control theme-input bg-opacity-10 d-flex align-items-center justify-content-between">
+              <span class="text-info fw-bold">{{ form.titles.length > 1 ? 'Multiple (' + form.titles.length + ' tasks)' : form.titles[0] }}</span>
+              <button class="btn btn-sm btn-link p-0 text-muted" @click="form.titles = []">Clear</button>
+            </div>
           </div>
 
           <div class="col-md-6">
@@ -153,7 +157,9 @@
         <button class="btn btn-subtle" @click="close">Cancel</button>
         <div class="ms-auto d-flex gap-2">
           <button class="btn btn-outline-primary" @click="submit(true)" :disabled="!isFormValid">Create Another</button>
-          <button class="btn btn-primary px-4" @click="submit(false)" :disabled="!isFormValid">Add Task</button>
+          <button class="btn btn-primary px-4" @click="submit(false)" :disabled="!isFormValid">
+            {{ isMultiple ? 'Add Tasks' : 'Add Task' }}
+          </button>
         </div>
       </div>
     </div>
@@ -183,6 +189,7 @@ const priorityDropdown = ref(null);
 
 const form = reactive({
   title: '',
+  titles: [],
   projectId: null,
   listId: null,
   parentId: null,
@@ -193,6 +200,8 @@ const form = reactive({
   end: null,
   estimateMinutes: 0
 });
+
+const isMultiple = computed(() => form.titles && form.titles.length > 0);
 
 const selectedProject = computed(() => {
   return projects.value.find(p => p.id === form.projectId) || null;
@@ -286,6 +295,7 @@ const selectPriority = (priority) => {
 };
 
 const isFormValid = computed(() => {
+  if (isMultiple.value) return form.projectId && form.listId;
   return form.title.trim() && form.projectId && form.listId;
 });
 
@@ -335,10 +345,16 @@ const submit = async (keepOpen = false) => {
       estimateMinutes: form.estimateMinutes
     };
 
-    if (form.parentId) {
-      await addSubtask(form.parentId, form.title, form.statusId, form.priorityId, taskData);
-    } else {
-      await addTask(form.listId, form.title, form.statusId, form.priorityId, taskData);
+    const titlesToCreate = isMultiple.value ? form.titles : [form.title];
+
+    for (const title of titlesToCreate) {
+      if (!title.trim()) continue;
+      
+      if (form.parentId) {
+        await addSubtask(form.parentId, title, form.statusId, form.priorityId, taskData);
+      } else {
+        await addTask(form.listId, title, form.statusId, form.priorityId, taskData);
+      }
     }
     
     // Remember last project, list, and parent task
@@ -355,6 +371,7 @@ const submit = async (keepOpen = false) => {
     
     if (keepOpen) {
       form.title = '';
+      form.titles = [];
       showValidation.value = false;
       setTimeout(() => {
         if (titleInput.value) titleInput.value.focus();
@@ -379,12 +396,13 @@ const handleKeyDown = (e) => {
 
 const handleOpenEvent = (e) => {
   if (e.detail) {
-    const { title, projectId, listId, parentId, statusId, priorityId, start, end, estimateMinutes } = e.detail;
+    const { title, titles, projectId, listId, parentId, statusId, priorityId, start, end, estimateMinutes } = e.detail;
     
     // Use a small timeout to ensure fetchProjects completes if needed, 
     // although fetchProjects is called in watch isOpen
     setTimeout(async () => {
       if (title !== undefined) form.title = title;
+      if (titles !== undefined && Array.isArray(titles)) form.titles = titles;
       if (projectId !== undefined) {
         form.projectId = projectId;
         // Trigger project change logic to populate lists/status/priority
@@ -421,6 +439,7 @@ watch(() => props.isOpen, async (newVal) => {
     
     // Reset form fields
     form.title = '';
+    form.titles = [];
     form.start = null;
     form.end = null;
     form.estimateMinutes = 0;

@@ -1,8 +1,10 @@
 ﻿<template>
   <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
-    <div class="flex-grow-1 overflow-hidden d-flex flex-column theme-bg-darker">
+    <Toast />
+    <div class="flex-grow-1 overflow-hidden d-flex flex-column theme-bg-darker" style="position: relative; z-index: 1;">
       <div class="flex-grow-1 overflow-hidden d-flex flex-row">
+
       <!-- Sidebar for files -->
       <div class="file-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
         <div class="sidebar-header d-flex align-items-center theme-border" :class="{ 'collapsed': sidebarCollapsed }">
@@ -46,16 +48,22 @@
 
       <!-- Main Editor Area -->
       <div class="main-area d-flex flex-column flex-grow-1 theme-bg-darker">
-        <div class="controls-bar theme-border">
-          <div class="d-flex align-items-center">
-            <h5 class="mb-0 me-3 theme-text"><i class="bi bi-journal-text"></i> {{ currentFile || 'No file selected' }}</h5>
-            <div v-if="currentFile" class="save-status small" :class="{ 'text-success': saveStatus === 'Saved', 'text-warning': saveStatus === 'Saving...', 'text-danger': saveStatus === 'Error' }">
-              {{ saveStatus }}
-            </div>
+        <div class="controls-bar theme-border px-3">
+          <h5 class="mb-0 me-3 theme-text d-flex align-items-center"><i class="bi bi-journal-text me-2"></i> {{ currentFile || 'No file selected' }}</h5>
+          <div v-if="currentFile" class="save-status small" :class="{ 'text-success': saveStatus === 'Saved', 'text-warning': saveStatus === 'Saving...', 'text-danger': saveStatus === 'Error' }">
+            {{ saveStatus }}
+          </div>
+          <div class="ms-auto d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-subtle d-flex align-items-center gap-2" 
+                    @click="handleCreateTask" 
+                    title="Create task from selection">
+              <i class="bi bi-check2-square"></i> 
+              <span>Create Task(s)</span>
+            </button>
           </div>
         </div>
 
-        <div v-if="currentFile" class="editor-area flex-grow-1 overflow-hidden">
+        <div v-if="currentFile" class="editor-area flex-grow-1 overflow-hidden" style="position: relative; z-index: 1;">
           <MdEditor 
             v-model="content" 
             :theme="mdTheme" 
@@ -63,7 +71,17 @@
             :completions="completions"
             language="en-US"
             style="height: 100%"
-          />
+            :toolbars="toolbars"
+            ref="editorRef"
+          >
+            <template #defToolbars>
+              <NormalToolbar title="Create Task(s)" @onClick="handleCreateTask">
+                <template #trigger>
+                  <i class="bi bi-check2-square"></i>
+                </template>
+              </NormalToolbar>
+            </template>
+          </MdEditor>
         </div>
         <div v-else class="flex-grow-1 d-flex align-items-center justify-content-center theme-text-muted">
           Select or create a file to start writing
@@ -75,22 +93,95 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue';
-import { showToast } from './components/Toast.vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+import Toast, { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
-import { MdEditor } from 'md-editor-v3';
+import { MdEditor, NormalToolbar } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { fetchSettings } from './js/dashboard-api';
 
 const files = ref([]);
 const currentFile = ref(null);
 const content = ref('');
+const editorRef = ref(null);
 const saveStatus = ref('');
 const saveTimeout = ref(null);
 
 const theme = ref('Cosmic');
 const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 const mdTheme = computed(() => theme.value.toLowerCase() === 'light' ? 'light' : 'dark');
+
+const toolbars = [
+  'bold',
+  'underline',
+  'italic',
+  '-',
+  'strikeThrough',
+  'title',
+  'sub',
+  'sup',
+  'quote',
+  'unorderedList',
+  'orderedList',
+  'task',
+  '-',
+  'codeRow',
+  'code',
+  'link',
+  'image',
+  'table',
+  'mermaid',
+  'katex',
+  0,
+  '-',
+  'revoke',
+  'next',
+  'save',
+  '=',
+  'pageFullscreen',
+  'fullscreen',
+  'preview',
+  'htmlPreview',
+  'catalog',
+  'github'
+];
+
+const handleCreateTask = () => {
+  console.log('[DEBUG_LOG] handleCreateTask called');
+  let selection = '';
+  
+  // Standard window selection
+  selection = window.getSelection().toString();
+  console.log('[DEBUG_LOG] Window selection:', selection);
+  
+  if (!selection && editorRef.value) {
+    editorRef.value.getSelectedText((text) => {
+      selection = text;
+      console.log('[DEBUG_LOG] Editor selection:', selection);
+    });
+  }
+  
+  if (!selection) {
+    console.log('[DEBUG_LOG] No selection found');
+    showToast('Please select some text first', 'info');
+    return;
+  }
+
+  const lines = selection.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return;
+
+  if (lines.length === 1) {
+    console.log('[DEBUG_LOG] Opening task modal for single task:', lines[0]);
+    window.dispatchEvent(new CustomEvent('open-add-task-modal', {
+      detail: { title: lines[0] }
+    }));
+  } else {
+    console.log('[DEBUG_LOG] Opening task modal for multiple tasks:', lines.length);
+    window.dispatchEvent(new CustomEvent('open-add-task-modal', {
+      detail: { titles: lines }
+    }));
+  }
+};
 
 const loadSetting = (key, defaultValue) => {
   const val = localStorage.getItem(key);
@@ -107,6 +198,12 @@ const sidebarWidth = ref(loadSetting('notepadSidebarWidth', 260));
 const isResizingSidebar = ref(false);
 let sidebarStartX = 0;
 let sidebarStartWidth = 0;
+
+// Force currentFile if there is only one file or to the first one for testing if requested
+// But better let the user select. For now, let's make sure it's reactive.
+watch(currentFile, (newFile) => {
+  console.log('[DEBUG_LOG] currentFile changed to:', newFile);
+});
 
 const sidebarStyle = computed(() => {
   if (sidebarCollapsed.value) return {};
@@ -186,6 +283,7 @@ const loadFileList = async () => {
     const response = await fetch('/api/notepad/files');
     if (response.ok) {
       files.value = await response.json();
+      console.log('[DEBUG_LOG] Files loaded:', files.value);
       if (files.value.length > 0 && !currentFile.value) {
         selectFile(files.value[0]);
       }
@@ -295,6 +393,7 @@ const saveNote = async () => {
 };
 
 onMounted(async () => {
+  console.log('[DEBUG_LOG] NotepadApp mounted');
   await loadFileList();
   try {
     const settings = await fetchSettings();
@@ -386,6 +485,60 @@ onUnmounted(() => {
 
 .main-area {
   background-color: var(--bg-darker);
+  position: relative;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.controls-bar {
+  height: 50px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+  background-color: var(--bg-dark);
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+.controls-bar .btn-primary:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.btn-subtle {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn-subtle:not(.dropdown-toggle)::after {
+  display: none;
+}
+
+.btn-subtle:hover, .btn-subtle[aria-expanded="true"] {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.btn-subtle::after {
+  margin-left: 0.5em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
 }
 
 .editor-area {
