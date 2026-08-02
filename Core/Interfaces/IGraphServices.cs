@@ -16,4 +16,7 @@ public interface ICalendarService
 {
     Task<IEnumerable<MailFolderDto>> GetCalendarsAsync();
     Task<IEnumerable<CalendarEventDto>> GetNextEventsAsync(string? calendarId = null, int top = 10, DateTime? start = null, DateTime? end = null);
+    Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto);
+    Task DeleteEventAsync(string eventId, string? calendarId = null);
+    Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto);
 }

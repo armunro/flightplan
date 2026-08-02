@@ -14,6 +14,9 @@ public interface IGraphService
     Task ApplyRuleActionsAsync(string messageId, List<Models.RuleAction> actions);
     Task<IEnumerable<MailFolderDto>> GetCalendarsAsync();
     Task<IEnumerable<CalendarEventDto>> GetNextEventsAsync(string? calendarId = null, int top = 10, DateTime? start = null, DateTime? end = null);
+    Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto);
+    Task DeleteEventAsync(string eventId, string? calendarId = null);
+    Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto);
 }
 
 public class GraphService : IGraphService
@@ -77,5 +80,20 @@ public class GraphService : IGraphService
     public Task<IEnumerable<CalendarEventDto>> GetNextEventsAsync(string? calendarId = null, int top = 10, DateTime? start = null, DateTime? end = null)
     {
         return CurrentCalendarService.GetNextEventsAsync(calendarId, top, start, end);
+    }
+
+    public Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto)
+    {
+        return CurrentCalendarService.AddEventAsync(eventDto);
+    }
+
+    public Task DeleteEventAsync(string eventId, string? calendarId = null)
+    {
+        return CurrentCalendarService.DeleteEventAsync(eventId, calendarId);
+    }
+
+    public Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto)
+    {
+        return CurrentCalendarService.UpdateEventAsync(eventId, eventDto);
     }
 }

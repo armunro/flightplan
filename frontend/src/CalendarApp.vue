@@ -1,12 +1,30 @@
 <template>
   <div :class="['vh-100 d-flex flex-row overflow-hidden', themeClass]">
     <Navbar />
+    <AddEventModal 
+      :is-open="isAddEventModalOpen" 
+      :calendars="folders" 
+      :initial-data="addEventData"
+      @close="isAddEventModalOpen = false"
+      @event-added="onEventAdded"
+    />
+    <EventDetailsModal
+      :is-open="isEventDetailsModalOpen"
+      :event="selectedEvent"
+      :calendars="folders"
+      @close="isEventDetailsModalOpen = false"
+      @edit="onEditEvent"
+      @delete="onDeleteEvent"
+    />
     <div class="flex-grow-1 overflow-hidden d-flex flex-column">
       <div id="app-content" class="calendar-app-container flex-grow-1" :class="{ 'editing-folders': isEditingFolders }">
       <div class="calendar-sidebar d-flex flex-column" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
         <div class="sidebar-header d-flex align-items-center" :class="{ 'collapsed': sidebarCollapsed }">
           <h5 v-if="!sidebarCollapsed">Calendars</h5>
           <div v-if="!sidebarCollapsed" class="d-flex align-items-center gap-1 ms-auto">
+            <button class="btn btn-primary btn-sm me-2" @click="isAddEventModalOpen = true; addEventData = {}">
+              <i class="bi bi-plus-lg"></i> Event
+            </button>
             <button class="btn-icon ms-0" @click="isEditingFolders = !isEditingFolders" :title="isEditingFolders ? 'Save Calendars' : 'Edit Calendars'">
               <i class="bi" :class="isEditingFolders ? 'bi-check-lg text-success' : 'bi-pencil-square'"></i>
             </button>
@@ -107,12 +125,16 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
 import ColorPicker from './components/ColorPicker.vue';
+import AddEventModal from './components/AddEventModal.vue';
+import EventDetailsModal from './components/EventDetailsModal.vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { fetchSettings } from './js/dashboard-api';
+import { deleteCalendarEvent } from './js/calendar-api';
+import { showToast } from './components/Toast.vue';
 
 const loadSetting = (key, defaultValue) => {
   const val = localStorage.getItem(key);
@@ -141,6 +163,11 @@ const fullCalendar = ref(null);
 const theme = ref('Cosmic');
 const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 
+const isAddEventModalOpen = ref(false);
+const isEventDetailsModalOpen = ref(false);
+const addEventData = ref({});
+const selectedEvent = ref({});
+
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
@@ -153,10 +180,26 @@ const calendarOptions = computed(() => ({
   height: '100%',
   events: fetchEventsForFullCalendar,
   eventClick: (info) => {
-    if (info.event.url) {
-      window.open(info.event.url, '_blank');
-      info.jsEvent.preventDefault();
-    }
+    selectedEvent.value = {
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.start,
+      end: info.event.end,
+      allDay: info.event.allDay,
+      url: info.event.url,
+      backgroundColor: info.event.backgroundColor,
+      extendedProps: info.event.extendedProps
+    };
+    isEventDetailsModalOpen.value = true;
+    info.jsEvent.preventDefault();
+  },
+  select: (info) => {
+    addEventData.value = {
+      start: info.start,
+      end: info.end,
+      isAllDay: info.allDay
+    };
+    isAddEventModalOpen.value = true;
   },
   nowIndicator: true,
   firstDay: 1, // Monday
@@ -167,6 +210,40 @@ const calendarOptions = computed(() => ({
   allDayMaintainDuration: true,
   timeZone: 'local',
 }));
+
+const onEventAdded = () => {
+  if (fullCalendar.value) {
+    fullCalendar.value.getApi().refetchEvents();
+  }
+};
+
+const onEditEvent = (event) => {
+  isEventDetailsModalOpen.value = false;
+  addEventData.value = {
+    id: event.id,
+    subject: event.title,
+    start: event.start,
+    end: event.end,
+    isAllDay: event.allDay,
+    location: event.extendedProps?.location,
+    calendarId: event.extendedProps?.calendarId
+  };
+  isAddEventModalOpen.value = true;
+};
+
+const onDeleteEvent = async (eventId, calendarId) => {
+  try {
+    await deleteCalendarEvent(eventId, calendarId);
+    showToast('Event deleted successfully', 'success');
+    isEventDetailsModalOpen.value = false;
+    if (fullCalendar.value) {
+      fullCalendar.value.getApi().refetchEvents();
+    }
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    showToast('Failed to delete event: ' + error.message, 'error');
+  }
+};
 
 const sidebarStyle = computed(() => {
   if (sidebarCollapsed.value) return {};

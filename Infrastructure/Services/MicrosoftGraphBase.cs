@@ -27,7 +27,7 @@ public abstract class MicrosoftGraphBase
     {
         if (_graphClient != null) return _graphClient;
 
-        var scopes = new[] { "Mail.Read", "Calendars.Read", "User.Read", "Calendars.Read.Shared", "Offline_Access", "Mail.ReadWrite" };
+        var scopes = new[] { "Mail.Read", "Calendars.Read", "Calendars.ReadWrite", "User.Read", "Calendars.Read.Shared", "Offline_Access", "Mail.ReadWrite" };
         var options = new InteractiveBrowserCredentialOptions
         {
             TenantId = Config.TenantId,

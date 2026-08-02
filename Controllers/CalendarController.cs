@@ -63,4 +63,46 @@ public class CalendarController : ControllerBase
         await System.IO.File.WriteAllTextAsync(path, json);
         return Ok();
     }
+
+    [HttpPost]
+    public async Task<IActionResult> AddEvent([FromBody] CalendarEventDto eventDto)
+    {
+        try
+        {
+            var result = await _graphService.AddEventAsync(eventDto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteEvent(string id, [FromQuery] string? calendarId = null)
+    {
+        try
+        {
+            await _graphService.DeleteEventAsync(id, calendarId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdateEvent(string id, [FromBody] CalendarEventDto eventDto)
+    {
+        try
+        {
+            var result = await _graphService.UpdateEventAsync(id, eventDto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }

@@ -117,4 +117,110 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
             return Enumerable.Empty<CalendarEventDto>();
         }
     }
+    public async Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto)
+    {
+        try
+        {
+            var client = await GetClientAsync();
+            var newEvent = new Microsoft.Graph.Models.Event
+            {
+                Subject = eventDto.Subject,
+                Start = new Microsoft.Graph.Models.DateTimeTimeZone
+                {
+                    DateTime = eventDto.Start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    TimeZone = "UTC"
+                },
+                End = new Microsoft.Graph.Models.DateTimeTimeZone
+                {
+                    DateTime = eventDto.End.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    TimeZone = "UTC"
+                },
+                Location = new Microsoft.Graph.Models.Location
+                {
+                    DisplayName = eventDto.Location
+                },
+                IsAllDay = eventDto.IsAllDay
+            };
+
+            var calendarId = eventDto.CalendarId ?? "primary";
+            var createdEvent = await client.Me.Calendars[calendarId].Events.PostAsync(newEvent);
+
+            return new CalendarEventDto(
+                createdEvent?.Id ?? "",
+                createdEvent?.Subject ?? "",
+                createdEvent?.Start?.DateTime != null ? DateTimeOffset.Parse(createdEvent.Start.DateTime) : DateTimeOffset.MinValue,
+                createdEvent?.End?.DateTime != null ? DateTimeOffset.Parse(createdEvent.End.DateTime) : DateTimeOffset.MinValue,
+                createdEvent?.Location?.DisplayName ?? "",
+                createdEvent?.WebLink,
+                calendarId,
+                createdEvent?.IsAllDay ?? false
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error creating calendar event.");
+            throw;
+        }
+    }
+
+    public async Task DeleteEventAsync(string eventId, string? calendarId = null)
+    {
+        try
+        {
+            var client = await GetClientAsync();
+            var targetCalendarId = calendarId ?? "primary";
+            await client.Me.Calendars[targetCalendarId].Events[eventId].DeleteAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting calendar event {EventId} from calendar {CalendarId}.", eventId, calendarId);
+            throw;
+        }
+    }
+
+    public async Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto)
+    {
+        try
+        {
+            var client = await GetClientAsync();
+            var updateEvent = new Microsoft.Graph.Models.Event
+            {
+                Subject = eventDto.Subject,
+                Start = new Microsoft.Graph.Models.DateTimeTimeZone
+                {
+                    DateTime = eventDto.Start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    TimeZone = "UTC"
+                },
+                End = new Microsoft.Graph.Models.DateTimeTimeZone
+                {
+                    DateTime = eventDto.End.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    TimeZone = "UTC"
+                },
+                Location = new Microsoft.Graph.Models.Location
+                {
+                    DisplayName = eventDto.Location
+                },
+                IsAllDay = eventDto.IsAllDay
+            };
+
+            var calendarId = eventDto.CalendarId ?? "primary";
+            var updatedEvent = await client.Me.Calendars[calendarId].Events[eventId].PatchAsync(updateEvent);
+
+            return new CalendarEventDto(
+                updatedEvent?.Id ?? "",
+                updatedEvent?.Subject ?? "",
+                updatedEvent?.Start?.DateTime != null ? DateTimeOffset.Parse(updatedEvent.Start.DateTime) : DateTimeOffset.MinValue,
+                updatedEvent?.End?.DateTime != null ? DateTimeOffset.Parse(updatedEvent.End.DateTime) : DateTimeOffset.MinValue,
+                updatedEvent?.Location?.DisplayName ?? "",
+                updatedEvent?.WebLink,
+                calendarId,
+                updatedEvent?.IsAllDay ?? false
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating calendar event {EventId}.", eventId);
+            throw;
+        }
+    }
 }

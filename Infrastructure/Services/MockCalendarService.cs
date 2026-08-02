@@ -229,4 +229,33 @@ public class MockCalendarService : ICalendarService
 
         return Task.FromResult(query.OrderBy(e => e.Start).Take(top).ToList().AsEnumerable());
     }
+
+    public Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto)
+    {
+        var newEvent = eventDto with { Id = $"ev-{Guid.NewGuid()}" };
+        _mockEvents.Add(newEvent);
+        return Task.FromResult(newEvent);
+    }
+
+    public Task DeleteEventAsync(string eventId, string? calendarId = null)
+    {
+        var ev = _mockEvents.FirstOrDefault(e => e.Id == eventId);
+        if (ev != null)
+        {
+            _mockEvents.Remove(ev);
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task<CalendarEventDto> UpdateEventAsync(string eventId, CalendarEventDto eventDto)
+    {
+        var index = _mockEvents.FindIndex(e => e.Id == eventId);
+        if (index != -1)
+        {
+            var updated = eventDto with { Id = eventId };
+            _mockEvents[index] = updated;
+            return Task.FromResult(updated);
+        }
+        return Task.FromResult(eventDto);
+    }
 }

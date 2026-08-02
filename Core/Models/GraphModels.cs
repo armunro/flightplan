@@ -19,7 +19,7 @@ public record MailFolderDto(
     int? ChildFolderCount = 0);
 
 public record CalendarEventDto(
-    string Id,
+    string? Id,
     string Subject,
     DateTimeOffset Start,
     DateTimeOffset End,
