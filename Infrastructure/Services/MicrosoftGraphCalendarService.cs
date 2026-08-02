@@ -122,17 +122,33 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
         try
         {
             var client = await GetClientAsync();
+            var start = eventDto.Start;
+            var end = eventDto.End;
+
+            if (eventDto.IsAllDay)
+            {
+                // For all-day events, Microsoft Graph requires the time to be midnight.
+                // It also requires the duration to be at least 24 hours.
+                start = new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset);
+                end = new DateTimeOffset(end.Year, end.Month, end.Day, 0, 0, 0, end.Offset);
+                
+                if (end <= start)
+                {
+                    end = start.AddDays(1);
+                }
+            }
+
             var newEvent = new Microsoft.Graph.Models.Event
             {
                 Subject = eventDto.Subject,
                 Start = new Microsoft.Graph.Models.DateTimeTimeZone
                 {
-                    DateTime = eventDto.Start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    DateTime = start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
                     TimeZone = "UTC"
                 },
                 End = new Microsoft.Graph.Models.DateTimeTimeZone
                 {
-                    DateTime = eventDto.End.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    DateTime = end.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
                     TimeZone = "UTC"
                 },
                 Location = new Microsoft.Graph.Models.Location
@@ -183,17 +199,33 @@ public class MicrosoftGraphCalendarService : MicrosoftGraphBase, ICalendarServic
         try
         {
             var client = await GetClientAsync();
+            var start = eventDto.Start;
+            var end = eventDto.End;
+
+            if (eventDto.IsAllDay)
+            {
+                // For all-day events, Microsoft Graph requires the time to be midnight.
+                // It also requires the duration to be at least 24 hours.
+                start = new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset);
+                end = new DateTimeOffset(end.Year, end.Month, end.Day, 0, 0, 0, end.Offset);
+                
+                if (end <= start)
+                {
+                    end = start.AddDays(1);
+                }
+            }
+
             var updateEvent = new Microsoft.Graph.Models.Event
             {
                 Subject = eventDto.Subject,
                 Start = new Microsoft.Graph.Models.DateTimeTimeZone
                 {
-                    DateTime = eventDto.Start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    DateTime = start.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
                     TimeZone = "UTC"
                 },
                 End = new Microsoft.Graph.Models.DateTimeTimeZone
                 {
-                    DateTime = eventDto.End.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
+                    DateTime = end.ToString("yyyy-MM-ddTHH:mm:ss.fffffff"),
                     TimeZone = "UTC"
                 },
                 Location = new Microsoft.Graph.Models.Location

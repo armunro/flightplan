@@ -232,7 +232,21 @@ public class MockCalendarService : ICalendarService
 
     public Task<CalendarEventDto> AddEventAsync(CalendarEventDto eventDto)
     {
-        var newEvent = eventDto with { Id = $"ev-{Guid.NewGuid()}" };
+        var start = eventDto.Start;
+        var end = eventDto.End;
+
+        if (eventDto.IsAllDay)
+        {
+            start = new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset);
+            end = new DateTimeOffset(end.Year, end.Month, end.Day, 0, 0, 0, end.Offset);
+            
+            if (end <= start)
+            {
+                end = start.AddDays(1);
+            }
+        }
+
+        var newEvent = eventDto with { Id = $"ev-{Guid.NewGuid()}", Start = start, End = end };
         _mockEvents.Add(newEvent);
         return Task.FromResult(newEvent);
     }
@@ -252,7 +266,21 @@ public class MockCalendarService : ICalendarService
         var index = _mockEvents.FindIndex(e => e.Id == eventId);
         if (index != -1)
         {
-            var updated = eventDto with { Id = eventId };
+            var start = eventDto.Start;
+            var end = eventDto.End;
+
+            if (eventDto.IsAllDay)
+            {
+                start = new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset);
+                end = new DateTimeOffset(end.Year, end.Month, end.Day, 0, 0, 0, end.Offset);
+
+                if (end <= start)
+                {
+                    end = start.AddDays(1);
+                }
+            }
+
+            var updated = eventDto with { Id = eventId, Start = start, End = end };
             _mockEvents[index] = updated;
             return Task.FromResult(updated);
         }
