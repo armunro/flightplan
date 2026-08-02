@@ -318,9 +318,9 @@ public class ProjectManager
         };
     }
 
-    public TaskList AddListToProject(Project project, string listName)
+    public TaskList AddListToProject(Project project, string listName, string? color = null, string? icon = null)
     {
-        var list = new TaskList { Name = listName };
+        var list = new TaskList { Name = listName, Color = color, Icon = icon };
         project.Lists.Add(list);
         return list;
     }
@@ -872,7 +872,7 @@ public class ProjectManager
         return list;
     }
 
-    public TaskList? UpdateList(Guid projectId, Guid listId, string name)
+    public TaskList? UpdateList(Guid projectId, Guid listId, string name, string? color = null, string? icon = null)
     {
         var project = FindProjectById(projectId);
         if (project == null) return null;
@@ -881,6 +881,8 @@ public class ProjectManager
         if (list == null) return null;
 
         list.Name = name;
+        if (color != null) list.Color = color;
+        if (icon != null) list.Icon = icon;
         return list;
     }
 

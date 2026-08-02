@@ -212,7 +212,7 @@ const paletteStyle = computed(() => {
   } else {
     // Initial hidden or fixed positioning for Teleport
     style.position = 'fixed';
-    style.zIndex = '2000'; // Higher than modal
+    style.zIndex = '100000'; // Higher than modal
   }
 
   return style;

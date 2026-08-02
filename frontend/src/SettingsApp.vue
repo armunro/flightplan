@@ -64,8 +64,7 @@
                 <div class="row g-4 pb-5 content-area">
                   <div class="col-md-12">
                     <SettingsGeneral v-if="activeCategory === 'general'" :config="config" :allPages="allPages" />
-                    <SettingsJira v-if="activeCategory === 'jira'" :jira="config.jira" />
-                    <SettingsGitHub v-if="activeCategory === 'github'" :gitHub="config.gitHub" />
+                    <SettingsIntegrations v-if="activeCategory === 'integrations'" :jira="config.jira" :gitHub="config.gitHub" />
                     <SettingsMicrosoftGraph v-if="activeCategory === 'msgraph'" :microsoftGraph="config.microsoftGraph" />
                     <div v-if="activeCategory === 'colorschemes'">
                       <SettingsColorSchemes :colorSchemes="config.colorSchemes" :config="config" />
@@ -86,9 +85,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import Navbar from './components/Navbar.vue';
-import SettingsJira from './components/SettingsJira.vue';
+import SettingsIntegrations from './components/SettingsIntegrations.vue';
 import SettingsGeneral from './components/SettingsGeneral.vue';
-import SettingsGitHub from './components/SettingsGitHub.vue';
 import SettingsMicrosoftGraph from './components/SettingsMicrosoftGraph.vue';
 import SettingsColorSchemes from './components/SettingsColorSchemes.vue';
 import SettingsDebug from './components/SettingsDebug.vue';
@@ -117,8 +115,7 @@ const config = ref({
 
 const allPages = [
   { id: 'general', name: 'General' },
-  { id: 'jira', name: 'Jira' },
-  { id: 'github', name: 'GitHub' },
+  { id: 'integrations', name: 'Integrations' },
   { id: 'tasks', name: 'Tasks' },
   { id: 'scheduledtasks', name: 'Schedules' },
   { id: 'email', name: 'Email' },
@@ -131,8 +128,7 @@ const allPages = [
 
 const categories = [
   { id: 'general', name: 'General', icon: 'bi bi-gear-wide-connected text-white', color: '#6c757d' },
-  { id: 'jira', name: 'Jira', icon: 'bi bi-kanban text-white', color: '#0052CC' },
-  { id: 'github', name: 'GitHub', icon: 'bi bi-github text-white', color: '#333' },
+  { id: 'integrations', name: 'Integrations', icon: 'bi bi-plug text-white', color: '#0052CC' },
   { id: 'msgraph', name: 'MS Graph', icon: 'bi bi-microsoft text-white', color: '#00a4ef' },
   { id: 'colorschemes', name: 'Color Schemes', icon: 'bi bi-palette text-white', color: '#e83e8c' },
   { id: 'debug', name: 'Debug', icon: 'bi bi-bug text-white', color: '#ffc107' }

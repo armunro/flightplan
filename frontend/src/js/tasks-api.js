@@ -142,12 +142,12 @@ export async function bulkMoveTasks(taskIds, targetListId, targetTaskId, positio
     }
 }
 
-export async function addList(projectId, name) {
+export async function addList(projectId, name, color = null, icon = null) {
     try {
         await fetch(`/api/projects/${projectId}/lists`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ name, color, icon })
         });
     } catch (error) {
         console.error('Error adding list:', error);
@@ -166,12 +166,12 @@ export async function moveList(projectId, listId, targetListId, position = 'Afte
     }
 }
 
-export async function updateList(projectId, listId, name) {
+export async function updateList(projectId, listId, name, color = null, icon = null) {
     try {
         await fetch(`/api/projects/${projectId}/lists/${listId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ name, color, icon })
         });
     } catch (error) {
         console.error('Error updating list:', error);

@@ -56,7 +56,7 @@
               <i class="bi bi-grip-vertical"></i>
             </div>
             <input v-model="status.name" type="text" class="form-control form-control-sm" placeholder="Status Name">
-            <ColorPicker v-model="status.color" size="sm" palette-placement="top-start" />
+            <ColorPicker v-model="status.color" size="sm" palette-placement="top-start" :use-teleport="true" />
             <div class="form-check">
               <input class="form-check-input" type="checkbox" v-model="status.isCompletedState" :id="'completed-' + index">
               <label class="form-check-label text-nowrap" :for="'completed-' + index">Done</label>
@@ -85,7 +85,7 @@
             </div>
             <input v-model="type.name" type="text" class="form-control form-control-sm" placeholder="Type Name">
             <input v-model="type.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-tag)">
-            <ColorPicker v-model="type.color" size="sm" palette-placement="top-start" />
+            <ColorPicker v-model="type.color" size="sm" palette-placement="top-start" :use-teleport="true" />
             <button class="btn btn-sm btn-outline-danger" @click="removeTaskType(index)" title="Remove Type">
               <i class="bi bi-trash"></i>
             </button>
@@ -110,7 +110,7 @@
             </div>
             <input v-model="priority.name" type="text" class="form-control form-control-sm" placeholder="Priority Name">
             <input v-model="priority.icon" type="text" class="form-control form-control-sm" placeholder="Icon (bi-dash-lg)">
-            <ColorPicker v-model="priority.color" size="sm" palette-placement="top-start" />
+            <ColorPicker v-model="priority.color" size="sm" palette-placement="top-start" :use-teleport="true" />
             <button class="btn btn-sm btn-outline-danger" @click="removePriority(index)" title="Remove Priority">
               <i class="bi bi-trash"></i>
             </button>

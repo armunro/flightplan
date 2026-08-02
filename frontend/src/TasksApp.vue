@@ -18,28 +18,42 @@
             </div>
             <div v-else-if="error" class="p-3 text-danger small theme-text">{{ error }}</div>
             <template v-else>
-              <div v-for="project in projects" :key="project.id" 
-                 class="project-item theme-text"
-                 :class="{ active: selectedProjectId === project.id, 'project-drag-over-before': dropProjectPosition === 'before' && dropProjectId === project.id, 'project-drag-over-after': dropProjectPosition === 'after' && dropProjectId === project.id }"
-                 @click="selectedProjectId = project.id"
-                 draggable="true"
-                 @dragstart="onProjectDragStart($event, project.id)"
-                 @dragover.prevent="onProjectDragOver($event, project.id)"
-                 @dragenter.prevent="onProjectDragEnter($event)"
-                 @dragleave="onProjectDragLeave($event)"
-                 @drop="onProjectDrop($event, project.id)"
-                 @contextmenu.prevent="onProjectContextMenu($event, project)"
-                 :title="sidebarCollapsed ? project.name : ''">
-              <div class="project-icon-wrapper" :style="{ backgroundColor: project.color }">
-                <i :class="[getProjectIconClass(project)]"></i>
-              </div>
-              <span v-if="!sidebarCollapsed" class="project-name theme-text">{{ project.name }}</span>
-              <div v-if="!sidebarCollapsed" class="project-task-counts theme-text-muted">
-                <span class="project-task-count main-count" title="Tasks (excluding subtasks)">{{ getTaskCount(project, false) }}</span>
-                <span class="count-separator">/</span>
-                <span class="project-task-count sub-count" title="Total tasks (including subtasks)">{{ getTaskCount(project, true) }}</span>
-              </div>
-            </div>
+              <template v-for="project in projects" :key="project.id">
+                <div 
+                   class="project-item theme-text"
+                   :class="{ active: selectedProjectId === project.id && selectedListId === null, 'project-drag-over-before': dropProjectPosition === 'before' && dropProjectId === project.id, 'project-drag-over-after': dropProjectPosition === 'after' && dropProjectId === project.id }"
+                   @click="onSelectProject(project.id)"
+                   draggable="true"
+                   @dragstart="onProjectDragStart($event, project.id)"
+                   @dragover.prevent="onProjectDragOver($event, project.id)"
+                   @dragenter.prevent="onProjectDragEnter($event)"
+                   @dragleave="onProjectDragLeave($event)"
+                   @drop="onProjectDrop($event, project.id)"
+                   @contextmenu.prevent="onProjectContextMenu($event, project)"
+                   :title="sidebarCollapsed ? project.name : ''">
+                  <div class="project-icon-wrapper" :style="{ backgroundColor: project.color }">
+                    <i :class="[getProjectIconClass(project)]"></i>
+                  </div>
+                  <span v-if="!sidebarCollapsed" class="project-name theme-text">{{ project.name }}</span>
+                  <div v-if="!sidebarCollapsed" class="project-task-counts theme-text-muted">
+                    <span class="project-task-count main-count" title="Tasks (excluding subtasks)">{{ getTaskCount(project, false) }}</span>
+                    <span class="count-separator">/</span>
+                    <span class="project-task-count sub-count" title="Total tasks (including subtasks)">{{ getTaskCount(project, true) }}</span>
+                  </div>
+                </div>
+                
+                <!-- Sub-items: Lists -->
+                <div v-if="!sidebarCollapsed && !isProjectCollapsed(project.id)" class="project-lists-subitems">
+                  <div v-for="list in project.lists" :key="list.id" 
+                       class="list-subitem theme-text"
+                       :class="{ active: selectedListId === list.id }"
+                       @click.stop="onSelectList(project.id, list.id)">
+                    <i :class="[getListIconClass(list), 'me-2']" :style="{ color: list.color }"></i>
+                    <span class="list-name text-truncate">{{ list.name }}</span>
+                    <span class="list-count ms-auto">{{ getTaskListTaskCount(list) }}</span>
+                  </div>
+                </div>
+              </template>
           </template>
         </div>
         <div class="sidebar-footer" :class="{ 'collapsed': sidebarCollapsed }">
@@ -275,17 +289,24 @@
                             @save="onSaveProject"
                             @delete="onDeleteProject"></project-dialog>
 
+            <list-dialog v-if="showListDialog"
+                         :list="listDialogData"
+                         :is-new="listDialogIsNew"
+                         @close="showListDialog = false"
+                         @save="onSaveList"></list-dialog>
+
             <div class="project-content">
-              <div v-for="list in selectedProject.lists" :key="list.id" class="list"
-                   @dragover.prevent="onListDragOver($event, list.id)"
-                   @dragenter.prevent="onListDragEnter($event)"
-                   @dragleave="onListDragLeave($event)"
-                   @drop="onListDrop($event, list.id, selectedProject.id)"
-                   :class="{
-                     'list-drag-over-before': dropListPosition === 'before' && dropListId === list.id, 
-                     'list-drag-over-after': dropListPosition === 'after' && dropListId === list.id,
-                     'collapsed': collapsedLists.has(list.id)
-                   }">
+              <template v-for="list in selectedProject.lists" :key="list.id">
+                <div v-if="selectedListId === null || selectedListId === list.id" class="list"
+                     @dragover.prevent="onListDragOver($event, list.id)"
+                     @dragenter.prevent="onListDragEnter($event)"
+                     @dragleave="onListDragLeave($event)"
+                     @drop="onListDrop($event, list.id, selectedProject.id)"
+                     :class="{
+                       'list-drag-over-before': dropListPosition === 'before' && dropListId === list.id, 
+                       'list-drag-over-after': dropListPosition === 'after' && dropListId === list.id,
+                       'collapsed': collapsedLists.has(list.id)
+                     }">
                 <div class="list-header" :class="{ 'collapsed': collapsedLists.has(list.id) }"
                      draggable="true" @dragstart="onListDragStart($event, list.id)">
                   <span class="collapse-toggle" :class="{ collapsed: collapsedLists.has(list.id) }" @click="toggleListCollapse(list.id)">
@@ -299,6 +320,7 @@
                          @keyup.esc="cancelEditingList"
                          @click.stop>
                   <h3 v-else @dblclick="startEditingList(list)">
+                    <i :class="[getListIconClass(list), 'me-2']" :style="{ color: list.color }"></i>
                     {{ list.name }}
                     <button class="btn btn-sm btn-link text-info p-0 ms-2 edit-list-inline-btn" @click.stop="startEditingList(list)" title="Rename List">
                       <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
@@ -312,6 +334,7 @@
                          :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }"
                          style="position: absolute; right: 0; top: 100%; z-index: 10000; display: block !important; border: 1px solid var(--border-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
                          @click.stop>
+                      <div class="dropdown-item" @click="onEditListFromMenu"><i class="bi bi-gear me-2"></i>List Details</div>
                       <div class="dropdown-item" @click="onRenameListFromMenu"><i class="bi bi-pencil me-2"></i>Rename List</div>
                       <div class="dropdown-item delete" @click="onDeleteListFromMenu"><i class="bi bi-trash me-2"></i>Delete List</div>
                     </div>
@@ -386,7 +409,8 @@
                               @context-menu="onTaskContextMenu"></task-row>
                   </template>
                 </div>
-              </div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -408,6 +432,7 @@ import MoveTaskDialog from './components/MoveTaskDialog.vue';
 import BulkDateDialog from './components/BulkDateDialog.vue';
 import ExportTasksModal from './components/ExportTasksModal.vue';
 import ProjectDialog from './components/ProjectDialog.vue';
+import ListDialog from './components/ListDialog.vue';
 import ColorPicker from './components/ColorPicker.vue';
 import { addTask, moveTask, copyTask, bulkMoveTasks, addList, updateList, moveList, deleteList, updateProject, addProject, moveProject, deleteProject, deleteTask, bulkDeleteTasks, updateTask as apiUpdateTask, bulkUpdateTasks } from './js/tasks-api';
 import { fetchSettings } from './js/dashboard-api';
@@ -423,6 +448,7 @@ export default {
     BulkDateDialog,
     ExportTasksModal,
     ProjectDialog,
+    ListDialog,
     ColorPicker
   },
   setup() {
@@ -438,6 +464,7 @@ export default {
 
     const projects = ref([]);
     const selectedProjectId = ref(null);
+    const selectedListId = ref(null);
     const collapsedProjects = ref(new Set());
     const collapsedLists = ref(new Set());
     const loading = ref(true);
@@ -515,10 +542,14 @@ export default {
 
     sidebarCollapsed.value = loadSetting('sidebarCollapsed', false);
     selectedProjectId.value = loadSetting('selectedProjectId', null);
+    selectedListId.value = loadSetting('selectedListId', null);
     const savedCollapsedLists = loadSetting('collapsedLists', []);
     collapsedLists.value = new Set(savedCollapsedLists);
     const projectDialogIsNew = ref(false);
     const projectDialogData = ref({});
+    const showListDialog = ref(false);
+    const listDialogIsNew = ref(false);
+    const listDialogData = ref({});
     const selectedTaskIds = ref([]);
 
     const listMenu = ref({
@@ -864,6 +895,11 @@ export default {
       return icon.startsWith('bi-') ? `bi ${icon}` : `bi bi-${icon}`;
     };
 
+    const getListIconClass = (list) => {
+      const icon = list.icon || 'bi-list-task';
+      return icon.startsWith('bi-') ? `bi ${icon}` : `bi bi-${icon}`;
+    };
+
     const isListAllSelected = (list) => {
       const listTaskIds = [];
       const traverse = (tasks) => {
@@ -1083,11 +1119,39 @@ export default {
       fetchProjects();
     };
 
-    const onAddList = async (projectId) => {
-      const name = prompt('Enter list name:');
-      if (name) {
-        await addList(projectId, name);
+    const onAddList = (projectId) => {
+      selectedProjectId.value = projectId;
+      listDialogIsNew.value = true;
+      listDialogData.value = { name: '', icon: '', color: '' };
+      showListDialog.value = true;
+      closeContextMenu();
+    };
+
+    const onEditListFromMenu = () => {
+      const listId = listMenu.value.listId;
+      const list = selectedProject.value.lists.find(l => l.id === listId);
+      if (list) {
+        listDialogIsNew.value = false;
+        listDialogData.value = { ...list };
+        showListDialog.value = true;
+      }
+      closeListMenu();
+    };
+
+    const onSaveList = async (formData) => {
+      try {
+        if (listDialogIsNew.value) {
+          await addList(selectedProjectId.value, formData.name, formData.color, formData.icon);
+          showToast('List created successfully', 'success');
+        } else {
+          await updateList(selectedProjectId.value, listDialogData.value.id, formData.name, formData.color, formData.icon);
+          showToast('List updated successfully', 'success');
+        }
+        showListDialog.value = false;
         fetchProjects();
+      } catch (error) {
+        console.error('Error saving list:', error);
+        showToast('Failed to save list', 'error');
       }
     };
 
@@ -1095,12 +1159,14 @@ export default {
       projectDialogIsNew.value = true;
       projectDialogData.value = {};
       showProjectDialog.value = true;
+      closeContextMenu();
     };
 
     const onEditProject = (project) => {
       projectDialogIsNew.value = false;
       projectDialogData.value = { ...project };
       showProjectDialog.value = true;
+      closeContextMenu();
     };
 
     const onSaveProject = async (formData) => {
@@ -1550,6 +1616,25 @@ export default {
       localStorage.setItem('collapsedLists', JSON.stringify(Array.from(collapsedLists.value)));
     };
 
+    const getTaskListTaskCount = (list, includeSubtasks = false) => {
+      if (!list || !list.tasks) return 0;
+      
+      const countTasks = (tasks) => {
+        let internalCount = 0;
+        tasks.forEach(task => {
+          if (!task.isCompleted) {
+            internalCount++;
+          }
+          if (includeSubtasks && task.subtasks && task.subtasks.length > 0) {
+            internalCount += countTasks(task.subtasks);
+          }
+        });
+        return internalCount;
+      };
+
+      return countTasks(list.tasks);
+    };
+
     const getTaskCount = (project, includeSubtasks = false) => {
       if (!project || !project.lists) return 0;
       let count = 0;
@@ -1583,6 +1668,11 @@ export default {
       selectedTaskIds.value = [];
     });
 
+    watch(selectedListId, (newId) => {
+      localStorage.setItem('selectedListId', JSON.stringify(newId));
+      selectedTaskIds.value = [];
+    });
+
     watch(sidebarCollapsed, (newVal) => {
       localStorage.setItem('sidebarCollapsed', JSON.stringify(newVal));
     });
@@ -1606,11 +1696,36 @@ export default {
       }
     };
 
+    const onSelectProject = (projectId) => {
+      if (selectedProjectId.value === projectId) {
+        // Toggle collapse if already selected
+        if (collapsedProjects.value.has(projectId)) {
+          collapsedProjects.value.delete(projectId);
+        } else {
+          collapsedProjects.value.add(projectId);
+        }
+      } else {
+        selectedProjectId.value = projectId;
+        selectedListId.value = null; // Show all lists by default when selecting a project
+        collapsedProjects.value.delete(projectId); // Expand when selecting
+      }
+    };
+
+    const onSelectList = (projectId, listId) => {
+      selectedProjectId.value = projectId;
+      selectedListId.value = listId;
+    };
+
+    const isProjectCollapsed = (projectId) => {
+      return collapsedProjects.value.has(projectId);
+    };
+
     return {
       projects,
       collapsedLists,
       toggleListCollapse,
       getTaskCount,
+      getTaskListTaskCount,
       loading,
       error,
       showClosed,
@@ -1622,18 +1737,23 @@ export default {
       selectedProjectPriorities,
       columnWidths,
       gridStyle,
-      autosizeColumns,
-      startResize,
       sortBy,
       sortDesc,
       toggleSort,
       getSortedTasks,
-      getProjectIconClass,
       fetchProjects,
       selectedProjectId,
+      selectedListId,
       selectedProject,
+      onSelectProject,
+      onSelectList,
+      isProjectCollapsed,
+      getProjectIconClass,
+      getListIconClass,
       onAddTask,
       onAddList,
+      onEditListFromMenu,
+      onSaveList,
       onAddProject,
       onUpdateProjectName,
       onUpdateProjectColor,
@@ -1664,6 +1784,9 @@ export default {
       showProjectDialog,
       projectDialogIsNew,
       projectDialogData,
+      showListDialog,
+      listDialogIsNew,
+      listDialogData,
       onSaveProject,
       onDeleteProject,
       selectedTaskIds,
@@ -1719,6 +1842,43 @@ label, .form-label {
 </style>
 
 <style scoped>
+.project-lists-subitems {
+  padding-left: 20px;
+  margin-bottom: 5px;
+}
+
+.list-subitem {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin: 2px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.list-subitem:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.list-subitem.active {
+  background-color: var(--bg-selected);
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.list-subitem .list-count {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.project-item.active {
+  background-color: var(--bg-hover);
+  border-left: 3px solid var(--accent-blue);
+}
 .tasks-app-container {
   display: flex;
   height: 100%;

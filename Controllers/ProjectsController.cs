@@ -4,8 +4,8 @@ using FlightPlan.Services;
 
 namespace FlightPlan.Controllers;
 
-public record ListCreateRequest(string Name);
-public record ListUpdateRequest(string Name);
+public record ListCreateRequest(string Name, string? Color = null, string? Icon = null);
+public record ListUpdateRequest(string Name, string? Color = null, string? Icon = null);
 public record ListMoveRequest(Guid? TargetListId, ProjectManager.MovePosition? Position);
 public record TaskStatusDto(Guid? Id, string Name, string Color, bool IsCompletedState, int Order);
 public record TaskTypeDto(Guid? Id, string Name, string Color, string Icon);
@@ -149,7 +149,7 @@ public class ProjectsController : ControllerBase
         var project = _projectManager.FindProjectById(projectId);
         if (project == null) return NotFound("Project not found");
 
-        var list = _projectManager.AddListToProject(project, request.Name);
+        var list = _projectManager.AddListToProject(project, request.Name, request.Color, request.Icon);
         _projectManager.SaveProjectsToYaml(_storageService.GetProjectsPath());
         return Ok(list);
     }
@@ -157,7 +157,7 @@ public class ProjectsController : ControllerBase
     [HttpPut("{projectId:guid}/lists/{listId:guid}")]
     public IActionResult UpdateList(Guid projectId, Guid listId, ListUpdateRequest request)
     {
-        var list = _projectManager.UpdateList(projectId, listId, request.Name);
+        var list = _projectManager.UpdateList(projectId, listId, request.Name, request.Color, request.Icon);
         if (list == null) return NotFound("Project or List not found");
 
         _projectManager.SaveProjectsToYaml(_storageService.GetProjectsPath());
