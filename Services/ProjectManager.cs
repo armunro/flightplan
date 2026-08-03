@@ -465,7 +465,7 @@ public class ProjectManager
         return null;
     }
 
-    private TaskItem? FindTaskInList(List<TaskItem> tasks, Guid id)
+    public TaskItem? FindTaskInList(List<TaskItem> tasks, Guid id)
     {
         foreach (var task in tasks)
         {

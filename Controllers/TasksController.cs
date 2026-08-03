@@ -319,11 +319,30 @@ public class TasksController : ControllerBase
             var existing = _pm.FindTaskById(taskId);
             if (existing == null) continue;
 
+            // Find which project this task belongs to, so we can validate statuses/types/priorities
+            var projects = _pm.GetAllProjects();
+            var taskProject = projects.FirstOrDefault(p => p.Lists.Any(l => _pm.FindTaskInList(l.Tasks, taskId) != null));
+
             string title = requestBody.TryGetProperty("title", out var titleProp) && titleProp.ValueKind != JsonValueKind.Null ? titleProp.GetString() ?? existing.Title : existing.Title;
             string? description = requestBody.TryGetProperty("description", out var descProp) ? (descProp.ValueKind == JsonValueKind.Null ? null : descProp.GetString()) : existing.Description;
             TaskPriority priority = requestBody.TryGetProperty("priority", out var prioProp) && prioProp.ValueKind == JsonValueKind.Number ? (TaskPriority)prioProp.GetInt32() : existing.Priority;
             Guid? statusId = requestBody.TryGetProperty("statusId", out var statusProp) ? (statusProp.ValueKind == JsonValueKind.Null ? null : (statusProp.TryGetGuid(out var sId) ? sId : null)) : existing.StatusId;
-            bool isCompleted = requestBody.TryGetProperty("isCompleted", out var compProp) && (compProp.ValueKind == JsonValueKind.True || compProp.ValueKind == JsonValueKind.False) ? compProp.GetBoolean() : existing.IsCompleted;
+            
+            bool? isCompleted = null;
+            if (requestBody.TryGetProperty("isCompleted", out var compProp) && (compProp.ValueKind == JsonValueKind.True || compProp.ValueKind == JsonValueKind.False))
+            {
+                isCompleted = compProp.GetBoolean();
+            }
+            else if (statusId != existing.StatusId && taskProject != null && statusId.HasValue)
+            {
+                // If status changed and we didn't get an explicit isCompleted, try to find it from the project's statuses
+                var newStatus = taskProject.Statuses.FirstOrDefault(s => s.Id == statusId.Value);
+                if (newStatus != null)
+                {
+                    isCompleted = newStatus.IsCompletedState;
+                }
+            }
+
             int estimateMinutes = requestBody.TryGetProperty("estimateMinutes", out var estProp) && estProp.ValueKind == JsonValueKind.Number ? estProp.GetInt32() : existing.EstimateMinutes;
             DateTime? start = requestBody.TryGetProperty("start", out var startProp) ? (startProp.ValueKind == JsonValueKind.Null ? null : (startProp.TryGetDateTime(out var st) ? st : null)) : existing.Start;
             DateTime? end = requestBody.TryGetProperty("end", out var endProp) ? (endProp.ValueKind == JsonValueKind.Null ? null : (endProp.TryGetDateTime(out var en) ? en : null)) : existing.End;
@@ -367,7 +386,7 @@ public class TasksController : ControllerBase
                 description,
                 priority,
                 statusId,
-                isCompleted,
+                isCompleted ?? existing.IsCompleted,
                 estimateMinutes,
                 start,
                 end,
