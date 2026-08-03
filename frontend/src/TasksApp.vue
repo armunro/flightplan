@@ -1115,8 +1115,11 @@ export default {
 
     const onAddTask = async (listId, project) => {
       const defaultStatusId = project.statuses?.length > 0 ? project.statuses[0].id : null;
-      await addTask(listId, "", defaultStatusId);
-      fetchProjects();
+      const newTask = await addTask(listId, "", defaultStatusId);
+      if (newTask && newTask.id) {
+          window._focusTaskId = newTask.id;
+          await fetchProjects();
+      }
     };
 
     const onAddList = (projectId) => {

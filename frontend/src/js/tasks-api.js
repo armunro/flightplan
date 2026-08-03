@@ -24,14 +24,16 @@ export async function updateTask(taskId, data) {
 
 export async function addTask(listId, title, statusId = null, priorityId = null, data = {}) {
     try {
-        await fetch('/api/tasks', {
+        const response = await fetch('/api/tasks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ listId, title, priority: 2, statusId, priorityId, ...data })
         });
+        if (response.ok) return await response.json();
     } catch (error) {
         console.error('Error adding task:', error);
     }
+    return null;
 }
 
 export async function addSubtask(taskId, title, statusId = null, priorityId = null, data = {}) {

@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="task-row-container" :class="[{ 'is-selected': isSelected }, themeClass]">
+    <div class="task-row-container" :class="[{ 'is-selected': isSelected }, themeClass]" :data-task-id="task?.id">
         <div class="tasks-row" 
              draggable="true" 
              @dragstart="onDragStart"
@@ -157,7 +157,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import DateTimeSelector from './DateTimeSelector.vue';
 import { updateTask, addSubtask, addSibling, deleteTask, moveTask, copyTask } from '../js/tasks-api';
 import { formatFriendlyDate, formatForInput, formatToISO, formatEstimate, parseEstimate } from '../js/utils';
@@ -189,10 +189,105 @@ export default {
         };
 
         onMounted(() => {
-            if (props.task && !props.task.title && titleElement.value) {
-                titleElement.value.focus();
-            }
+            handleFocus();
         });
+
+        watch(() => props.task.id, () => {
+            handleFocus();
+        });
+
+        const handleFocus = () => {
+            if (props.task) {
+                // If this specific task was just updated (title changed), don't re-focus
+                if (window._lastUpdatedTaskId === props.task.id) {
+                    window._lastUpdatedTaskId = null;
+                    // Also clear any pending focus just in case
+                    if (window._focusTaskId === props.task.id) {
+                        window._focusTaskId = null;
+                    }
+                    return;
+                }
+
+                // Only auto-focus if we explicitly triggered a "new task" creation or deletion for THIS specific ID
+                if (window._focusTaskId === props.task.id) {
+                    // Prevent this component instance from stealing focus if it's being deleted
+                    // The "watch" or "onMounted" might trigger on the old component just before it's unmounted
+                    if (window._isDeletingTaskId === props.task.id) {
+                        return;
+                    }
+
+                    console.log('[DEBUG_LOG] handleFocus: Focus match found for task:', props.task.id);
+                    
+                    nextTick(() => {
+                        // Use a slightly longer delay for the first attempt to allow DOM to settle after refresh
+                        let attempts = 0;
+                        const maxAttempts = 15;
+                        const tryFocus = () => {
+                            attempts++;
+                            const el = titleElement.value;
+                            if (el && typeof el.focus === 'function') {
+                                // Check if the element is actually "ready" (visible and in DOM)
+                                const isVisible = el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+                                if (!isVisible) {
+                                    if (attempts < maxAttempts) {
+                                        setTimeout(tryFocus, 50);
+                                    } else {
+                                        window._focusTaskId = null;
+                                    }
+                                    return;
+                                }
+
+                                // Force focusable just in case it's being stubborn
+                                if (el.getAttribute('contenteditable') !== 'true') {
+                                    el.setAttribute('contenteditable', 'true');
+                                }
+                                
+                                el.focus();
+                                console.log('[DEBUG_LOG] handleFocus: focus() called on element for:', props.task.id, 'window._focusTaskId was:', window._focusTaskId);
+                                
+                                // Monitor if focus is lost immediately
+                                setTimeout(() => {
+                                    if (document.activeElement !== el) {
+                                        console.warn('[DEBUG_LOG] handleFocus: focus lost immediately after setting for:', props.task.id, 'activeElement:', document.activeElement.tagName);
+                                    } else {
+                                        console.log('[DEBUG_LOG] handleFocus: focus confirmed for:', props.task.id);
+                                        // Clear the flag only after we've confirmed focus is stable
+                                        window._focusTaskId = null;
+                                    }
+                                }, 100);
+
+                                // Move cursor to end
+                                try {
+                                    const range = document.createRange();
+                                    const sel = window.getSelection();
+                                    range.selectNodeContents(el);
+                                    range.collapse(false);
+                                    sel.removeAllRanges();
+                                    sel.addRange(range);
+                                } catch (e) {
+                                    // Ignore selection errors
+                                }
+                            } else if (attempts < maxAttempts) {
+                                // Fallback: try to find it in the DOM if ref is failing us
+                                if (!el || typeof el.focus !== 'function') {
+                                    const selector = `.task-row-container[data-task-id="${props.task.id}"] .task-title`;
+                                    const domEl = document.querySelector(selector);
+                                    if (domEl && typeof domEl.focus === 'function') {
+                                        titleElement.value = domEl;
+                                    }
+                                }
+                                setTimeout(tryFocus, 50);
+                            } else {
+                                window._focusTaskId = null;
+                            }
+                        };
+                        
+                        // Start with a small delay
+                        setTimeout(tryFocus, 50);
+                    });
+                }
+            }
+        };
 
         const getPriorityName = (priorityId) => {
             const priority = props.projectPriorities?.find(p => p.id === priorityId);
@@ -339,25 +434,31 @@ export default {
 
 
         const onTitleKeyDown = async (e) => {
-            console.log('[DEBUG_LOG] onTitleKeyDown triggered', e.key);
-            e.preventDefault();
-            e.stopPropagation();
-            // If Enter is pressed, create a new sibling task
-            const defaultStatusId = props.projectStatuses?.length > 0 ? props.projectStatuses[0].id : null;
-            console.log('[DEBUG_LOG] Adding sibling for task:', props.task.id);
-            try {
-                // Ensure the current title is saved before creating sibling
-                await onUpdateTitle(e);
-                const newSibling = await addSibling(props.task.id, "", defaultStatusId); 
-                console.log('[DEBUG_LOG] Sibling added:', newSibling);
-                emit('refresh');
-            } catch (err) {
-                console.error('[DEBUG_LOG] Error adding sibling:', err);
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                // If Enter is pressed, create a new sibling task
+                const defaultStatusId = props.projectStatuses?.length > 0 ? props.projectStatuses[0].id : null;
+                try {
+                    // Ensure the current title is saved before creating sibling
+                    // Pass false to avoid triggering refresh before sibling creation
+                    await onUpdateTitle(e, false);
+                    
+                    const newSibling = await addSibling(props.task.id, "", defaultStatusId); 
+                    
+                    // Set flag for new task creation with specific ID
+                    if (newSibling && newSibling.id) {
+                        window._focusTaskId = newSibling.id;
+                    }
+                    
+                    emit('refresh');
+                } catch (err) {
+                    window._focusTaskId = null;
+                }
             }
         };
 
         const onTitleTabKeyDown = async (e) => {
-            console.log('[DEBUG_LOG] onTitleTabKeyDown triggered', e.key, 'Shift:', e.shiftKey);
             e.preventDefault();
             e.stopPropagation();
 
@@ -368,31 +469,31 @@ export default {
                 if (e.shiftKey) {
                     // Shift+Tab: Promote task (outdent)
                     if (props.parentTaskId) {
-                        console.log('[DEBUG_LOG] Promoting task:', props.task.id, 'to be sibling of:', props.parentTaskId);
                         await moveTask(props.task.id, null, props.parentTaskId, 'After'); // Shift+Tab: Promote task (outdent)
                         emit('refresh');
                     }
                 } else {
                     // Tab: Demote task (indent)
                     if (props.previousTaskId) {
-                        console.log('[DEBUG_LOG] Demoting task:', props.task.id, 'to be subtask of:', props.previousTaskId);
                         await moveTask(props.task.id, null, props.previousTaskId, 'Inside'); // Tab: Demote task (indent)
                         emit('refresh');
                     }
                 }
             } catch (err) {
-                console.error('[DEBUG_LOG] Error moving task:', err);
+                // Silent error
             }
         };
 
         const onTitleEsc = (e) => {
-            console.log('[DEBUG_LOG] onTitleEsc triggered');
             e.target.innerText = props.task.title;
             e.target.blur();
         };
 
         const onGeneralKeyDown = (e) => {
-            console.log('[DEBUG_LOG] onGeneralKeyDown:', e.key, 'target:', e.target.tagName, 'content:', JSON.stringify(e.target.textContent));
+            if (e.key === 'Enter') {
+                // Enter is handled by onTitleKeyDown, but we want to make sure it doesn't propagate to any general handlers
+                return;
+            }
             if (e.key === 'Tab') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -401,38 +502,47 @@ export default {
                 const text = e.target.textContent || '';
                 // Use a more aggressive regex to strip all whitespace including non-breaking spaces and zero-width characters
                 const currentTitle = text.replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
-                console.log(`[DEBUG_LOG] ${e.key} pressed. text:`, JSON.stringify(text), 'currentTitle after regex:', JSON.stringify(currentTitle));
                 const isTitleEmpty = currentTitle === '';
                 if (isTitleEmpty) {
-                    console.log(`[DEBUG_LOG] isTitleEmpty is true, calling onDeleteTask from ${e.key}`);
                     e.preventDefault();
+                    e.stopPropagation();
                     onDeleteTask(e);
                 }
             }
         };
 
         const onDeleteTask = async (e) => {
-            console.log('[DEBUG_LOG] onDeleteTask entered. e.target.textContent:', e?.target ? JSON.stringify(e.target.textContent) : 'N/A');
             // If the title is NOT empty, ask for confirmation
             // If it is empty, just delete it (likely a newly created but unwanted sibling/subtask)
             const targetTitle = (e?.target?.textContent || '').replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
             const propTitle = (props.task.title || '').replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
             const isTitleEmpty = targetTitle === '' || propTitle === '';
             
-            console.log('[DEBUG_LOG] onDeleteTask - isTitleEmpty:', isTitleEmpty, 'targetTitle:', JSON.stringify(targetTitle), 'propTitle:', JSON.stringify(propTitle));
-            
             if (isTitleEmpty || confirm(`Are you sure you want to delete "${e?.target?.textContent?.trim() || props.task.title}"?`)) {
                 try {
-                    console.log('[DEBUG_LOG] Proceeding with deleteTask for ID:', props.task.id);
+                    if (isTitleEmpty) {
+                        if (props.previousTaskId) {
+                            console.log('[DEBUG_LOG] Deleting empty task, setting focus to previous sibling:', props.previousTaskId);
+                            window._focusTaskId = props.previousTaskId;
+                        } else if (props.parentTaskId) {
+                            console.log('[DEBUG_LOG] Deleting empty task (first in list), setting focus to parent:', props.parentTaskId);
+                            window._focusTaskId = props.parentTaskId;
+                        }
+                    }
+                    window._isDeletingTaskId = props.task.id;
                     await deleteTask(props.task.id);
+                    // Clear last updated and deleting flags to avoid conflict
+                    window._lastUpdatedTaskId = null;
+                    window._isDeletingTaskId = null;
                     emit('refresh');
                 } catch (err) {
+                    window._isDeletingTaskId = null;
                     console.error('Error during deleteTask:', err);
                 }
             }
         };
 
-        const onUpdateTitle = async (e) => {
+        const onUpdateTitle = async (e, shouldRefresh = true) => {
             if (!props.task) return;
             const text = e.target.textContent || '';
             const newTitle = text.trim();
@@ -441,7 +551,11 @@ export default {
             console.log('[DEBUG_LOG] Updating task title:', props.task.id, 'New Title:', JSON.stringify(newTitle));
             const { subtasks, ...taskWithoutSubtasks } = props.task;
             await updateTask(props.task.id, { ...taskWithoutSubtasks, title: newTitle });
-            emit('refresh');
+            // Set a flag to prevent re-focusing on mount if it's just a title update
+            window._lastUpdatedTaskId = props.task.id;
+            if (shouldRefresh) {
+                emit('refresh');
+            }
         };
 
         const onPaste = async (e) => {
@@ -536,23 +650,6 @@ export default {
         const onContextMenu = (e) => {
             emit('context-menu', e, props.task);
         };
-
-        onMounted(() => {
-            if (props.task && (props.task.title === "" || props.task.title === null)) {
-                setTimeout(() => {
-                    if (titleElement.value) {
-                        titleElement.value.focus();
-                        // Move cursor to end
-                        const range = document.createRange();
-                        const sel = window.getSelection();
-                        range.selectNodeContents(titleElement.value);
-                        range.collapse(false);
-                        sel.removeAllRanges();
-                        sel.addRange(range);
-                    }
-                }, 50);
-            }
-        });
 
         return {
             getPriorityName,
