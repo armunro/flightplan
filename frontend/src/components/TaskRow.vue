@@ -251,6 +251,7 @@ export default {
                                 
                                 console.log('[DEBUG_LOG] handleFocus: actual focus() attempt for:', props.task.id);
                                 el.focus();
+                                
                                 // For contenteditable, sometimes we need to ensure the cursor is at the end
                                 try {
                                     const range = document.createRange();
@@ -494,14 +495,14 @@ export default {
                     // Shift+Tab: Promote task (outdent)
                     if (props.parentTaskId) {
                         window._focusTaskId = props.task.id;
-                        await moveTask(props.task.id, null, props.parentTaskId, 'After'); // Shift+Tab: Promote task (outdent)
+                        await moveTask(props.task.id, null, props.parentTaskId, 'After');
                         emit('refresh');
                     }
                 } else {
                     // Tab: Demote task (indent)
                     if (props.previousTaskId) {
                         window._focusTaskId = props.task.id;
-                        await moveTask(props.task.id, null, props.previousTaskId, 'Inside'); // Tab: Demote task (indent)
+                        await moveTask(props.task.id, null, props.previousTaskId, 'Inside');
                         emit('refresh');
                     }
                 }
@@ -528,8 +529,7 @@ export default {
                 const text = e.target.textContent || '';
                 // Use a more aggressive regex to strip all whitespace including non-breaking spaces and zero-width characters
                 const currentTitle = text.replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
-                const isTitleEmpty = currentTitle === '';
-                if (isTitleEmpty) {
+                if (currentTitle === '') {
                     console.log('[DEBUG_LOG] Backspace/Delete on empty title, triggering onDeleteTask');
                     e.preventDefault();
                     e.stopPropagation();

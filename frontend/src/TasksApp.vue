@@ -213,6 +213,7 @@
                  :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
                  @click.stop>
               <template v-if="contextMenu.task">
+                <div class="context-menu-item" @click="onOpenTaskFromMenu">Edit Task...</div>
                 <div class="context-menu-item" @click="onShowMoveDialog(contextMenu.task)">Move Task...</div>
                 <div class="context-menu-separator"></div>
                 <div class="context-menu-header">Due at...</div>
@@ -314,20 +315,9 @@
                      draggable="true" @dragstart="onListDragStart($event, list.id)">
                   <span class="collapse-toggle" :class="{ collapsed: collapsedLists.has(list.id) }" @click="toggleListCollapse(list.id)">
                   </span>
-                  <input v-if="editingListId === list.id" 
-                         ref="listNameInput"
-                         v-model="editingListName" 
-                         class="list-name-input"
-                         @blur="saveListName(list)"
-                         @keyup.enter="saveListName(list)"
-                         @keyup.esc="cancelEditingList"
-                         @click.stop>
-                  <h3 v-else @dblclick="startEditingList(list)">
+                  <h3 @click="onEditList(list)">
                     <i :class="[getListIconClass(list), 'me-2']" :style="{ color: list.color }"></i>
                     {{ list.name }}
-                    <button class="btn btn-sm btn-link text-info p-0 ms-2 edit-list-inline-btn" @click.stop="startEditingList(list)" title="Rename List">
-                      <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
-                    </button>
                   </h3>
                   <div class="list-actions-dropdown">
                     <button class="list-actions-btn" @click.stop="onAddTask(list.id, selectedProject)" title="Add Task">+</button>
@@ -338,7 +328,6 @@
                          style="position: absolute; right: 0; top: 100%; z-index: 10000; display: block !important; border: 1px solid var(--border-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
                          @click.stop>
                       <div class="dropdown-item" @click="onEditListFromMenu"><i class="bi bi-gear me-2"></i>List Details</div>
-                      <div class="dropdown-item" @click="onRenameListFromMenu"><i class="bi bi-pencil me-2"></i>Rename List</div>
                       <div class="dropdown-item delete" @click="onDeleteListFromMenu"><i class="bi bi-trash me-2"></i>Delete List</div>
                     </div>
                   </div>
@@ -492,9 +481,6 @@ export default {
     const moveDialogTargetTaskIds = ref(null);
     const showProjectDialog = ref(false);
     const sidebarCollapsed = ref(false);
-    const editingListId = ref(null);
-    const editingListName = ref('');
-    const listNameInput = ref(null);
     const sidebarWidth = ref(loadSetting('tasksSidebarWidth', 260));
     const isResizingSidebar = ref(false);
     let sidebarStartX = 0;
@@ -1161,13 +1147,17 @@ export default {
       closeContextMenu();
     };
 
+    const onEditList = (list) => {
+      listDialogIsNew.value = false;
+      listDialogData.value = { ...list };
+      showListDialog.value = true;
+    };
+
     const onEditListFromMenu = () => {
       const listId = listMenu.value.listId;
       const list = selectedProject.value.lists.find(l => l.id === listId);
       if (list) {
-        listDialogIsNew.value = false;
-        listDialogData.value = { ...list };
-        showListDialog.value = true;
+        onEditList(list);
       }
       closeListMenu();
     };
@@ -1387,6 +1377,14 @@ export default {
       selectedProjectPriorities.value = priorities;
     };
 
+    const onOpenTaskFromMenu = () => {
+      const task = contextMenu.value.task;
+      if (task) {
+        onOpenTask(task, selectedProjectStatuses.value, selectedProjectTaskTypes.value, selectedProjectPriorities.value);
+      }
+      closeContextMenu();
+    };
+
     const onTaskContextMenu = (e, task) => {
       contextMenu.value = {
         visible: true,
@@ -1526,47 +1524,6 @@ export default {
       }
       showMoveDialog.value = false;
       fetchProjects();
-    };
-
-    const startEditingList = (list) => {
-      editingListId.value = list.id;
-      editingListName.value = list.name;
-      nextTick(() => {
-        if (listNameInput.value) {
-          if (Array.isArray(listNameInput.value)) {
-             listNameInput.value[0]?.focus();
-             listNameInput.value[0]?.select();
-          } else {
-             listNameInput.value.focus();
-             listNameInput.value.select();
-          }
-        }
-      });
-    };
-
-    const cancelEditingList = () => {
-      editingListId.value = null;
-      editingListName.value = '';
-    };
-
-    const saveListName = async (list) => {
-      if (!editingListId.value) return;
-      
-      const newName = editingListName.value.trim();
-      if (newName && newName !== list.name) {
-        await updateList(selectedProject.value.id, list.id, newName);
-        fetchProjects();
-      }
-      cancelEditingList();
-    };
-
-    const onRenameListFromMenu = () => {
-      const listId = listMenu.value.listId;
-      const list = selectedProject.value.lists.find(l => l.id === listId);
-      if (list) {
-        startEditingList(list);
-      }
-      closeListMenu();
     };
 
     const onListMenu = (e, listId) => {
@@ -1780,12 +1737,14 @@ export default {
       selectedProject,
       onSelectProject,
       onSelectList,
+      onOpenTaskFromMenu,
       toggleProjectCollapse,
       isProjectCollapsed,
       getProjectIconClass,
       getListIconClass,
       onAddTask,
       onAddList,
+      onEditList,
       onEditListFromMenu,
       onSaveList,
       onAddProject,
@@ -1843,13 +1802,6 @@ export default {
       allColumns,
       visibleColumnIds,
       onDeleteListFromMenu,
-      startEditingList,
-      cancelEditingList,
-      saveListName,
-      onRenameListFromMenu,
-      editingListId,
-      editingListName,
-      listNameInput,
       onEditProject,
       sidebarCollapsed,
       sidebarWidth,
@@ -2173,33 +2125,9 @@ label, .form-label {
   font-size: var(--fs-base);
   font-weight: 600;
   flex-grow: 1;
+  cursor: pointer;
 }
 
-.list-name-input {
-  background: var(--bg-card);
-  border: 1px solid var(--accent-blue);
-  color: var(--text-primary);
-  font-size: var(--fs-base);
-  font-weight: 600;
-  padding: 2px 4px;
-  border-radius: 4px;
-  flex-grow: 1;
-  margin-right: 8px;
-  outline: none;
-}
-
-.edit-list-inline-btn {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.list-header:hover .edit-list-inline-btn {
-  opacity: 0.7;
-}
-
-.edit-list-inline-btn:hover {
-  opacity: 1 !important;
-}
 
 .tasks-grid {
   overflow: visible;
