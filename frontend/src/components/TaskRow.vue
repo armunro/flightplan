@@ -198,17 +198,18 @@ export default {
 
         const handleFocus = () => {
             if (props.task) {
-                // If this specific task was just updated (title changed), don't re-focus
-                if (window._lastUpdatedTaskId === props.task.id) {
+                // Only skip re-focus if it's a title update AND we don't have an explicit focus request
+                if (window._lastUpdatedTaskId === props.task.id && window._focusTaskId !== props.task.id) {
                     window._lastUpdatedTaskId = null;
-                    // Also clear any pending focus just in case
-                    if (window._focusTaskId === props.task.id) {
-                        window._focusTaskId = null;
-                    }
                     return;
                 }
+                
+                // Clear the update flag if we matched
+                if (window._lastUpdatedTaskId === props.task.id) {
+                    window._lastUpdatedTaskId = null;
+                }
 
-                // Only auto-focus if we explicitly triggered a "new task" creation or deletion for THIS specific ID
+                // Only auto-focus if we explicitly triggered a "new task" creation, deletion, or movement for THIS specific ID
                 if (window._focusTaskId === props.task.id) {
                     // Prevent this component instance from stealing focus if it's being deleted
                     // The "watch" or "onMounted" might trigger on the old component just before it's unmounted
@@ -469,18 +470,20 @@ export default {
                 if (e.shiftKey) {
                     // Shift+Tab: Promote task (outdent)
                     if (props.parentTaskId) {
+                        window._focusTaskId = props.task.id;
                         await moveTask(props.task.id, null, props.parentTaskId, 'After'); // Shift+Tab: Promote task (outdent)
                         emit('refresh');
                     }
                 } else {
                     // Tab: Demote task (indent)
                     if (props.previousTaskId) {
+                        window._focusTaskId = props.task.id;
                         await moveTask(props.task.id, null, props.previousTaskId, 'Inside'); // Tab: Demote task (indent)
                         emit('refresh');
                     }
                 }
             } catch (err) {
-                // Silent error
+                window._focusTaskId = null;
             }
         };
 
@@ -553,6 +556,11 @@ export default {
             await updateTask(props.task.id, { ...taskWithoutSubtasks, title: newTitle });
             // Set a flag to prevent re-focusing on mount if it's just a title update
             window._lastUpdatedTaskId = props.task.id;
+            
+            // If we have a pending focus request for THIS task, we should keep it
+            // because onUpdateTitle might be called just before a refresh that we WANT focus for
+            // (like when pressing Tab)
+            
             if (shouldRefresh) {
                 emit('refresh');
             }
