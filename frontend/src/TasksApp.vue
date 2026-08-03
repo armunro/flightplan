@@ -1822,6 +1822,7 @@ export default {
       isResizingSidebar,
       sidebarStyle,
       startSidebarResize,
+      startResize,
       theme,
       themeClass
     };

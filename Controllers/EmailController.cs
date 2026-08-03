@@ -6,7 +6,7 @@ using FlightPlan.Core.Models;
 namespace FlightPlan.Controllers;
 
 public record MatchingRuleDto(string Name, string? Color);
-public record EmailWithRulesDto(string Id, string Subject, string From, string FromAddress, DateTimeOffset ReceivedDateTime, string BodyPreview, string WebLink, List<MatchingRuleDto> MatchingRules);
+public record EmailWithRulesDto(string Id, string Subject, string From, string FromAddress, DateTimeOffset ReceivedDateTime, string BodyPreview, string WebLink, string? Body, List<MatchingRuleDto> MatchingRules);
 
 [ApiController]
 [Route("api/[controller]")]
@@ -37,6 +37,7 @@ public class EmailController : ControllerBase
             email.ReceivedDateTime,
             email.BodyPreview,
             email.WebLink,
+            email.Body,
             rules.Where(r => _ruleService.Matches(r, email)).Select(r => new MatchingRuleDto(r.Name, r.Color)).ToList()
         ));
 
@@ -70,6 +71,31 @@ public class EmailController : ControllerBase
         var json = System.Text.Json.JsonSerializer.Serialize(preferences);
         await System.IO.File.WriteAllTextAsync(path, json);
         return Ok();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetEmail(string id)
+    {
+        var email = await _graphService.GetEmailAsync(id);
+        if (email == null)
+        {
+            return NotFound();
+        }
+
+        var rules = _ruleService.GetAllRules();
+        var result = new EmailWithRulesDto(
+            email.Id,
+            email.Subject,
+            email.From,
+            email.FromAddress,
+            email.ReceivedDateTime,
+            email.BodyPreview,
+            email.WebLink,
+            email.Body,
+            rules.Where(r => _ruleService.Matches(r, email)).Select(r => new MatchingRuleDto(r.Name, r.Color)).ToList()
+        );
+
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]

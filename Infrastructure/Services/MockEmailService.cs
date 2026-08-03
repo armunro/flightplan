@@ -40,6 +40,7 @@ public class MockEmailService : IEmailService
                 "Junie assigned DEMO-101 to you. The dashboard layout is broken on mobile devices. We need to fix the CSS grid to ensure the charts don't overlap on smaller screens.",
                 DateTimeOffset.UtcNow.AddHours(-1),
                 "https://outlook.office.com/mail/inbox/id/msg-1",
+                "<div><p>Junie assigned <strong>DEMO-101</strong> to you.</p><p>The dashboard layout is broken on mobile devices. We need to fix the CSS grid to ensure the charts don't overlap on smaller screens.</p><p><a href='#'>View Issue</a></p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -50,6 +51,7 @@ public class MockEmailService : IEmailService
                 "Andrew opened a new pull request: Feature/demo-mode. Please review the changes that enable the new demo mode for the application.",
                 DateTimeOffset.UtcNow.AddHours(-3),
                 "https://outlook.office.com/mail/inbox/id/msg-2",
+                "<div><p>Andrew opened a new pull request: <strong>Feature/demo-mode</strong>.</p><p>Please review the changes that enable the new demo mode for the application.</p><hr/><p>15 files changed, 450 additions, 120 deletions.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -60,6 +62,7 @@ public class MockEmailService : IEmailService
                 "Hi, I've updated the project requirements for the next sprint. Let's discuss this afternoon at 2 PM.",
                 DateTimeOffset.UtcNow.AddDays(-1),
                 "https://outlook.office.com/mail/inbox/id/msg-3",
+                "<div><p>Hi,</p><p>I've updated the project requirements for the next sprint. Let's discuss this afternoon at 2 PM.</p><p>Best regards,<br/>Andrew</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -70,6 +73,7 @@ public class MockEmailService : IEmailService
                 "No security issues detected in the last 7 days. Your system is up to date and all patches have been applied.",
                 DateTimeOffset.UtcNow.AddDays(-2),
                 "https://outlook.office.com/mail/inbox/id/msg-4",
+                "<div><h3>Weekly Security Report</h3><p>No security issues detected in the last 7 days. Your system is up to date and all patches have been applied.</p><ul><li>Scan completed: Today, 4:00 AM</li><li>Status: Healthy</li></ul></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -80,6 +84,7 @@ public class MockEmailService : IEmailService
                 "Production-Web-01 has exceeded 90% CPU usage for the last 15 minutes. Please investigate potential traffic spikes.",
                 DateTimeOffset.UtcNow.AddMinutes(-45),
                 "https://outlook.office.com/mail/inbox/id/msg-5",
+                "<div><h2 style='color: red;'>Critical Alert</h2><p><strong>Production-Web-01</strong> has exceeded 90% CPU usage for the last 15 minutes. Please investigate potential traffic spikes.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -90,6 +95,7 @@ public class MockEmailService : IEmailService
                 "We are planning a team offsite for next month. Please fill out the survey to choose your preferred location and dietary requirements.",
                 DateTimeOffset.UtcNow.AddHours(-5),
                 "https://outlook.office.com/mail/inbox/id/msg-6",
+                "<div><p>We are planning a team offsite for next month. Please fill out the survey to choose your preferred location and dietary requirements.</p><p><button>Fill Survey</button></p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -100,6 +106,7 @@ public class MockEmailService : IEmailService
                 "Your monthly invoice for June 2026 is now available. The total amount of $450.00 will be charged to your card on file.",
                 DateTimeOffset.UtcNow.AddDays(-3),
                 "https://outlook.office.com/mail/inbox/id/msg-7",
+                "<div><p>Your monthly invoice for June 2026 is now available. The total amount of <strong>$450.00</strong> will be charged to your card on file.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -110,6 +117,7 @@ public class MockEmailService : IEmailService
                 "A new support ticket has been opened regarding a password reset request. User: Sarah Jenkins.",
                 DateTimeOffset.UtcNow.AddHours(-8),
                 "https://outlook.office.com/mail/inbox/id/msg-8",
+                "<div><p>A new support ticket has been opened regarding a password reset request. <strong>User: Sarah Jenkins.</strong></p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -120,6 +128,7 @@ public class MockEmailService : IEmailService
                 "Here are the marketing plans for Q3. We are focusing on social media outreach and new blog content.",
                 DateTimeOffset.UtcNow.AddDays(-4),
                 "https://outlook.office.com/mail/inbox/id/msg-9",
+                "<div><p>Here are the marketing plans for Q3. We are focusing on social media outreach and new blog content.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -130,6 +139,7 @@ public class MockEmailService : IEmailService
                 "We have updated the remote work policy. Please review the attached document for the new guidelines.",
                 DateTimeOffset.UtcNow.AddDays(-5),
                 "https://outlook.office.com/mail/inbox/id/msg-10",
+                "<div><p>We have updated the remote work policy. Please review the attached document for the new guidelines.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -140,6 +150,7 @@ public class MockEmailService : IEmailService
                 "Check out the latest trends: AI-driven UI, WebAssembly growth, and the rise of edge computing.",
                 DateTimeOffset.UtcNow.AddDays(-6),
                 "https://outlook.office.com/mail/inbox/id/msg-11",
+                "<div><p>Check out the latest trends: AI-driven UI, WebAssembly growth, and the rise of edge computing.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -150,6 +161,7 @@ public class MockEmailService : IEmailService
                 "Attached is our proposal for the Q4 integration project. We look forward to your feedback.",
                 DateTimeOffset.UtcNow.AddDays(-7),
                 "https://outlook.office.com/mail/inbox/id/msg-12",
+                "<div><p>Attached is our proposal for the Q4 integration project. We look forward to your feedback.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -160,6 +172,7 @@ public class MockEmailService : IEmailService
                 "Here is the summary of today's standup. Key action items: Andrew to fix DEMO-101, Junie to review PR #45.",
                 DateTimeOffset.UtcNow.AddHours(-2),
                 "https://outlook.office.com/mail/inbox/id/msg-13",
+                "<div><p>Here is the summary of today's standup. Key action items: Andrew to fix DEMO-101, Junie to review PR #45.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -170,6 +183,7 @@ public class MockEmailService : IEmailService
                 "See who wants to connect with you and expand your professional network on LinkedIn.",
                 DateTimeOffset.UtcNow.AddDays(-1),
                 "https://outlook.office.com/mail/inbox/id/msg-14",
+                "<div><p>See who wants to connect with you and expand your professional network on LinkedIn.</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -180,6 +194,7 @@ public class MockEmailService : IEmailService
                 "Sarah: 'Hey Andrew, do you have a minute to look at the new design mockups?'",
                 DateTimeOffset.UtcNow.AddMinutes(-10),
                 "https://outlook.office.com/mail/inbox/id/msg-15",
+                "<div><p>Sarah: 'Hey Andrew, do you have a minute to look at the new design mockups?'</p></div>",
                 new List<string>()
             ),
             new EmailDto(
@@ -190,6 +205,7 @@ public class MockEmailService : IEmailService
                 "Your flight to Seattle (SEA) on July 30th is confirmed. Booking reference: ABC123XYZ.",
                 DateTimeOffset.UtcNow.AddDays(-10),
                 "https://outlook.office.com/mail/inbox/id/msg-16",
+                "<div><p>Your flight to Seattle (SEA) on July 30th is confirmed. Booking reference: ABC123XYZ.</p></div>",
                 new List<string>()
             )
         };

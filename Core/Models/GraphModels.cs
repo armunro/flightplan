@@ -8,6 +8,7 @@ public record EmailDto(
     string BodyPreview,
     DateTimeOffset ReceivedDateTime,
     string WebLink,
+    string? Body = null,
     List<string>? MatchingRules = null);
 
 public record MailFolderDto(

@@ -114,6 +114,23 @@
               <h2 class="fw-bold mb-0 theme-text">{{ currentFolderName }}</h2>
             </div>
             <div class="d-flex align-items-center gap-2">
+              <div class="btn-group btn-group-sm me-2">
+                <button class="btn btn-outline-secondary" 
+                        :class="{ active: readingPaneLayout === 'off' }" 
+                        @click="readingPaneLayout = 'off'" title="Reading Pane: Off">
+                  <i class="bi bi-layout-sidebar-inset"></i>
+                </button>
+                <button class="btn btn-outline-secondary" 
+                        :class="{ active: readingPaneLayout === 'right' }" 
+                        @click="readingPaneLayout = 'right'" title="Reading Pane: Right">
+                  <i class="bi bi-layout-sidebar-inset-reverse"></i>
+                </button>
+                <button class="btn btn-outline-secondary" 
+                        :class="{ active: readingPaneLayout === 'bottom' }" 
+                        @click="readingPaneLayout = 'bottom'" title="Reading Pane: Bottom">
+                  <i class="bi bi-layout-split"></i>
+                </button>
+              </div>
               <div class="input-group input-group-sm">
                 <button class="btn btn-outline-secondary" @click="showRulesManager = true" title="Manage Rules">
                   <i class="bi bi-gear"></i>
@@ -145,26 +162,114 @@
             </div>
           </div>
 
-          <div class="email-content-scrollable">
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-info" role="status">
-                <span class="visually-hidden">Loading...</span>
+          <div class="email-content-scrollable" :class="{ 'd-flex flex-row': readingPaneLayout === 'right', 'd-flex flex-column': readingPaneLayout === 'bottom' }">
+            <div class="email-list-wrapper" :style="readingPaneLayout === 'right' ? { flex: 1, minWidth: '300px' } : readingPaneLayout === 'bottom' ? { flex: 1, minHeight: '200px' } : { width: '100%' }">
+              <div v-if="loading" class="text-center py-5">
+                <div class="spinner-border text-info" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div v-else-if="emails.length === 0" class="card theme-card">
+                <div class="card-body text-center py-5">
+                  <p class="theme-text-muted opacity-50 mb-0">No emails found or failed to fetch emails.</p>
+                </div>
+              </div>
+              <div v-else class="email-list">
+                <div v-for="email in getSortedEmails(emails)" :key="email.id" 
+                     class="email-item" 
+                     :class="{ 'unread': !email.isRead, 'highlighted': email.id === selectedEmailId }"
+                     @click="selectEmail(email)">
+                  <div class="email-item-content">
+                    <div class="email-item-top">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="email-sender fs-base theme-text" :title="email.fromAddress">{{ email.from }}</span>
+                        <span class="email-address theme-text-muted fs-xs opacity-75" v-if="readingPaneLayout === 'off'">&lt;{{ email.fromAddress }}&gt;</span>
+                        <div v-if="email.matchingRules && email.matchingRules.length > 0" class="email-item-tags d-flex gap-1 ms-1">
+                          <span v-for="rule in email.matchingRules" 
+                                :key="rule.name" 
+                                class="rule-tag"
+                                :style="rule.color ? { backgroundColor: rule.color } : {}">
+                            {{ rule.name }}
+                          </span>
+                        </div>
+                      </div>
+                      <span class="email-date">{{ formatFriendlyDate(email.receivedDateTime) }}</span>
+                    </div>
+                    <div class="email-item-details">
+                      <span class="subject-text" :title="email.subject">{{ email.subject }}</span>
+                      <span class="preview-separator" v-if="email.subject && email.bodyPreview"> - </span>
+                      <span class="email-preview-text">{{ email.bodyPreview }}</span>
+                    </div>
+                  </div>
+
+                  <div v-if="email.matchingRules && email.matchingRules.length > 0" 
+                       class="rule-border-bar"
+                       :style="{ backgroundColor: email.matchingRules[0].color || 'var(--accent-blue)' }">
+                  </div>
+                  
+                  <div class="email-item-actions">
+                    <div class="dropdown">
+                      <button class="btn btn-link p-1 theme-text-muted action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" @click.stop>
+                        <i class="bi bi-three-dots"></i>
+                      </button>
+                      <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                        <li><a class="dropdown-item small" href="#" @click.prevent="createRuleFromEmail(email.id)">
+                          <i class="bi bi-filter me-2"></i> Create Rule
+                        </a></li>
+                        <li><a class="dropdown-item small" href="#" @click.prevent="createTask(email)">
+                          <i class="bi bi-check2-square me-2"></i> Create Task
+                        </a></li>
+                        <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
+                          <div class="dropdown-item small d-flex align-items-center">
+                            <i class="bi bi-chevron-left small me-2"></i>
+                            <span><i class="bi bi-lightning me-2"></i> Apply Rule</span>
+                          </div>
+                          <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                            <li v-for="rule in rules" :key="rule.name">
+                              <a class="dropdown-item small" href="#" @click.prevent="applyRule(email.id, rule.name)">{{ rule.name }}</a>
+                            </li>
+                          </ul>
+                        </li>
+                        <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
+                          <div class="dropdown-item small d-flex align-items-center">
+                            <i class="bi bi-chevron-left small me-2"></i>
+                            <span><i class="bi bi-plus-circle me-2"></i> Add Sender to Rule</span>
+                          </div>
+                          <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                            <li v-for="rule in rules" :key="rule.name">
+                              <a class="dropdown-item small" href="#" @click.prevent="addSenderToRule(rule.name, email.fromAddress, email.subject)">{{ rule.name }}</a>
+                            </li>
+                          </ul>
+                        </li>
+                        <li><hr class="dropdown-divider border-primary opacity-25"></li>
+                        <li><a class="dropdown-item small text-danger" href="#" @click.prevent="deleteEmail(email.id)">
+                          <i class="bi bi-trash me-2"></i> Delete
+                        </a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div v-else-if="emails.length === 0" class="card theme-card">
-              <div class="card-body text-center py-5">
-                <p class="theme-text-muted opacity-50 mb-0">No emails found or failed to fetch emails.</p>
+
+            <div v-if="readingPaneLayout === 'right'" class="reading-pane-resizer-v" @mousedown="startResize('readingPaneRight', $event)"></div>
+            <div v-if="readingPaneLayout === 'bottom'" class="reading-pane-resizer-h" @mousedown="startResize('readingPaneBottom', $event)"></div>
+
+            <div v-if="readingPaneLayout !== 'off'" 
+                 class="reading-pane" 
+                 :style="readingPaneLayout === 'right' ? { width: readingPaneWidth + 'px' } : { height: readingPaneHeight + 'px' }">
+              <div v-if="emailLoading" class="d-flex justify-content-center align-items-center h-100">
+                <div class="spinner-border text-info" role="status">
+                  <span class="visually-hidden">Loading email...</span>
+                </div>
               </div>
-            </div>
-            <div v-else class="email-list">
-              <div v-for="email in getSortedEmails(emails)" :key="email.id" class="email-item" :class="{ 'unread': !email.isRead, 'highlighted': email.id === highlightedEmailId }">
-                <div class="email-item-content">
-                  <div class="email-item-top">
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="email-sender fs-base theme-text" :title="email.fromAddress">{{ email.from }}</span>
-                      <span class="email-address theme-text-muted fs-xs opacity-75">&lt;{{ email.fromAddress }}&gt;</span>
-                      <div v-if="email.matchingRules && email.matchingRules.length > 0" class="email-item-tags d-flex gap-1 ms-1">
-                        <span v-for="rule in email.matchingRules" 
+              <div v-else-if="selectedEmailFull" class="email-view h-100 d-flex flex-column">
+                <div class="email-view-header p-3 theme-border border-bottom">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex flex-column gap-1">
+                      <h4 class="theme-text mb-0">{{ selectedEmailFull.subject || '(No Subject)' }}</h4>
+                      <div v-if="selectedEmailFull.matchingRules && selectedEmailFull.matchingRules.length > 0" class="d-flex flex-wrap gap-1 mt-1">
+                        <span v-for="rule in selectedEmailFull.matchingRules" 
                               :key="rule.name" 
                               class="rule-tag"
                               :style="rule.color ? { backgroundColor: rule.color } : {}">
@@ -172,64 +277,76 @@
                         </span>
                       </div>
                     </div>
-                    <span class="email-date">{{ formatFriendlyDate(email.receivedDateTime) }}</span>
-                  </div>
-                  <div class="email-item-details">
-                    <span class="subject-text" :title="email.subject">{{ email.subject }}</span>
-                    <span class="preview-separator" v-if="email.subject && email.bodyPreview"> - </span>
-                    <span class="email-preview-text">{{ email.bodyPreview }}</span>
-                  </div>
-                </div>
-
-                <div v-if="email.matchingRules && email.matchingRules.length > 0" 
-                     class="rule-border-bar"
-                     :style="{ backgroundColor: email.matchingRules[0].color || 'var(--accent-blue)' }">
-                </div>
-                
-                <div class="email-item-actions">
-                  <div class="dropdown">
-                    <button class="btn btn-link p-1 theme-text-muted action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots"></i>
-                    </button>
-                    <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                      <li><a class="dropdown-item small" href="#" @click.prevent="createRuleFromEmail(email.id)">
-                        <i class="bi bi-filter me-2"></i> Create Rule
-                      </a></li>
-                      <li><a class="dropdown-item small" href="#" @click.prevent="createTask(email)">
-                        <i class="bi bi-check2-square me-2"></i> Create Task
-                      </a></li>
-                      <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
-                        <div class="dropdown-item small d-flex align-items-center">
-                          <i class="bi bi-chevron-left small me-2"></i>
-                          <span><i class="bi bi-lightning me-2"></i> Apply Rule</span>
-                        </div>
-                        <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                          <li v-for="rule in rules" :key="rule.name">
-                            <a class="dropdown-item small" href="#" @click.prevent="applyRule(email.id, rule.name)">{{ rule.name }}</a>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-info" @click="createTask(selectedEmailFull)" title="Create Task">
+                        <i class="bi bi-check2-square"></i>
+                      </button>
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Rule Actions">
+                          <i class="bi bi-filter"></i>
+                        </button>
+                        <ul class="dropdown-menu border-primary shadow-lg" :class="{ 'dropdown-menu-dark': themeClass === 'theme-cosmic' }">
+                          <li><a class="dropdown-item small" href="#" @click.prevent="createRuleFromEmail(selectedEmailFull.id)">
+                            <i class="bi bi-filter me-2"></i> Create Rule
+                          </a></li>
+                          <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
+                            <div class="dropdown-item small d-flex align-items-center">
+                              <i class="bi bi-chevron-left small me-2"></i>
+                              <span><i class="bi bi-lightning me-2"></i> Apply Rule</span>
+                            </div>
+                            <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': themeClass === 'theme-cosmic' }">
+                              <li v-for="rule in rules" :key="rule.name">
+                                <a class="dropdown-item small" href="#" @click.prevent="applyRule(selectedEmailFull.id, rule.name)">{{ rule.name }}</a>
+                              </li>
+                            </ul>
+                          </li>
+                          <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
+                            <div class="dropdown-item small d-flex align-items-center">
+                              <i class="bi bi-chevron-left small me-2"></i>
+                              <span><i class="bi bi-plus-circle me-2"></i> Add Sender to Rule</span>
+                            </div>
+                            <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': themeClass === 'theme-cosmic' }">
+                              <li v-for="rule in rules" :key="rule.name">
+                                <a class="dropdown-item small" href="#" @click.prevent="addSenderToRule(rule.name, selectedEmailFull.fromAddress, selectedEmailFull.subject)">{{ rule.name }}</a>
+                              </li>
+                            </ul>
                           </li>
                         </ul>
-                      </li>
-                      <li v-if="rules.length > 0" class="dropdown-submenu submenu-left">
-                        <div class="dropdown-item small d-flex align-items-center">
-                          <i class="bi bi-chevron-left small me-2"></i>
-                          <span><i class="bi bi-plus-circle me-2"></i> Add Sender to Rule</span>
-                        </div>
-                        <ul class="dropdown-menu border-primary" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                          <li v-for="rule in rules" :key="rule.name">
-                            <a class="dropdown-item small" href="#" @click.prevent="addSenderToRule(rule.name, email.fromAddress, email.subject)">{{ rule.name }}</a>
-                          </li>
-                        </ul>
-                      </li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item small text-info" :href="email.webLink" target="_blank">
-                        <i class="bi bi-box-arrow-up-right me-2"></i> Open in Graph
-                      </a></li>
-                      <li><a class="dropdown-item small text-danger" href="#" @click.prevent="deleteEmail(email.id)">
-                        <i class="bi bi-trash me-2"></i> Delete
-                      </a></li>
-                    </ul>
+                      </div>
+                      <button class="btn btn-sm btn-outline-danger" @click="deleteEmail(selectedEmailFull.id)" title="Delete Email">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      <a :href="selectedEmailFull.webLink" target="_blank" class="btn btn-sm btn-outline-secondary" title="Open in Outlook" v-if="selectedEmailFull.webLink">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="sender-avatar">
+                      {{ (selectedEmailFull.from || '?').charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <div class="fw-bold theme-text">{{ selectedEmailFull.from || 'Unknown Sender' }}</div>
+                      <div class="small theme-text-muted">{{ selectedEmailFull.fromAddress || '' }}</div>
+                    </div>
+                    <div class="ms-auto text-end" v-if="selectedEmailFull.receivedDateTime">
+                      <div class="small theme-text-muted">{{ formatFriendlyDate(selectedEmailFull.receivedDateTime) }}</div>
+                      <div class="x-small theme-text-muted opacity-50">{{ new Date(selectedEmailFull.receivedDateTime).toLocaleString() }}</div>
+                    </div>
                   </div>
                 </div>
+                <div class="email-view-body p-0 overflow-auto flex-grow-1 theme-text">
+                  <iframe 
+                    v-if="selectedEmailFull"
+                    :srcdoc="`<style>body { font-family: sans-serif; font-size: 14px; margin: 20px; color: ${themeClass === 'theme-cosmic' ? '#c9d1d9' : '#24292f'}; background: transparent; }</style>` + (selectedEmailFull.body || selectedEmailFull.bodyPreview || '(No content)')"
+                    class="w-100 h-100 border-0"
+                    sandbox="allow-popups allow-popups-to-escape-sandbox"
+                    title="Email Body"
+                  ></iframe>
+                </div>
+              </div>
+              <div v-else class="d-flex justify-content-center align-items-center h-100 theme-text-muted opacity-50">
+                Select an email to read
               </div>
             </div>
           </div>
@@ -368,7 +485,6 @@ const loadSetting = (key, defaultValue) => {
 };
 
 const emails = ref([]);
-const highlightedEmailId = ref(null);
 const theme = ref('Cosmic');
 const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 const pageSize = ref(loadSetting('emailPageSize', 50));
@@ -551,6 +667,57 @@ watch(folderPreferences, (newVal) => {
 const sortBy = ref('receivedDateTime');
 const sortDesc = ref(true);
 
+// Reading Pane state
+const readingPaneLayout = ref(localStorage.getItem('emailReadingPaneLayout') || 'off'); // 'off', 'right', 'bottom'
+const readingPaneWidth = ref(Number(localStorage.getItem('emailReadingPaneWidth')) || 450);
+const readingPaneHeight = ref(Number(localStorage.getItem('emailReadingPaneHeight')) || 300);
+const selectedEmailId = ref(null);
+const selectedEmailFull = ref(null);
+const emailLoading = ref(false);
+
+const selectEmail = async (email) => {
+  if (!email) {
+    selectedEmailId.value = null;
+    selectedEmailFull.value = null;
+    return;
+  }
+  
+  selectedEmailId.value = email.id;
+  
+  // Set selectedEmailFull to the list version immediately to avoid crash or empty view
+  selectedEmailFull.value = { ...email };
+
+  if (readingPaneLayout.value === 'off') return;
+
+  emailLoading.value = true;
+  try {
+    const response = await fetch(`/api/email/${email.id}`);
+    if (response.ok) {
+      selectedEmailFull.value = await response.json();
+    }
+  } catch (error) {
+    console.error('Error fetching full email:', error);
+  } finally {
+    emailLoading.value = false;
+  }
+};
+
+watch(readingPaneLayout, (newVal) => {
+  localStorage.setItem('emailReadingPaneLayout', newVal);
+  if (newVal !== 'off' && selectedEmailId.value && !selectedEmailFull.value) {
+    const email = emails.value.find(e => e.id === selectedEmailId.value);
+    if (email) selectEmail(email);
+  }
+});
+
+watch(readingPaneWidth, (newVal) => {
+  localStorage.setItem('emailReadingPaneWidth', newVal.toString());
+});
+
+watch(readingPaneHeight, (newVal) => {
+  localStorage.setItem('emailReadingPaneHeight', newVal.toString());
+});
+
 // Resizing state - No longer used for main list but kept for potential future use or to avoid removing too much logic at once
 const columnWidths = ref([200, 0, 150, 80]); // From, Subject (unused as 1fr), Date, Action
 const isResizing = ref(false);
@@ -571,6 +738,22 @@ const gridStyle = computed(() => {
 });
 
 const startResize = (index, event) => {
+  if (index === 'readingPaneRight') {
+    isResizing.value = true;
+    startX.value = event.pageX;
+    startWidth.value = readingPaneWidth.value;
+    document.addEventListener('mousemove', onMouseMoveRight);
+    document.addEventListener('mouseup', stopResizePane);
+    return;
+  }
+  if (index === 'readingPaneBottom') {
+    isResizing.value = true;
+    startX.value = event.pageY;
+    startWidth.value = readingPaneHeight.value;
+    document.addEventListener('mousemove', onMouseMoveBottom);
+    document.addEventListener('mouseup', stopResizePane);
+    return;
+  }
   isResizing.value = true;
   activeResizer.value = index;
   startX.value = event.pageX;
@@ -594,12 +777,32 @@ const onMouseMove = (event) => {
   columnWidths.value[activeResizer.value] = newWidth;
 };
 
+const onMouseMoveRight = (event) => {
+  if (!isResizing.value) return;
+  const diff = startX.value - event.pageX;
+  readingPaneWidth.value = Math.max(200, Math.min(800, startWidth.value + diff));
+};
+
+const onMouseMoveBottom = (event) => {
+  if (!isResizing.value) return;
+  const diff = startX.value - event.pageY;
+  readingPaneHeight.value = Math.max(100, Math.min(600, startWidth.value + diff));
+};
+
+const stopResizePane = () => {
+  isResizing.value = false;
+  document.removeEventListener('mousemove', onMouseMoveRight);
+  document.removeEventListener('mousemove', onMouseMoveBottom);
+  document.removeEventListener('mouseup', stopResizePane);
+};
+
 const stopResize = () => {
   isResizing.value = false;
   activeResizer.value = -1;
   document.removeEventListener('mousemove', onMouseMove);
   document.removeEventListener('mouseup', stopResize);
 };
+
 
 const fetchEmails = async () => {
   loading.value = true;
@@ -973,6 +1176,10 @@ const deleteEmail = async (id) => {
     if (response.ok) {
       // Remove email from local list for seamless update
       emails.value = emails.value.filter(e => e.id !== id);
+      if (selectedEmailId.value === id) {
+        selectedEmailId.value = null;
+        selectedEmailFull.value = null;
+      }
       // Refresh folders to update unread counts
       fetchFolders();
     }
@@ -1021,15 +1228,21 @@ watch(pageSize, (newVal) => {
   fetchEmails();
 });
 
-onMounted(() => {
-  fetchPreferences();
-  fetchFolders();
-  fetchEmails();
-  fetchRules();
+  onMounted(() => {
+    fetchPreferences();
+    fetchFolders();
+    fetchEmails();
+    fetchRules();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  highlightedEmailId.value = urlParams.get('messageId');
-});
+    const urlParams = new URLSearchParams(window.location.search);
+    const messageId = urlParams.get('messageId');
+    if (messageId) {
+      selectedEmailId.value = messageId;
+      // In a real app, you might want to auto-select and fetch body here
+      const email = emails.value.find(e => e.id === messageId);
+      if (email) selectEmail(email);
+    }
+  });
 </script>
 
 <style>
@@ -1274,7 +1487,66 @@ label, .form-label {
 
 .email-content-scrollable {
   flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.email-list-wrapper {
   overflow-y: auto;
+  border-right: 1px solid var(--border-primary);
+}
+
+.email-content-scrollable.flex-column .email-list-wrapper {
+  border-right: none;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.reading-pane {
+  background-color: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.reading-pane-resizer-v {
+  width: 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.reading-pane-resizer-v:hover {
+  background-color: var(--accent-blue);
+}
+
+.reading-pane-resizer-h {
+  height: 4px;
+  cursor: row-resize;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.reading-pane-resizer-h:hover {
+  background-color: var(--accent-blue);
+}
+
+.sender-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--accent-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.email-view-body iframe {
+  background: transparent;
 }
 
 .email-list {

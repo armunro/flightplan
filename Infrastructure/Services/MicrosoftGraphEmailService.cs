@@ -81,7 +81,7 @@ public class MicrosoftGraphEmailService : MicrosoftGraphBase, IEmailService
                 .GetAsync(config =>
                 {
                     config.QueryParameters.Top = top;
-                    config.QueryParameters.Select = new[] { "id", "subject", "from", "receivedDateTime", "bodyPreview", "webLink" };
+                    config.QueryParameters.Select = new[] { "id", "subject", "from", "receivedDateTime", "bodyPreview", "webLink", "body" };
                     config.QueryParameters.Orderby = new[] { "receivedDateTime desc" };
                 });
 
@@ -92,7 +92,8 @@ public class MicrosoftGraphEmailService : MicrosoftGraphBase, IEmailService
                 m.Subject ?? "(No Subject)",
                 m.BodyPreview ?? "",
                 m.ReceivedDateTime ?? DateTimeOffset.MinValue,
-                m.WebLink ?? ""
+                m.WebLink ?? "",
+                m.Body?.Content
             )) ?? Enumerable.Empty<EmailDto>();
         }
         catch (Exception ex)
@@ -110,7 +111,7 @@ public class MicrosoftGraphEmailService : MicrosoftGraphBase, IEmailService
             var m = await client.Me.Messages[messageId]
                 .GetAsync(config =>
                 {
-                    config.QueryParameters.Select = new[] { "id", "subject", "from", "receivedDateTime", "bodyPreview", "webLink" };
+                    config.QueryParameters.Select = new[] { "id", "subject", "from", "receivedDateTime", "bodyPreview", "webLink", "body" };
                 });
 
             if (m == null) return null;
@@ -122,7 +123,8 @@ public class MicrosoftGraphEmailService : MicrosoftGraphBase, IEmailService
                 m.Subject ?? "(No Subject)",
                 m.BodyPreview ?? "",
                 m.ReceivedDateTime ?? DateTimeOffset.MinValue,
-                m.WebLink ?? ""
+                m.WebLink ?? "",
+                m.Body?.Content
             );
         }
         catch (Exception ex)

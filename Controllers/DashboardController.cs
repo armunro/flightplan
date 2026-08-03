@@ -138,6 +138,7 @@ public class DashboardController : ControllerBase
                     email.ReceivedDateTime,
                     email.BodyPreview,
                     email.WebLink,
+                    email.Body,
                     rules.Where(r => _ruleService.Matches(r, email)).Select(r => new MatchingRuleDto(r.Name, r.Color))
                         .ToList()
                 )).ToList();
