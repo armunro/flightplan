@@ -56,8 +56,7 @@
                   <h2 v-else class="theme-text">Links & Bookmarks</h2>
                 </div>
 
-                <div class="d-flex align-items-center gap-3 flex-grow-1 justify-content-end">
-                  <!-- View & Filter Group -->
+                <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end">
                   <div class="d-flex align-items-center gap-3 theme-bg-dark rounded-pill px-3 py-1 theme-border border">
                     <div class="search-box position-relative" style="width: 200px;">
                       <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-info opacity-75 x-small"></i>
@@ -75,16 +74,13 @@
                     </div>
                   </div>
 
-                  <!-- Actions Group -->
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-info text-dark text-nowrap" @click="$refs.fileInput.click()" title="Import Bookmark File">
-                      <i class="bi bi-file-earmark-arrow-up"></i>
-                      <span class="ms-1 d-none d-xl-inline">Import</span>
+                  <div class="btn-group btn-group-sm gap-2">
+                    <button class="btn theme-btn-outline btn-sm" @click="$refs.fileInput.click()" title="Import Bookmark File">
+                      <i class="bi bi-file-earmark-arrow-up me-1"></i>Import
                     </button>
-                    <button class="btn btn-primary text-nowrap" @click="saveBookmarks" :disabled="saving" title="Save Changes">
+                    <button class="btn btn-primary btn-sm px-3" @click="saveBookmarks" :disabled="saving" title="Save Changes">
                       <span v-if="saving" class="spinner-border spinner-border-sm"></span>
-                      <i v-else class="bi bi-save"></i>
-                      <span class="ms-1 d-none d-xl-inline">Save</span>
+                      <i v-else class="bi bi-save me-1"></i>Save
                     </button>
                   </div>
                   <input type="file" ref="fileInput" class="d-none" accept=".html" @change="handleFileUpload" />

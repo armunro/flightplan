@@ -2208,37 +2208,4 @@ label, .form-label {
   color: var(--text-muted);
   font-style: italic;
 }
-
-.btn-subtle {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.btn-subtle:not(.dropdown-toggle)::after {
-  display: none;
-}
-
-.btn-subtle:hover, .btn-subtle[aria-expanded="true"] {
-  background-color: var(--bg-card);
-  color: var(--text-primary);
-  border-color: var(--border-primary);
-}
-
-.btn-subtle::after {
-  margin-left: 0.5em;
-  vertical-align: 0.255em;
-  content: "";
-  border-top: 0.3em solid;
-  border-right: 0.3em solid transparent;
-  border-bottom: 0;
-  border-left: 0.3em solid transparent;
-}
 </style>

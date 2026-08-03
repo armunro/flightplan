@@ -82,8 +82,22 @@
 }
 
 .theme-badge {
-  background-color: var(--border-primary) !important;
+  background-color: var(--bg-badge) !important;
   color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+.rule-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .theme-btn-outline {
@@ -95,6 +109,123 @@
 .theme-btn-outline:hover {
   background-color: var(--bg-hover) !important;
   color: var(--text-primary) !important;
+}
+
+.controls-bar .btn-outline-secondary,
+.controls-bar .btn-outline-primary,
+.controls-bar .btn-outline-info,
+.controls-bar .btn-secondary,
+.controls-bar .btn-primary,
+.controls-bar .btn-info,
+.controls-bar .btn-subtle,
+.controls-bar .btn-link,
+.controls-bar .btn-group .btn:not(.btn-danger):not(.theme-btn-outline),
+.controls-bar .dropdown .btn-outline-secondary,
+.controls-bar .dropdown .btn-primary,
+.controls-bar .input-group .btn-outline-secondary,
+.controls-bar .input-group .btn-primary,
+.controls-bar .dropdown > .btn,
+.controls-bar .input-group > .btn {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--text-muted) !important;
+  padding: 4px 12px !important;
+  border-radius: 4px !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.controls-bar .btn-outline-secondary:hover,
+.controls-bar .btn-outline-primary:hover,
+.controls-bar .btn-outline-info:hover,
+.controls-bar .btn-secondary:hover,
+.controls-bar .btn-primary:hover,
+.controls-bar .btn-info:hover,
+.controls-bar .btn-subtle:hover,
+.controls-bar .btn-link:hover,
+.controls-bar .btn-group .btn:not(.btn-danger):not(.theme-btn-outline):hover,
+.controls-bar .dropdown .btn-outline-secondary:hover,
+.controls-bar .dropdown .btn-primary:hover,
+.controls-bar .input-group .btn-outline-secondary:hover,
+.controls-bar .input-group .btn-primary:hover,
+.controls-bar .dropdown > .btn:hover,
+.controls-bar .input-group > .btn:hover,
+.controls-bar .btn-outline-secondary.active,
+.controls-bar .btn-outline-primary.active,
+.controls-bar .btn-outline-info.active,
+.controls-bar .btn-subtle.active,
+.controls-bar .btn-link.active,
+.controls-bar .btn-group .btn:not(.btn-danger):not(.theme-btn-outline).active,
+.controls-bar .dropdown .btn-outline-secondary.active,
+.controls-bar .dropdown .btn-primary.active,
+.controls-bar .input-group .btn-outline-secondary.active,
+.controls-bar .input-group .btn-primary.active,
+.controls-bar .dropdown > .btn.active,
+.controls-bar .input-group > .btn.active,
+.controls-bar .btn-outline-secondary[aria-expanded="true"],
+.controls-bar .btn-outline-primary[aria-expanded="true"],
+.controls-bar .btn-subtle[aria-expanded="true"],
+.controls-bar .btn-link[aria-expanded="true"],
+.controls-bar .dropdown .btn-outline-secondary[aria-expanded="true"],
+.controls-bar .dropdown .btn-primary[aria-expanded="true"],
+.controls-bar .input-group .btn-outline-secondary[aria-expanded="true"],
+.controls-bar .input-group .btn-primary[aria-expanded="true"],
+.controls-bar .dropdown > .btn[aria-expanded="true"],
+.controls-bar .input-group > .btn[aria-expanded="true"] {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.controls-bar .btn-primary,
+.controls-bar .btn-info,
+.controls-bar .px-3 {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.controls-bar .btn-danger,
+.controls-bar .theme-btn-outline {
+  /* Keep these as they are or standardize them too? User said they liked TasksApp style most. */
+}
+
+.btn-subtle {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--text-muted) !important;
+  padding: 4px 12px !important;
+  border-radius: 4px !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.btn-subtle:not(.dropdown-toggle)::after {
+  display: none !important;
+}
+
+.btn-subtle:hover, .btn-subtle[aria-expanded="true"] {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.btn-subtle::after {
+  margin-left: 0.5em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
 }
 
 .theme-modal {
@@ -366,20 +497,20 @@ body {
 }
 
 .btn-icon {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.1rem;
-  padding: 4px;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted) !important;
+  font-size: 1.1rem !important;
+  padding: 4px !important;
+  cursor: pointer !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s !important;
 }
 
 .btn-icon:hover {
-  color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }

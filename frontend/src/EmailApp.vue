@@ -113,53 +113,102 @@
             <div class="page-title-area">
               <h2 class="fw-bold mb-0 theme-text">{{ currentFolderName }}</h2>
             </div>
-            <div class="d-flex align-items-center gap-2">
-              <div class="btn-group btn-group-sm me-2">
-                <button class="btn btn-outline-secondary" 
-                        :class="{ active: readingPaneLayout === 'off' }" 
-                        @click="readingPaneLayout = 'off'" title="Reading Pane: Off">
-                  <i class="bi bi-layout-sidebar-inset"></i>
-                </button>
-                <button class="btn btn-outline-secondary" 
-                        :class="{ active: readingPaneLayout === 'right' }" 
-                        @click="readingPaneLayout = 'right'" title="Reading Pane: Right">
-                  <i class="bi bi-layout-sidebar-inset-reverse"></i>
-                </button>
-                <button class="btn btn-outline-secondary" 
-                        :class="{ active: readingPaneLayout === 'bottom' }" 
-                        @click="readingPaneLayout = 'bottom'" title="Reading Pane: Bottom">
-                  <i class="bi bi-layout-split"></i>
-                </button>
-              </div>
-              <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary" @click="showRulesManager = true" title="Manage Rules">
-                  <i class="bi bi-gear"></i>
-                </button>
-                <span class="input-group-text theme-input">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary opacity-75 fw-normal">
                   <i class="bi bi-envelope me-1"></i> {{ emails.length }}
                 </span>
-                <select v-model="pageSize" class="form-select theme-input" style="width: auto;">
-                  <option :value="10">10</option>
-                  <option :value="20">20</option>
-                  <option :value="50">50</option>
-                  <option :value="100">100</option>
-                </select>
-                <button v-if="rules.length > 0" 
-                        class="btn btn-outline-secondary dropdown-toggle" 
-                        type="button" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false">
-                  Apply Rules
-                </button>
-                <ul class="dropdown-menu border-primary dropdown-menu-end shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
-                  <li v-for="rule in rules" :key="rule.name">
-                    <a class="dropdown-item" href="#" @click.prevent="applyToAll(rule.name)" :title="'Apply ' + rule.name + ' to all emails'">
-                      Apply {{ rule.name }}
-                    </a>
-                  </li>
-                </ul>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-eye me-1"></i> View
+                  </button>
+                  <ul class="dropdown-menu border-primary shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                    <li class="dropdown-header small text-uppercase fw-bold opacity-75">Reading Pane</li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="readingPaneLayout = 'off'"
+                         :class="{ active: readingPaneLayout === 'off' }">
+                        <span><i class="bi bi-layout-sidebar-inset me-2"></i> Off</span>
+                        <i v-if="readingPaneLayout === 'off'" class="bi bi-check small"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="readingPaneLayout = 'right'"
+                         :class="{ active: readingPaneLayout === 'right' }">
+                        <span><i class="bi bi-layout-sidebar-inset-reverse me-2"></i> Right</span>
+                        <i v-if="readingPaneLayout === 'right'" class="bi bi-check small"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="readingPaneLayout = 'bottom'"
+                         :class="{ active: readingPaneLayout === 'bottom' }">
+                        <span><i class="bi bi-layout-split me-2"></i> Bottom</span>
+                        <i v-if="readingPaneLayout === 'bottom'" class="bi bi-check small"></i>
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-50"></li>
+                    <li class="dropdown-header small text-uppercase fw-bold opacity-75">Sort By</li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="toggleSort('receivedDateTime')"
+                         :class="{ active: sortBy === 'receivedDateTime' }">
+                        <span><i class="bi bi-calendar3 me-2"></i> Date</span>
+                        <i v-if="sortBy === 'receivedDateTime'" class="bi" :class="sortDesc ? 'bi-sort-down' : 'bi-sort-up'"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="toggleSort('from')"
+                         :class="{ active: sortBy === 'from' }">
+                        <span><i class="bi bi-person me-2"></i> From</span>
+                        <i v-if="sortBy === 'from'" class="bi" :class="sortDesc ? 'bi-sort-down' : 'bi-sort-up'"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="toggleSort('subject')"
+                         :class="{ active: sortBy === 'subject' }">
+                        <span><i class="bi bi-chat-left-text me-2"></i> Subject</span>
+                        <i v-if="sortBy === 'subject'" class="bi" :class="sortDesc ? 'bi-sort-down' : 'bi-sort-up'"></i>
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-50"></li>
+                    <li class="dropdown-header small text-uppercase fw-bold opacity-75">Page Size</li>
+                    <li v-for="size in [10, 20, 50, 100]" :key="size">
+                      <a class="dropdown-item small d-flex align-items-center justify-content-between" 
+                         href="#" @click.prevent="pageSize = size"
+                         :class="{ active: pageSize === size }">
+                        <span>{{ size }} emails</span>
+                        <i v-if="pageSize === size" class="bi bi-check small"></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle btn-sm" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                    Rules
+                  </button>
+                  <ul class="dropdown-menu border-primary dropdown-menu-end shadow" :class="{ 'dropdown-menu-dark': theme === 'Cosmic' }">
+                    <li v-if="rules.length > 0" class="dropdown-header small text-uppercase fw-bold opacity-75">Apply Rules</li>
+                    <li v-for="rule in rules" :key="rule.name">
+                      <a class="dropdown-item small" href="#" @click.prevent="applyToAll(rule.name)" :title="'Apply ' + rule.name + ' to all emails'">
+                        {{ rule.name }}
+                      </a>
+                    </li>
+                    <li v-if="rules.length > 0"><hr class="dropdown-divider opacity-50"></li>
+                    <li>
+                      <a class="dropdown-item small d-flex align-items-center" 
+                         href="#" @click.prevent="showRulesManager = true">
+                        <i class="bi bi-gear me-2"></i> Manage Rules
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
           </div>
 
           <div class="email-content-scrollable" :class="{ 'd-flex flex-row': readingPaneLayout === 'right', 'd-flex flex-column': readingPaneLayout === 'bottom' }">
@@ -272,7 +321,7 @@
                         <span v-for="rule in selectedEmailFull.matchingRules" 
                               :key="rule.name" 
                               class="rule-tag"
-                              :style="rule.color ? { backgroundColor: rule.color } : {}">
+                              :style="rule.color ? { backgroundColor: rule.color } : { backgroundColor: 'var(--accent-blue)' }">
                           {{ rule.name }}
                         </span>
                       </div>

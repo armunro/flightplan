@@ -44,10 +44,10 @@
                <h2>{{ selectedTaskId ? 'Edit Scheduled Task' : 'Create New Scheduled Task' }}</h2>
              </div>
              <div class="d-flex gap-2">
-               <button v-if="selectedTaskId" class="btn btn-danger btn-sm" @click="confirmDelete">
-                 <i class="bi bi-trash me-1"></i> Delete
+               <button v-if="selectedTaskId" class="btn btn-sm theme-btn-outline" @click="confirmDelete" title="Delete Schedule">
+                 <i class="bi bi-trash"></i>
                </button>
-               <button class="btn btn-primary btn-sm" @click="saveTask" :disabled="!isFormValid">
+               <button class="btn btn-primary btn-sm px-3" @click="saveTask" :disabled="!isFormValid">
                  <i class="bi bi-check-lg me-1"></i> Save Schedule
                </button>
              </div>

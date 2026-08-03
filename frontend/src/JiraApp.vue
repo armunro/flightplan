@@ -66,13 +66,13 @@
             <div>
               <h1 class="h3 fw-bold mb-0">Jira Issues</h1>
             </div>
-            <div class="d-flex align-items-center gap-3">
-              <div class="text-muted small d-none d-md-block" v-if="selectedQueryName">
+            <div class="d-flex align-items-center gap-2">
+              <div class="text-muted small d-none d-md-block me-2" v-if="selectedQueryName">
                 Filter: <span class="text-info fw-bold">{{ selectedQueryName }}</span>
               </div>
 
               <!-- Search Box -->
-              <div class="d-flex align-items-center gap-3 theme-bg-darker rounded-pill px-3 py-1 border border-secondary">
+              <div class="d-flex align-items-center gap-3 theme-bg-dark rounded-pill px-3 py-1 theme-border border">
                 <div class="search-box position-relative" style="width: 200px;">
                   <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-info opacity-75 x-small"></i>
                   <input v-model="searchQuery" class="form-control form-control-sm bg-transparent border-0 theme-text ps-4 search-input" placeholder="Search..." />
@@ -82,8 +82,8 @@
                 </div>
               </div>
 
-              <button class="btn btn-sm btn-outline-secondary" @click="showQueriesDialog = true" title="Edit Queries">
-                <i class="bi bi-pencil-square me-1"></i> Edit Queries
+              <button class="btn btn-sm btn-subtle" @click="showQueriesDialog = true" title="Edit Queries">
+                <i class="bi bi-pencil-square me-1"></i>Filters
               </button>
             </div>
           </div>
