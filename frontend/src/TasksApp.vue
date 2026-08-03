@@ -31,6 +31,9 @@
                    @drop="onProjectDrop($event, project.id)"
                    @contextmenu.prevent="onProjectContextMenu($event, project)"
                    :title="sidebarCollapsed ? project.name : ''">
+                  <div v-if="!sidebarCollapsed" class="project-collapse-chevron" @click.stop="toggleProjectCollapse(project.id)">
+                    <i class="bi" :class="isProjectCollapsed(project.id) ? 'bi-chevron-right' : 'bi-chevron-down'"></i>
+                  </div>
                   <div class="project-icon-wrapper" :style="{ backgroundColor: project.color }">
                     <i :class="[getProjectIconClass(project)]"></i>
                   </div>
@@ -1727,19 +1730,18 @@ export default {
       }
     };
 
-    const onSelectProject = (projectId) => {
-      if (selectedProjectId.value === projectId) {
-        // Toggle collapse if already selected
-        if (collapsedProjects.value.has(projectId)) {
-          collapsedProjects.value.delete(projectId);
-        } else {
-          collapsedProjects.value.add(projectId);
-        }
+    const toggleProjectCollapse = (projectId) => {
+      if (collapsedProjects.value.has(projectId)) {
+        collapsedProjects.value.delete(projectId);
       } else {
-        selectedProjectId.value = projectId;
-        selectedListId.value = null; // Show all lists by default when selecting a project
-        collapsedProjects.value.delete(projectId); // Expand when selecting
+        collapsedProjects.value.add(projectId);
       }
+    };
+
+    const onSelectProject = (projectId) => {
+      selectedProjectId.value = projectId;
+      selectedListId.value = null; // Show all lists by default when selecting a project
+      collapsedProjects.value.delete(projectId); // Expand when selecting
     };
 
     const onSelectList = (projectId, listId) => {
@@ -1778,6 +1780,7 @@ export default {
       selectedProject,
       onSelectProject,
       onSelectList,
+      toggleProjectCollapse,
       isProjectCollapsed,
       getProjectIconClass,
       getListIconClass,
@@ -1971,13 +1974,31 @@ label, .form-label {
 }
 
 .project-item {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   border-left: 3px solid transparent;
   min-width: 0;
   overflow: hidden;
+}
+
+.project-collapse-chevron {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.project-collapse-chevron:hover {
+  background-color: var(--bg-hover);
+  opacity: 1;
 }
 
 .tasks-sidebar.collapsed .project-item {
