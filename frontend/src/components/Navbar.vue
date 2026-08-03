@@ -5,7 +5,7 @@
     <AddTaskModal v-model:isOpen="isAddTaskModalOpen" @close="isAddTaskModalOpen = false" />
     <div class="navbar-header d-flex align-items-center" :class="{ 'collapsed': isCollapsed }">
       <a href="/Dashboard" class="navbar-brand d-flex align-items-center">
-        <i class="bi bi-send brand-icon"></i>
+        <img :src="'/assets/logo.svg'" class="brand-icon" alt="FlightPlan Logo" />
         <span v-if="!isCollapsed" class="brand-text">FlightPlan</span>
       </a>
     </div>
@@ -220,9 +220,9 @@ const currentPath = computed(() => {
 }
 
 .brand-icon {
-  font-size: 1.2rem;
-  color: var(--accent-blue);
-  min-width: 20px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
 }
 
 .brand-text {
