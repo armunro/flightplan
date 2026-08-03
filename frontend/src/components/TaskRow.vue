@@ -189,10 +189,12 @@ export default {
         };
 
         onMounted(() => {
+            console.log('[DEBUG_LOG] TaskRow onMounted:', props.task?.id);
             handleFocus();
         });
 
-        watch(() => props.task.id, () => {
+        watch(() => props.task.id, (newId, oldId) => {
+            console.log('[DEBUG_LOG] TaskRow watch task.id changed from', oldId, 'to', newId);
             handleFocus();
         });
 
@@ -200,6 +202,7 @@ export default {
             if (props.task) {
                 // Only skip re-focus if it's a title update AND we don't have an explicit focus request
                 if (window._lastUpdatedTaskId === props.task.id && window._focusTaskId !== props.task.id) {
+                    console.log('[DEBUG_LOG] handleFocus: skipping re-focus for title update', props.task.id);
                     window._lastUpdatedTaskId = null;
                     return;
                 }
@@ -211,9 +214,12 @@ export default {
 
                 // Only auto-focus if we explicitly triggered a "new task" creation, deletion, or movement for THIS specific ID
                 if (window._focusTaskId === props.task.id) {
+                    console.log('[DEBUG_LOG] handleFocus: MATCH for task:', props.task.id);
+                    console.log('[DEBUG_LOG] handleFocus: Focus match found for task:', props.task.id, 'window._isDeletingTaskId:', window._isDeletingTaskId);
                     // Prevent this component instance from stealing focus if it's being deleted
                     // The "watch" or "onMounted" might trigger on the old component just before it's unmounted
                     if (window._isDeletingTaskId === props.task.id) {
+                        console.log('[DEBUG_LOG] handleFocus: skipping focus because task is being deleted', props.task.id);
                         return;
                     }
 
@@ -243,7 +249,20 @@ export default {
                                     el.setAttribute('contenteditable', 'true');
                                 }
                                 
+                                console.log('[DEBUG_LOG] handleFocus: actual focus() attempt for:', props.task.id);
                                 el.focus();
+                                // For contenteditable, sometimes we need to ensure the cursor is at the end
+                                try {
+                                    const range = document.createRange();
+                                    const sel = window.getSelection();
+                                    range.selectNodeContents(el);
+                                    range.collapse(false);
+                                    sel.removeAllRanges();
+                                    sel.addRange(range);
+                                } catch (e) {
+                                    console.error('[DEBUG_LOG] handleFocus: error setting cursor position:', e);
+                                }
+                                
                                 console.log('[DEBUG_LOG] handleFocus: focus() called on element for:', props.task.id, 'window._focusTaskId was:', window._focusTaskId);
                                 
                                 // Monitor if focus is lost immediately
@@ -254,6 +273,10 @@ export default {
                                         console.log('[DEBUG_LOG] handleFocus: focus confirmed for:', props.task.id);
                                         // Clear the flag only after we've confirmed focus is stable
                                         window._focusTaskId = null;
+                                        // Also clear last updated if it was this task
+                                        if (window._lastUpdatedTaskId === props.task.id) {
+                                            window._lastUpdatedTaskId = null;
+                                        }
                                     }
                                 }, 100);
 
@@ -507,6 +530,7 @@ export default {
                 const currentTitle = text.replace(/[\s\u200B\u00A0\uFEFF\u2000-\u200F\u2028\u2029]/g, '');
                 const isTitleEmpty = currentTitle === '';
                 if (isTitleEmpty) {
+                    console.log('[DEBUG_LOG] Backspace/Delete on empty title, triggering onDeleteTask');
                     e.preventDefault();
                     e.stopPropagation();
                     onDeleteTask(e);
@@ -524,19 +548,49 @@ export default {
             if (isTitleEmpty || confirm(`Are you sure you want to delete "${e?.target?.textContent?.trim() || props.task.title}"?`)) {
                 try {
                     if (isTitleEmpty) {
-                        if (props.previousTaskId) {
-                            console.log('[DEBUG_LOG] Deleting empty task, setting focus to previous sibling:', props.previousTaskId);
-                            window._focusTaskId = props.previousTaskId;
-                        } else if (props.parentTaskId) {
-                            console.log('[DEBUG_LOG] Deleting empty task (first in list), setting focus to parent:', props.parentTaskId);
-                            window._focusTaskId = props.parentTaskId;
+                        const allVisibleTasks = Array.from(document.querySelectorAll('.task-row-container'));
+                        const currentIndex = allVisibleTasks.findIndex(el => el.getAttribute('data-task-id') === props.task.id);
+                        
+                        if (currentIndex > 0) {
+                            const visuallyAboveTask = allVisibleTasks[currentIndex - 1];
+                            const visuallyAboveTaskId = visuallyAboveTask.getAttribute('data-task-id');
+                            console.log('[DEBUG_LOG] onDeleteTask: visually preceding task found at index', currentIndex - 1, 'ID:', visuallyAboveTaskId);
+                            if (visuallyAboveTaskId) {
+                                window._focusTaskId = visuallyAboveTaskId;
+                            }
+                        } else {
+                            console.log('[DEBUG_LOG] onDeleteTask: No visually preceding task found (currentIndex 0), checking for parent or previous list');
+                            if (props.parentTaskId) {
+                                console.log('[DEBUG_LOG] onDeleteTask: setting focus to parent:', props.parentTaskId);
+                                window._focusTaskId = props.parentTaskId;
+                            } else {
+                                const currentList = e.target.closest('.list');
+                                if (currentList) {
+                                    const allLists = Array.from(document.querySelectorAll('.list'));
+                                    const listIndex = allLists.indexOf(currentList);
+                                    if (listIndex > 0) {
+                                        const prevList = allLists[listIndex - 1];
+                                        const allTasksInPrevList = Array.from(prevList.querySelectorAll('.task-row-container'));
+                                        if (allTasksInPrevList.length > 0) {
+                                            const lastTaskInPrevList = allTasksInPrevList[allTasksInPrevList.length - 1];
+                                            const lastTaskId = lastTaskInPrevList.getAttribute('data-task-id');
+                                            if (lastTaskId) {
+                                                console.log('[DEBUG_LOG] onDeleteTask: setting focus to last task of previous list:', lastTaskId);
+                                                window._focusTaskId = lastTaskId;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     window._isDeletingTaskId = props.task.id;
+                    console.log('[DEBUG_LOG] onDeleteTask: calling deleteTask for', props.task.id, 'window._focusTaskId is', window._focusTaskId);
                     await deleteTask(props.task.id);
                     // Clear last updated and deleting flags to avoid conflict
                     window._lastUpdatedTaskId = null;
                     window._isDeletingTaskId = null;
+                    console.log('[DEBUG_LOG] onDeleteTask: emitting refresh, window._focusTaskId still', window._focusTaskId);
                     emit('refresh');
                 } catch (err) {
                     window._isDeletingTaskId = null;

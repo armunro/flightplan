@@ -1084,6 +1084,34 @@ export default {
         
         projects.value = await projectsResponse.json();
         
+        console.log('[DEBUG_LOG] fetchProjects completed, window._focusTaskId is:', window._focusTaskId);
+        if (window._focusTaskId) {
+          nextTick(() => {
+            console.log('[DEBUG_LOG] fetchProjects nextTick: triggering global focus check for:', window._focusTaskId);
+            // We can't easily call handleFocus on all components from here, 
+            // but the nextTick should ensure that existing components have updated 
+            // and their watch() or onMounted() should have fired if Vue decided to re-render them.
+            // If they didn't, we can try to find the element manually as a fallback.
+            const el = document.querySelector(`.task-row-container[data-task-id="${window._focusTaskId}"] [contenteditable="true"]`);
+            if (el) {
+               console.log('[DEBUG_LOG] fetchProjects: manual focus fallback found element');
+               el.focus();
+               // Ensure cursor is at the end
+               try {
+                   const range = document.createRange();
+                   const sel = window.getSelection();
+                   range.selectNodeContents(el);
+                   range.collapse(false);
+                   sel.removeAllRanges();
+                   sel.addRange(range);
+                   window._focusTaskId = null; // Clear it if successful
+               } catch (e) {}
+            } else {
+               console.log('[DEBUG_LOG] fetchProjects: manual focus fallback did NOT find element for:', window._focusTaskId);
+            }
+          });
+        }
+        
         if (settings) {
           theme.value = settings.theme || 'Cosmic';
         }
