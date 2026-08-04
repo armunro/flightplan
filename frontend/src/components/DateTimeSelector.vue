@@ -11,6 +11,7 @@
       <button v-if="modelValue" 
               class="inline-clear-btn"
               @click.stop="clearValue"
+              @mousedown.stop
               title="Clear date">
         <i class="bi bi-x" style="pointer-events: none;"></i>
       </button>
@@ -32,8 +33,8 @@
               class="btn btn-outline-secondary clear-btn"
               :class="{ 'btn-sm': size === 'small' }"
               type="button"
-              @mousedown.prevent
-              @click.stop="clearValue"
+              @mousedown.stop.prevent="clearValue"
+              @click.stop
               title="Clear date">
         <i class="bi bi-x"></i>
       </button>
@@ -94,16 +95,21 @@ const textInputRef = ref(null);
 const parseError = ref('');
 const internalValue = ref(props.modelValue);
 const isEditing = ref(false);
+const lastClearTime = ref(0);
+
+const isActuallyEmpty = (val) => val === null || val === undefined || val === '';
 
 const friendlyDisplay = computed(() => {
-  if (!props.modelValue) return props.placeholder || '-';
+  if (isActuallyEmpty(props.modelValue)) return props.placeholder || '-';
   return formatFriendlyDate(props.modelValue, false, true);
 });
 
 const startEditing = () => {
   if (isEditing.value) return;
   isEditing.value = true;
-  updateTextInput(props.modelValue);
+  // If we recently cleared it, internalValue is null. 
+  // We should use that instead of the potentially stale props.modelValue
+  updateTextInput(internalValue.value);
   nextTick(() => {
     if (textInputRef.value) {
       textInputRef.value.focus();
@@ -121,7 +127,7 @@ const handleEnter = () => {
 };
 
 const commitEdit = () => {
-  if (!textInput.value) {
+  if (isActuallyEmpty(textInput.value)) {
     clearValue();
     return;
   }
@@ -130,7 +136,9 @@ const commitEdit = () => {
   if (parsed) {
     const iso = parsed.toISOString();
     if (iso !== props.modelValue) {
+      console.log('[DateTimeSelector] commitEdit: new value', iso);
       internalValue.value = iso;
+      lastClearTime.value = 0; // Reset clear suppression if we manually set a date
       emit('update:modelValue', iso);
     }
     updateTextInput(iso);
@@ -142,7 +150,9 @@ const commitEdit = () => {
     if (!isNaN(d.getTime())) {
       const iso = d.toISOString();
       if (iso !== props.modelValue) {
+        console.log('[DateTimeSelector] commitEdit (native): new value', iso);
         internalValue.value = iso;
+        lastClearTime.value = 0; // Reset clear suppression
         emit('update:modelValue', iso);
       }
       updateTextInput(iso);
@@ -158,14 +168,18 @@ const clearValue = () => {
   internalValue.value = null;
   textInput.value = '';
   pickerValue.value = '';
+  lastClearTime.value = Date.now();
   emit('update:modelValue', null);
-  isEditing.value = false;
+  // Using a timeout for isEditing to prevent immediate blur->commit
+  setTimeout(() => {
+    isEditing.value = false;
+  }, 50);
   parseError.value = '';
 };
 
 // Initialize text input from modelValue
 const updateTextInput = (val) => {
-  if (!val) {
+  if (isActuallyEmpty(val)) {
     textInput.value = '';
     pickerValue.value = '';
     return;
@@ -195,9 +209,32 @@ const updateTextInput = (val) => {
 };
 
 watch(() => props.modelValue, (newVal) => {
+  const timeSinceClear = Date.now() - lastClearTime.value;
+  const isSuppressing = lastClearTime.value > 0 && timeSinceClear < 5000;
+
   if (newVal !== internalValue.value) {
+    // If both are empty, just sync internal state without re-updating text input
+    if (isActuallyEmpty(internalValue.value) && isActuallyEmpty(newVal)) {
+      internalValue.value = newVal;
+      return;
+    }
+    
+    // If we just cleared it (within the last 5 seconds), don't let a non-empty newVal restore it.
+    // This handles the race condition where the parent emits the old value while the API call is in progress.
+    if (isActuallyEmpty(internalValue.value) && !isActuallyEmpty(newVal) && isSuppressing) {
+      // console.log(`[DateTimeSelector] Ignoring stale prop update (${Math.round(timeSinceClear)}ms after clear):`, newVal);
+      return;
+    }
+    
+    // console.log('[DateTimeSelector] Prop update accepted:', newVal);
     internalValue.value = newVal;
     updateTextInput(newVal);
+    
+    // If we received a non-empty value that matches our internal expectation (or we are not suppressing),
+    // we can stop suppressing further updates.
+    if (!isActuallyEmpty(newVal) || !isSuppressing) {
+      lastClearTime.value = 0;
+    }
   }
 }, { immediate: true });
 
@@ -236,6 +273,7 @@ const onBlur = (event) => {
     if (!isEditing.value) return;
 
     // Check if focus is still within the component
+    // If we're clicking the clear button or calendar button, we might briefly lose focus but stay in selector
     if (document.activeElement && 
         (document.activeElement === textInputRef.value || 
          document.activeElement.closest('.datetime-selector') === textInputRef.value?.closest('.datetime-selector'))) {
