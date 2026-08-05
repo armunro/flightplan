@@ -45,11 +45,15 @@ export async function fetchSettings() {
       if (response.status === 404) {
           // Fallback if the controller is named differently or route is different
           const altResponse = await fetch('/api/settings/config');
-          if (altResponse.ok) return altResponse.json();
+          if (altResponse.ok) {
+              const data = await altResponse.json();
+              return data;
+          }
       }
       throw new Error('Failed to fetch settings');
   }
-  return response.json();
+  const data = await response.json();
+  return data;
 }
 
 export async function updateSettings(config) {

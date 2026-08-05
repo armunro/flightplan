@@ -98,6 +98,7 @@
               :searchQuery="searchQuery"
               :showStarredOnly="showStarredOnly"
               :projects="projects"
+              :colorSchemes="colorSchemes"
               @select-issue="selectedIssue = $event" 
               @create-task="openQuickAddTask"
               @fetched-issue="tempSearchIssue = $event"
@@ -109,7 +110,7 @@
 
           <!-- Jira Issue Detail Section -->
           <div class="h-100 overflow-auto module-detail-pane flex-grow-1" style="flex: 1 1 0; min-width: 0;">
-            <JiraIssueDetail :issue="selectedIssue" />
+            <JiraIssueDetail :issue="selectedIssue" :colorSchemes="colorSchemes" />
           </div>
         </div>
       </div>
@@ -126,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { showToast } from './components/Toast.vue';
 import Navbar from './components/Navbar.vue';
 import JiraIssues from './components/JiraIssues.vue';
@@ -143,6 +144,7 @@ const showStarredOnly = ref(true);
 const loadingFilters = ref(false);
 const showQueriesDialog = ref(false);
 const projects = ref([]);
+const colorSchemes = ref([]);
 
 const theme = ref('Cosmic');
 const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
@@ -262,13 +264,21 @@ watch(sidebarCollapsed, (val) => {
 onMounted(async () => {
   loadFilters();
   loadSettings();
+  
+  // Refresh settings when the tab becomes active to ensure latest color schemes are used
+  window.addEventListener('focus', loadSettings);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('focus', loadSettings);
 });
 
 const loadSettings = async () => {
   try {
     const settings = await fetchSettings();
     if (settings) {
-      theme.value = settings.theme || 'Cosmic';
+      theme.value = settings.theme || settings.Theme || 'Cosmic';
+      colorSchemes.value = settings.colorSchemes || settings.ColorSchemes || [];
     }
   } catch (e) {
     console.error('Failed to load settings:', e);

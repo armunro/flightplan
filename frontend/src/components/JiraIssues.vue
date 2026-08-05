@@ -36,7 +36,7 @@
                 <span class="text-info fw-bold fs-xs">{{ issue.key }}</span>
               </div>
               <div class="d-flex align-items-center gap-2 ps-4 ms-1">
-                <span class="status-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
+                <span class="status-badge" :style="{ color: getStatusColor(issue.status), backgroundColor: getStatusColor(issue.status) + '15' }">{{ issue.status }}</span>
               </div>
             </div>
             
@@ -50,7 +50,7 @@
 
             <div class="col-status">
               <div class="d-flex flex-column gap-1 align-items-end">
-                <span v-if="issue.issueType" class="type-badge">{{ issue.issueType }}</span>
+                <span v-if="issue.issueType" class="type-badge" :style="{ color: getTypeColor(issue.issueType), backgroundColor: getTypeColor(issue.issueType) + '15' }">{{ issue.issueType }}</span>
                 <span :style="{ color: getPriorityColor(issue.priority) }" class="fs-xxs fw-bold uppercase-text">{{ issue.priority }}</span>
               </div>
             </div>
@@ -120,6 +120,10 @@ const props = defineProps({
     default: true
   },
   projects: {
+    type: Array,
+    default: () => []
+  },
+  colorSchemes: {
     type: Array,
     default: () => []
   }
@@ -381,7 +385,33 @@ const unassignIssue = async (issue) => {
 };
 
 const getStatusColor = (status) => {
-  const s = status.toLowerCase();
+  if (!status) return '#bc8cff';
+  
+  const trimmedStatus = status.toString().trim();
+  
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-status' || name === 'jira-status';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedStatus.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  const s = trimmedStatus.toLowerCase();
   if (s.includes('done') || s.includes('closed') || s.includes('resolved')) return '#3fb950';
   if (s.includes('progress')) return '#58a6ff';
   if (s.includes('todo') || s.includes('backlog')) return '#aab2bb';
@@ -389,12 +419,68 @@ const getStatusColor = (status) => {
 };
 
 const getPriorityColor = (priority) => {
-  const p = priority.toLowerCase();
+  if (!priority) return '#aab2bb';
+
+  const trimmedPriority = priority.toString().trim();
+  
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-priority' || name === 'jira-priority';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedPriority.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  const p = trimmedPriority.toLowerCase();
   if (p.includes('highest') || p.includes('critical')) return '#f85149';
   if (p.includes('high')) return '#f0883e';
   if (p.includes('medium')) return '#ffa500';
   if (p.includes('low')) return '#3fb950';
   return '#aab2bb';
+};
+
+const getTypeColor = (type) => {
+  if (!type) return '#aab2bb';
+
+  const trimmedType = type.toString().trim();
+  
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-type' || name === 'jira-type';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedType.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  return '#bc8cff';
 };
 
 const formatPriorityColor = (priority) => {
@@ -526,7 +612,6 @@ onUnmounted(() => {
   padding: 2px 6px;
   border: 1px solid currentColor;
   border-radius: 4px;
-  color: var(--text-muted);
   background-color: var(--bg-badge, rgba(255, 255, 255, 0.05));
   display: inline-block;
   white-space: nowrap;

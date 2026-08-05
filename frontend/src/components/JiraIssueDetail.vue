@@ -18,9 +18,9 @@
               </nav>
             </div>
             <div class="d-flex gap-2 ms-3 flex-shrink-0 align-items-center">
-              <span v-if="issue.issueType" class="detail-badge opacity-75">{{ issue.issueType }}</span>
-              <span class="detail-badge" :style="{ color: getStatusColor(issue.status) }">{{ issue.status }}</span>
-              <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority) }">{{ issue.priority }}</span>
+              <span v-if="issue.issueType" class="detail-badge opacity-75" :style="{ color: getTypeColor(issue.issueType), backgroundColor: getTypeColor(issue.issueType) + '15' }">{{ issue.issueType }}</span>
+              <span class="detail-badge" :style="{ color: getStatusColor(issue.status), backgroundColor: getStatusColor(issue.status) + '15' }">{{ issue.status }}</span>
+              <span class="detail-badge" :style="{ color: getPriorityColor(issue.priority), backgroundColor: getPriorityColor(issue.priority) + '15' }">{{ issue.priority }}</span>
             </div>
           </div>
           <h2 class="h3 mb-0 theme-text w-100">{{ issue.summary }}</h2>
@@ -124,6 +124,10 @@ const props = defineProps({
   issue: {
     type: Object,
     default: null
+  },
+  colorSchemes: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -225,7 +229,32 @@ const submitComment = async () => {
 
 const getStatusColor = (status) => {
   if (!status) return '#aab2bb';
-  const s = status.toLowerCase();
+
+  const trimmedStatus = status.toString().trim();
+
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-status' || name === 'jira-status';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedStatus.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  const s = trimmedStatus.toLowerCase();
   if (s.includes('done') || s.includes('closed') || s.includes('resolved')) return '#3fb950';
   if (s.includes('progress')) return '#58a6ff';
   if (s.includes('todo') || s.includes('backlog')) return '#aab2bb';
@@ -234,12 +263,67 @@ const getStatusColor = (status) => {
 
 const getPriorityColor = (priority) => {
   if (!priority) return '#aab2bb';
-  const p = priority.toLowerCase();
+
+  const trimmedPriority = priority.toString().trim();
+
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-priority' || name === 'jira-priority';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedPriority.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  const p = trimmedPriority.toLowerCase();
   if (p.includes('highest') || p.includes('critical')) return '#f85149';
   if (p.includes('high')) return '#f0883e';
   if (p.includes('medium')) return '#ffa500';
   if (p.includes('low')) return '#3fb950';
-  return '#aab2bb';
+  return '#bc8cff';
+};
+
+const getTypeColor = (type) => {
+  if (!type) return '#aab2bb';
+
+  const trimmedType = type.toString().trim();
+
+  // Custom palette check
+  const palette = (props.colorSchemes || []).find(s => {
+    const name = (s.name || s.Name)?.toString().trim().toLowerCase();
+    return name === 'system-jira-type' || name === 'jira-type';
+  });
+
+  if (palette) {
+    const colors = palette.colors || palette.Colors;
+    if (colors) {
+      const customColor = colors.find(c => {
+        if (!c) return false;
+        const cName = (c.name || c.Name);
+        if (!cName) return false;
+        const match = cName.toString().trim().toLowerCase() === trimmedType.toLowerCase();
+        return match;
+      });
+      if (customColor) {
+        return (customColor.color || customColor.Color);
+      }
+    }
+  }
+
+  return '#bc8cff';
 };
 
 const formatDescription = (description) => {

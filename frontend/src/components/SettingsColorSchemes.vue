@@ -222,11 +222,44 @@ const presets = [
       { name: 'Hot Pink', color: '#FF69B4' },
       { name: 'Bright Yellow', color: '#FFFF00' }
     ]
+  },
+  {
+    name: 'system-jira-status',
+    colors: [
+      { name: 'To Do', color: '#aab2bb' },
+      { name: 'In Progress', color: '#58a6ff' },
+      { name: 'Done', color: '#3fb950' },
+      { name: 'Closed', color: '#3fb950' },
+      { name: 'Open', color: '#bc8cff' }
+    ]
+  },
+  {
+    name: 'system-jira-priority',
+    colors: [
+      { name: 'Highest', color: '#f85149' },
+      { name: 'High', color: '#f0883e' },
+      { name: 'Medium', color: '#ffa500' },
+      { name: 'Low', color: '#3fb950' },
+      { name: 'Lowest', color: '#aab2bb' }
+    ]
+  },
+  {
+    name: 'system-jira-type',
+    colors: [
+      { name: 'Bug', color: '#f85149' },
+      { name: 'Task', color: '#58a6ff' },
+      { name: 'Sub-task', color: '#58a6ff' },
+      { name: 'Story', color: '#3fb950' },
+      { name: 'Epic', color: '#bc8cff' }
+    ]
   }
 ];
 
 const applyPreset = (preset) => {
-  props.colorSchemes.push(JSON.parse(JSON.stringify(preset)));
+  const newScheme = JSON.parse(JSON.stringify(preset));
+  // Standardize palette names to match expectations
+  newScheme.name = newScheme.name.trim().toLowerCase();
+  props.colorSchemes.push(newScheme);
 };
 
 const addScheme = () => {
