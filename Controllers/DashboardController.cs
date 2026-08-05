@@ -29,6 +29,7 @@ public record DashboardTaskDto(
 );
 
 public record DashboardDto(
+    List<DashboardTaskDto> DueTodayTasks,
     List<DashboardTaskDto> UpcomingTasks,
     List<EmailWithRulesDto> RecentEmails,
     List<CalendarEventResponseDto> TodaysEvents,
@@ -117,9 +118,15 @@ public class DashboardController : ControllerBase
             }
         }
 
-        var upcomingTasks = allUpcoming
+        var dueTodayTasks = allUpcoming
+            .Where(t => t.End.Value.Date <= today.AddDays(1)) // Include through tomorrow to handle timezones
             .OrderBy(t => t.End.Value)
-            .Take(_config.Debug.UpcomingTasksCount)
+            .ToList();
+
+        var upcomingTasks = allUpcoming
+            .Where(t => t.End.Value.Date > today.AddDays(1))
+            .OrderBy(t => t.End.Value)
+            .Take(Math.Max(_config.Debug.UpcomingTasksCount, 50))
             .ToList();
 
         // 2. Recent emails (Inbox)
@@ -207,7 +214,7 @@ public class DashboardController : ControllerBase
             // Ignore pref errors
         }
 
-        return Ok(new DashboardDto(upcomingTasks, recentEmails, todaysEvents, upcomingEvents, emailVisible, calendarVisible, calendarPreferences));
+        return Ok(new DashboardDto(dueTodayTasks, upcomingTasks, recentEmails, todaysEvents, upcomingEvents, emailVisible, calendarVisible, calendarPreferences));
     }
 
     private List<TaskItem> FindAllIncompleteTasks(List<TaskItem> tasks)

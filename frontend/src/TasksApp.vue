@@ -1582,7 +1582,12 @@ export default {
           nextTick(() => {
             const result = findTaskInProjects(projects.value, taskId);
             if (result && result.task) {
-              selectedTask.value = result.task;
+              const project = projects.value.find(p => p.id === projectId);
+              if (project) {
+                onOpenTask(result.task, project.statuses, project.taskTypes, project.priorities);
+              } else {
+                selectedTask.value = result.task;
+              }
             }
           });
         }

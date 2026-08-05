@@ -103,62 +103,119 @@
 
           <!-- Tasks Section -->
           <div class="dashboard-pane d-flex flex-column h-100" :style="paneStyles.tasks">
-            <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
-              <i class="bi bi-check2-square me-2 text-success"></i>
-              <h6 class="mb-0 theme-text fs-base">Upcoming Deadlines</h6>
-              <span class="badge theme-badge ms-auto small">{{ data.upcomingTasks.length }}</span>
-            </div>
-            <div class="pane-body flex-grow-1 overflow-auto">
-              <div v-if="data.upcomingTasks.length === 0" class="py-3 px-4 text-center text-muted small">
-                No upcoming deadlines.
+            <!-- Due Today Tasks -->
+            <div class="d-flex flex-column" :style="paneStyles.dueTodayTasks">
+              <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
+                <i class="bi bi-check2-square me-2 text-warning"></i>
+                <h6 class="mb-0 theme-text fs-base">Due Today</h6>
+                <span class="badge theme-badge ms-auto small">{{ data.dueTodayTasks.length }}</span>
               </div>
-              <div v-else class="dashboard-tasks-grid">
-                <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2" @click="navigateToTask(task)" style="cursor: pointer;">
-                  <div class="d-flex align-items-center w-100 px-3">
-                    <div class="flex-grow-1 min-width-0">
-                      <!-- First Line: Project & List -->
-                      <div class="d-flex align-items-center gap-2 mb-1">
-                        <span v-if="task.projectName" class="d-flex align-items-center gap-1" :style="{ color: task.projectColor || 'var(--accent-blue)' }">
-                          <i v-if="task.projectIcon" class="bi fs-xxs" :class="task.projectIcon"></i>
-                          <span class="fs-xxs fw-bold text-uppercase">{{ task.projectName }}</span>
-                        </span>
-                        <span v-if="task.listName" class="text-muted fs-xxs">
-                          <i class="bi bi-chevron-right mx-1" style="font-size: 8px;"></i>
-                          {{ task.listName }}
-                        </span>
-                      </div>
-
-                      <!-- Second Line: Title -->
-                      <div class="d-flex align-items-center">
-                        <span class="task-title text-truncate fw-bold" :title="task.title">{{ task.title }}</span>
-                      </div>
-                      
-                      <!-- Third Line: Metadata -->
-                      <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
-                        <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
-                          <i :class="task.typeIcon || 'bi-briefcase'"></i>
-                          <span class="ms-1">{{ task.typeName || 'Work' }}</span>
-                        </span>
-
-                        <span class="status-badge" :style="{ color: task.statusColor || '#cccccc' }">
-                          <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
-                          <span>{{ task.statusName || 'Unknown' }}</span>
-                        </span>
-
-                        <span class="priority-badge" :style="{ color: task.priorityColor || '#ccc' }">
-                          <i :class="task.priorityIcon || 'bi-dash-lg'" style="margin-right: 4px;"></i>
-                          <span>{{ task.priorityName || '' }}</span>
-                        </span>
-
-                        <div class="ms-auto d-flex align-items-center gap-3">
-                          <span class="date-cell" :class="getDateColorClass(task.end, task.isCompleted)">
-                            <i class="bi bi-calendar3 me-1"></i>
-                            {{ formatRelativeTime(task.end) }}
+              <div class="pane-body flex-grow-1 overflow-auto">
+                <div v-if="data.dueTodayTasks.length === 0" class="py-3 px-4 text-center text-muted small">
+                  No tasks due today.
+                </div>
+                <div v-else class="dashboard-tasks-grid">
+                  <div v-for="task in data.dueTodayTasks" :key="task.id" class="tasks-row py-2" @click="navigateToTask(task)" style="cursor: pointer;">
+                    <div class="d-flex align-items-center w-100 px-3">
+                      <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                          <span v-if="task.projectName" class="d-flex align-items-center gap-1" :style="{ color: task.projectColor || 'var(--accent-blue)' }">
+                            <i v-if="task.projectIcon" class="bi fs-xxs" :class="task.projectIcon"></i>
+                            <span class="fs-xxs fw-bold text-uppercase">{{ task.projectName }}</span>
                           </span>
-                          <span v-if="task.estimateMinutes" class="estimate-cell text-muted">
-                            <i class="bi bi-hourglass-split me-1"></i>
-                            {{ formatEstimate(task.estimateMinutes) }}
+                          <span v-if="task.listName" class="text-muted fs-xxs">
+                            <i class="bi bi-chevron-right mx-1" style="font-size: 8px;"></i>
+                            {{ task.listName }}
                           </span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                          <span class="task-title text-truncate fw-bold" :title="task.title">{{ task.title }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
+                          <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
+                            <i :class="task.typeIcon || 'bi-briefcase'"></i>
+                            <span class="ms-1">{{ task.typeName || 'Work' }}</span>
+                          </span>
+                          <span class="status-badge" :style="{ color: task.statusColor || '#cccccc' }">
+                            <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
+                            <span>{{ task.statusName || 'Unknown' }}</span>
+                          </span>
+                          <span class="priority-badge" :style="{ color: task.priorityColor || '#ccc' }">
+                            <i :class="task.priorityIcon || 'bi-dash-lg'" style="margin-right: 4px;"></i>
+                            <span>{{ task.priorityName || '' }}</span>
+                          </span>
+                          <div class="ms-auto d-flex align-items-center gap-3">
+                            <span class="date-cell" :class="getDateColorClass(task.end, task.isCompleted)">
+                              <i class="bi bi-calendar3 me-1"></i>
+                              {{ formatTaskDate(task.end) }} {{ formatTime(task.end) }}
+                            </span>
+                            <span v-if="task.estimateMinutes" class="estimate-cell text-muted">
+                              <i class="bi bi-hourglass-split me-1"></i>
+                              {{ formatEstimate(task.estimateMinutes) }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horizontal Resizer -->
+            <div class="horizontal-resizer" @mousedown="startResize('tasksVertical', $event)"></div>
+
+            <!-- Upcoming Tasks -->
+            <div class="d-flex flex-column" :style="paneStyles.upcomingTasks">
+              <div class="pane-header d-flex align-items-center flex-shrink-0 px-3">
+                <i class="bi bi-check2-square me-2 text-success"></i>
+                <h6 class="mb-0 theme-text fs-base">Upcoming</h6>
+                <span class="badge theme-badge ms-auto small">{{ data.upcomingTasks.length }}</span>
+              </div>
+              <div class="pane-body flex-grow-1 overflow-auto">
+                <div v-if="data.upcomingTasks.length === 0" class="py-3 px-4 text-center text-muted small">
+                  No upcoming deadlines.
+                </div>
+                <div v-else class="dashboard-tasks-grid">
+                  <div v-for="task in data.upcomingTasks" :key="task.id" class="tasks-row py-2" @click="navigateToTask(task)" style="cursor: pointer;">
+                    <div class="d-flex align-items-center w-100 px-3">
+                      <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                          <span v-if="task.projectName" class="d-flex align-items-center gap-1" :style="{ color: task.projectColor || 'var(--accent-blue)' }">
+                            <i v-if="task.projectIcon" class="bi fs-xxs" :class="task.projectIcon"></i>
+                            <span class="fs-xxs fw-bold text-uppercase">{{ task.projectName }}</span>
+                          </span>
+                          <span v-if="task.listName" class="text-muted fs-xxs">
+                            <i class="bi bi-chevron-right mx-1" style="font-size: 8px;"></i>
+                            {{ task.listName }}
+                          </span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                          <span class="task-title text-truncate fw-bold" :title="task.title">{{ task.title }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mt-1 flex-wrap">
+                          <span class="type-badge" :style="{ color: task.typeColor || '#3498db' }">
+                            <i :class="task.typeIcon || 'bi-briefcase'"></i>
+                            <span class="ms-1">{{ task.typeName || 'Work' }}</span>
+                          </span>
+                          <span class="status-badge" :style="{ color: task.statusColor || '#cccccc' }">
+                            <i class="bi bi-circle-fill" style="font-size: 8px; margin-right: 4px;"></i>
+                            <span>{{ task.statusName || 'Unknown' }}</span>
+                          </span>
+                          <span class="priority-badge" :style="{ color: task.priorityColor || '#ccc' }">
+                            <i :class="task.priorityIcon || 'bi-dash-lg'" style="margin-right: 4px;"></i>
+                            <span>{{ task.priorityName || '' }}</span>
+                          </span>
+                          <div class="ms-auto d-flex align-items-center gap-3">
+                            <span class="date-cell" :class="getDateColorClass(task.end, task.isCompleted)">
+                              <i class="bi bi-calendar3 me-1"></i>
+                              {{ formatRelativeTime(task.end) }}
+                            </span>
+                            <span v-if="task.estimateMinutes" class="estimate-cell text-muted">
+                              <i class="bi bi-hourglass-split me-1"></i>
+                              {{ formatEstimate(task.estimateMinutes) }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -242,6 +299,7 @@ const themeClass = computed(() => `theme-${theme.value.toLowerCase()}`);
 // Resize state
 const splitWidths = ref(JSON.parse(localStorage.getItem('dashboardSplitWidths')) || [33.33, 33.33, 33.33]);
 const calendarSplitHeight = ref(Number(localStorage.getItem('calendarSplitHeight')) || 50); // Height of today's events in %
+const tasksSplitHeight = ref(Number(localStorage.getItem('tasksSplitHeight')) || 50); // Height of today's tasks in %
 
 const todayDate = computed(() => {
   return new Date().toLocaleDateString(undefined, { 
@@ -289,6 +347,8 @@ const paneStyles = computed(() => {
     todayEvents: { height: `${calendarSplitHeight.value}%`, flex: `0 0 ${calendarSplitHeight.value}%` },
     upcomingEvents: { height: `${100 - calendarSplitHeight.value}%`, flex: `0 0 ${100 - calendarSplitHeight.value}%` },
     tasks: { width: `${widths[1]}%`, flex: `0 0 ${widths[1]}%` },
+    dueTodayTasks: { height: `${tasksSplitHeight.value}%`, flex: `0 0 ${tasksSplitHeight.value}%` },
+    upcomingTasks: { height: `${100 - tasksSplitHeight.value}%`, flex: `0 0 ${100 - tasksSplitHeight.value}%` },
     email: { width: `${widths[2]}%`, flex: `0 0 ${widths[2]}%` }
   };
 });
@@ -319,7 +379,7 @@ const loadData = async () => {
 const startResize = (resizer, e) => {
   e.preventDefault();
   
-  if (resizer === 'calendarVertical') {
+    if (resizer === 'calendarVertical') {
     const container = e.target.parentElement;
     if (!container) return;
 
@@ -331,6 +391,27 @@ const startResize = (resizer, e) => {
 
     const onMouseUp = () => {
       localStorage.setItem('calendarSplitHeight', calendarSplitHeight.value.toString());
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return;
+  }
+
+  if (resizer === 'tasksVertical') {
+    const container = e.target.parentElement;
+    if (!container) return;
+
+    const onMouseMove = (moveEvent) => {
+      const rect = container.getBoundingClientRect();
+      const percent = ((moveEvent.clientY - rect.top) / rect.height) * 100;
+      tasksSplitHeight.value = Math.max(10, Math.min(percent, 90));
+    };
+
+    const onMouseUp = () => {
+      localStorage.setItem('tasksSplitHeight', tasksSplitHeight.value.toString());
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
@@ -430,6 +511,7 @@ const completeTask = async (task) => {
   try {
     await updateTask(task.id, { isCompleted: true });
     data.value.upcomingTasks = data.value.upcomingTasks.filter(t => t.id !== task.id);
+    data.value.dueTodayTasks = data.value.dueTodayTasks.filter(t => t.id !== task.id);
   } catch (e) {
     console.error('Failed to complete task:', e);
   }
