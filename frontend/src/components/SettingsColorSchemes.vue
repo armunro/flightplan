@@ -23,9 +23,20 @@
     </div>
     
     <div class="accordion color-schemes-accordion" id="colorSchemesAccordion">
-      <div v-for="(scheme, schemeIdx) in colorSchemes" :key="schemeIdx" class="accordion-item theme-card mb-2 border-0 overflow-hidden shadow-sm">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed py-3 theme-text bg-transparent d-flex align-items-center" 
+      <div v-for="(scheme, schemeIdx) in colorSchemes" 
+           :key="schemeIdx" 
+           class="accordion-item theme-card mb-2 border-0 overflow-hidden shadow-sm"
+           :draggable="true"
+           @dragstart="onSchemeDragStart($event, schemeIdx)"
+           @dragover.prevent="onSchemeDragOver($event, schemeIdx)"
+           @drop="onSchemeDrop($event, schemeIdx)"
+           @dragend="onSchemeDragEnd"
+           :class="{ 'dragging': draggingSchemeIdx === schemeIdx }">
+        <h2 class="accordion-header d-flex align-items-center bg-transparent">
+          <div class="drag-handle px-3 theme-text-muted cursor-move" title="Drag to reorder">
+            <i class="bi bi-grip-vertical"></i>
+          </div>
+          <button class="accordion-button collapsed py-3 theme-text bg-transparent d-flex align-items-center flex-grow-1" 
                   type="button" 
                   data-bs-toggle="collapse" 
                   :data-bs-target="'#collapse' + schemeIdx" 
@@ -56,13 +67,27 @@
 
             <div class="color-list mt-3">
               <div class="d-flex align-items-center mb-2 px-2 py-1 theme-text-muted small text-uppercase fw-bold border-bottom theme-border">
+                <div style="width: 30px" class="me-2"></div>
                 <div style="width: 40px" class="me-3">Color</div>
                 <div class="flex-grow-1">Name</div>
                 <div style="width: 120px">HEX</div>
                 <div style="width: 80px" class="text-end">Actions</div>
               </div>
 
-              <div v-for="(color, colorIdx) in scheme.colors" :key="colorIdx" class="color-row d-flex align-items-center p-2 rounded transition hover-bg">
+              <div v-for="(color, colorIdx) in scheme.colors" 
+                   :key="colorIdx" 
+                   class="color-row d-flex align-items-center p-2 rounded transition hover-bg"
+                   :draggable="true"
+                   @dragstart="onColorDragStart($event, schemeIdx, colorIdx)"
+                   @dragover.prevent="onColorDragOver($event, colorIdx)"
+                   @drop="onColorDrop($event, schemeIdx, colorIdx)"
+                   @dragend="onColorDragEnd"
+                   :class="{ 'dragging': draggingColorIdx === colorIdx && draggingColorSchemeIdx === schemeIdx }">
+                
+                <div class="drag-handle-small me-2 theme-text-muted cursor-move" title="Drag to reorder">
+                  <i class="bi bi-grip-vertical"></i>
+                </div>
+
                 <div class="color-picker-wrapper me-3">
                   <input v-model="color.color" type="color" 
                          class="form-control-color border-0 p-0 rounded-circle shadow-sm" 
@@ -116,6 +141,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { getComplementary, getAnalogous, getTriadic } from '../js/colorUtils.js';
 
 const props = defineProps({
@@ -128,6 +154,55 @@ const props = defineProps({
     required: false
   }
 });
+
+const draggingSchemeIdx = ref(null);
+const draggingColorIdx = ref(null);
+const draggingColorSchemeIdx = ref(null);
+
+const onSchemeDragStart = (event, index) => {
+  draggingSchemeIdx.value = index;
+  event.dataTransfer.effectAllowed = 'move';
+};
+
+const onSchemeDragOver = (event, index) => {
+  if (draggingSchemeIdx.value === null) return;
+  // Visual feedback could be added here
+};
+
+const onSchemeDrop = (event, index) => {
+  if (draggingSchemeIdx.value === null || draggingSchemeIdx.value === index) return;
+  
+  const movedItem = props.colorSchemes.splice(draggingSchemeIdx.value, 1)[0];
+  props.colorSchemes.splice(index, 0, movedItem);
+};
+
+const onSchemeDragEnd = () => {
+  draggingSchemeIdx.value = null;
+};
+
+const onColorDragStart = (event, schemeIdx, colorIdx) => {
+  draggingColorIdx.value = colorIdx;
+  draggingColorSchemeIdx.value = schemeIdx;
+  event.dataTransfer.effectAllowed = 'move';
+};
+
+const onColorDragOver = (event, index) => {
+  if (draggingColorIdx.value === null) return;
+};
+
+const onColorDrop = (event, schemeIdx, colorIdx) => {
+  if (draggingColorIdx.value === null || draggingColorSchemeIdx.value !== schemeIdx) return;
+  if (draggingColorIdx.value === colorIdx) return;
+
+  const scheme = props.colorSchemes[schemeIdx];
+  const movedItem = scheme.colors.splice(draggingColorIdx.value, 1)[0];
+  scheme.colors.splice(colorIdx, 0, movedItem);
+};
+
+const onColorDragEnd = () => {
+  draggingColorIdx.value = null;
+  draggingColorSchemeIdx.value = null;
+};
 
 const presets = [
   {
@@ -311,6 +386,40 @@ const addCoordinated = (scheme, baseColor, type) => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.cursor-move {
+  cursor: move;
+}
+
+.drag-handle {
+  transition: color 0.2s ease;
+  z-index: 10;
+}
+
+.drag-handle:hover {
+  color: var(--accent-blue) !important;
+}
+
+.drag-handle-small {
+  cursor: move;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle-small:hover {
+  opacity: 1;
+  color: var(--accent-blue) !important;
+}
+
+.accordion-item.dragging {
+  opacity: 0.5;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.color-row.dragging {
+  opacity: 0.5;
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 .color-schemes-accordion .accordion-button {
