@@ -659,136 +659,179 @@ export default {
     });
 
     const autosizeColumns = () => {
-      if (!selectedProject.value) return;
-
-      const container = document.querySelector('.project-content');
-      const availableWidth = container ? container.clientWidth - 40 : 1200; // 40 for selection column and some buffer
-
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      context.font = '0.875rem "Segoe UI", Roboto, Helvetica, Arial, sans-serif'; // Match your app's font
-
-      const getTextWidth = (text) => {
-        if (!text) return 0;
-        return context.measureText(text).width;
-      };
-
-      const padding = 16; // Padding and extra space (8px left + 8px right)
-      const datePadding = 48; // Increased padding for date columns to prevent "..." truncation
-      const newWidths = [...columnWidths.value];
-
-      // 0: Type
-      if (isColumnVisible('type')) {
-        let maxTypeWidth = getTextWidth('Type');
-        selectedProject.value.taskTypes.forEach(t => {
-          const w = getTextWidth(t.name);
-          if (w > maxTypeWidth) maxTypeWidth = w;
-        });
-        // 8px left padding + 16px badge padding + 12px for icon/spacing (since right padding is 0)
-        newWidths[0] = Math.ceil(maxTypeWidth + 8 + 16 + 12); 
+      console.log('Autosizing columns...');
+      if (!selectedProject.value) {
+        console.warn('No project selected for autosizing');
+        return;
       }
 
-      // 1: Task Name
-      if (isColumnVisible('name')) {
-        let maxNameWidth = getTextWidth('Task Name');
-        const checkTasks = (tasks, depth) => {
-          tasks.forEach(t => {
-            const w = getTextWidth(t.title) + (depth * 20) + 24; // Indent + icon space
-            if (w > maxNameWidth) maxNameWidth = w;
-            if (t.subtasks) checkTasks(t.subtasks, depth + 1);
-          });
+      try {
+        const container = document.querySelector('.project-content') || document.querySelector('.tasks-container');
+        const availableWidth = container ? container.clientWidth : 1200;
+        console.log('Available width:', availableWidth);
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        // Match the UI font from global.css and TaskRow.vue (0.8rem is approx 12.8px, but 14px is safer)
+        context.font = '14px "Noto Sans", "Segoe UI", Tahoma, sans-serif';
+
+        const getTextWidth = (text) => {
+          if (text === null || text === undefined) return 0;
+          return context.measureText(text.toString()).width;
         };
-        selectedProject.value.lists.forEach(l => {
-          if (l.tasks) checkTasks(l.tasks, 0);
-        });
-        // 4px left padding + 8px right padding + maxNameWidth
-        newWidths[1] = Math.max(200, Math.ceil(maxNameWidth + 4 + 8));
-      }
 
-      // 2: Status
-      if (isColumnVisible('status')) {
-        let maxStatusWidth = getTextWidth('Status');
-        selectedProject.value.statuses.forEach(s => {
-          const w = getTextWidth(s.name);
-          if (w > maxStatusWidth) maxStatusWidth = w;
-        });
-        newWidths[2] = Math.ceil(maxStatusWidth + padding + 32); // Extra for badge padding and non-wrapping
-      }
+        const padding = 16; // 8px left + 8px right
+        const datePadding = 32; 
+        const newWidths = [...columnWidths.value];
 
-      // 3: Priority
-      if (isColumnVisible('priority')) {
-        let maxPriorityWidth = getTextWidth('Priority');
-        selectedProject.value.priorities.forEach(p => {
-          const w = getTextWidth(p.name);
-          if (w > maxPriorityWidth) maxPriorityWidth = w;
-        });
-        newWidths[3] = Math.ceil(maxPriorityWidth + padding + 32);
-      }
-
-      // 4: Start
-      // 5: End
-      if (isColumnVisible('start') || isColumnVisible('end')) {
-        const dateHeaderWidth = getTextWidth('Start'); // Both are similar
-        let maxDateWidth = dateHeaderWidth;
-        const checkDates = (tasks) => {
-          tasks.forEach(t => {
-            if (t.start) {
-              const w = getTextWidth(formatFriendlyDate(t.start, false, true));
-              if (w > maxDateWidth) maxDateWidth = w;
-            }
-            if (t.end) {
-              const w = getTextWidth(formatFriendlyDate(t.end, false, true));
-              if (w > maxDateWidth) maxDateWidth = w;
-            }
-            if (t.subtasks) checkDates(t.subtasks);
-          });
-        };
-        selectedProject.value.lists.forEach(l => {
-          if (l.tasks) checkDates(l.tasks);
-        });
-        if (isColumnVisible('start')) newWidths[4] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
-        if (isColumnVisible('end')) newWidths[5] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
-      }
-
-      // 6: Est
-      if (isColumnVisible('estimate')) {
-        let maxEstWidth = getTextWidth('Est');
-        const checkEst = (tasks) => {
-          tasks.forEach(t => {
-            if (t.estimateMinutes) {
-              const w = getTextWidth(formatEstimate(t.estimateMinutes));
-              if (w > maxEstWidth) maxEstWidth = w;
-            }
-            if (t.subtasks) checkEst(t.subtasks);
-          });
-        };
-        selectedProject.value.lists.forEach(l => {
-          if (l.tasks) checkEst(l.tasks);
-        });
-        newWidths[6] = Math.max(80, Math.ceil(maxEstWidth + padding));
-      }
-
-      // 7: Deadline (represented as 0 in columnWidths, meaning it takes 1fr)
-      // No fixed width for the last column in this logic.
-
-      // Adjust widths if total exceeds available width
-      const totalFixedWidth = newWidths.slice(0, 7).reduce((a, b) => a + b, 0);
-      const minLastColumnWidth = 100;
-      
-      if (totalFixedWidth + minLastColumnWidth > availableWidth) {
-        const excess = totalFixedWidth + minLastColumnWidth - availableWidth;
-        // Reduce Task Name column first (index 1)
-        if (newWidths[1] - excess >= 200) {
-          newWidths[1] -= excess;
-        } else {
-          // If we can't take it all from Task Name, set it to min and spread the rest?
-          // For now, just cap it to available space even if it's below min
-          newWidths[1] = Math.max(100, newWidths[1] - excess);
+        // 0: Type
+        if (isColumnVisible('type')) {
+          let maxTypeWidth = getTextWidth('Type');
+          if (selectedProject.value.taskTypes) {
+            selectedProject.value.taskTypes.forEach(t => {
+              const w = getTextWidth(t.name);
+              if (w > maxTypeWidth) maxTypeWidth = w;
+            });
+          }
+          // Badge padding (16px) + Icon space (20px) + Cell padding (16px)
+          newWidths[0] = Math.ceil(maxTypeWidth + 16 + 20 + 16); 
         }
-      }
 
-      columnWidths.value = newWidths;
-      localStorage.setItem('columnWidths', JSON.stringify(newWidths));
+        // 1: Task Name
+        if (isColumnVisible('name')) {
+          let maxNameWidth = getTextWidth('Task Name');
+          const checkTasks = (tasks, depth) => {
+            if (!tasks) return;
+            tasks.forEach(t => {
+              if (!showClosed.value && t.isCompleted) return;
+              
+              // Indent (20px per depth) + Icons (24px) + Link icon (20px) + Desc icon (20px) + Text
+              let extra = (depth > 0 ? (depth * 20) + 24 : 0);
+              if (t.link) extra += 20;
+              if (t.description) extra += 20;
+              
+              // Add space for the checkbox and possible hover actions if needed, 
+              // but here we just need the text and its immediate icons.
+              // TaskRow has .task-name-cell which contains .task-title
+              
+              const w = getTextWidth(t.title) + extra;
+              if (w > maxNameWidth) maxNameWidth = w;
+              if (t.subtasks) checkTasks(t.subtasks, depth + 1);
+            });
+          };
+          if (selectedProject.value.lists) {
+            selectedProject.value.lists.forEach(l => {
+              checkTasks(l.tasks, 0);
+            });
+          }
+          // Cell padding (16px) + some buffer (4px)
+          newWidths[1] = Math.max(200, Math.ceil(maxNameWidth + 20));
+        }
+
+        // 2: Status
+        if (isColumnVisible('status')) {
+          let maxStatusWidth = getTextWidth('Status');
+          if (selectedProject.value.statuses) {
+            selectedProject.value.statuses.forEach(s => {
+              const w = getTextWidth(s.name);
+              if (w > maxStatusWidth) maxStatusWidth = w;
+            });
+          }
+          // Badge padding + Dot (32px) + Cell padding (16px) + buffer
+          newWidths[2] = Math.ceil(maxStatusWidth + 32 + 20);
+        }
+
+        // 3: Priority
+        if (isColumnVisible('priority')) {
+          let maxPriorityWidth = getTextWidth('Priority');
+          if (selectedProject.value.priorities) {
+            selectedProject.value.priorities.forEach(p => {
+              const w = getTextWidth(p.name);
+              if (w > maxPriorityWidth) maxPriorityWidth = w;
+            });
+          }
+          // Badge padding + Icon (32px) + Cell padding (16px) + buffer
+          newWidths[3] = Math.ceil(maxPriorityWidth + 32 + 20);
+        }
+
+        // 4: Start
+        // 5: End
+        if (isColumnVisible('start') || isColumnVisible('end')) {
+          const dateHeaderWidth = getTextWidth('Start');
+          let maxDateWidth = dateHeaderWidth;
+          const checkDates = (tasks) => {
+            if (!tasks) return;
+            tasks.forEach(t => {
+              if (!showClosed.value && t.isCompleted) return;
+              if (t.start) {
+                const w = getTextWidth(formatFriendlyDate(t.start, false, true));
+                if (w > maxDateWidth) maxDateWidth = w;
+              }
+              if (t.end) {
+                const w = getTextWidth(formatFriendlyDate(t.end, false, true));
+                if (w > maxDateWidth) maxDateWidth = w;
+              }
+              if (t.subtasks) checkDates(t.subtasks);
+            });
+          };
+          if (selectedProject.value.lists) {
+            selectedProject.value.lists.forEach(l => {
+              checkDates(l.tasks);
+            });
+          }
+          if (isColumnVisible('start')) newWidths[4] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
+          if (isColumnVisible('end')) newWidths[5] = Math.max(120, Math.ceil(maxDateWidth + datePadding));
+        }
+
+        // 6: Est
+        if (isColumnVisible('estimate')) {
+          let maxEstWidth = getTextWidth('Est');
+          const checkEst = (tasks) => {
+            if (!tasks) return;
+            tasks.forEach(t => {
+              if (!showClosed.value && t.isCompleted) return;
+              if (t.estimateMinutes) {
+                const w = getTextWidth(formatEstimate(t.estimateMinutes));
+                if (w > maxEstWidth) maxEstWidth = w;
+              }
+              if (t.subtasks) checkEst(t.subtasks);
+            });
+          };
+          if (selectedProject.value.lists) {
+            selectedProject.value.lists.forEach(l => {
+              checkEst(l.tasks);
+            });
+          }
+          newWidths[6] = Math.max(80, Math.ceil(maxEstWidth + padding));
+        }
+
+        const visibleIndices = visibleColumnIds.value.map(id => {
+          const col = allColumns.find(c => c.id === id);
+          return col?.widthIndex;
+        }).filter(idx => idx !== undefined && idx !== 7);
+        
+        const selWidth = selectionColumnWidth.value || 40;
+        const totalFixedWidth = visibleIndices.reduce((sum, idx) => sum + newWidths[idx], 0);
+        const minLastColumnWidth = 100;
+        
+        if (totalFixedWidth + selWidth + minLastColumnWidth > availableWidth) {
+          const excess = totalFixedWidth + selWidth + minLastColumnWidth - availableWidth;
+          // Reduce Task Name column first (index 1)
+          if (newWidths[1] - excess >= 200) {
+            newWidths[1] -= excess;
+          } else {
+            newWidths[1] = 200;
+          }
+        }
+
+        columnWidths.value = [...newWidths];
+        localStorage.setItem('columnWidths', JSON.stringify(newWidths));
+        console.log('Column widths updated:', newWidths);
+        showToast(`Columns autosized (${newWidths.length} columns)`, 'success');
+      } catch (err) {
+        console.error('Error in autosizeColumns:', err);
+        showToast('Error autosizing columns', 'error');
+      }
     };
 
     const startResize = (index, event) => {
@@ -1815,7 +1858,8 @@ export default {
       startSidebarResize,
       startResize,
       theme,
-      themeClass
+      themeClass,
+      autosizeColumns
     };
   }
 };
