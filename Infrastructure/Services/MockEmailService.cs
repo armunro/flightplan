@@ -41,7 +41,7 @@ public class MockEmailService : IEmailService
                 DateTimeOffset.UtcNow.AddHours(-1),
                 "https://outlook.office.com/mail/inbox/id/msg-1",
                 "<div><p>Junie assigned <strong>DEMO-101</strong> to you.</p><p>The dashboard layout is broken on mobile devices. We need to fix the CSS grid to ensure the charts don't overlap on smaller screens.</p><p><a href='#'>View Issue</a></p></div>",
-                new List<string>()
+                new List<string> { "Jira Notifications" }
             ),
             new EmailDto(
                 "msg-2",
@@ -52,7 +52,7 @@ public class MockEmailService : IEmailService
                 DateTimeOffset.UtcNow.AddHours(-3),
                 "https://outlook.office.com/mail/inbox/id/msg-2",
                 "<div><p>Andrew opened a new pull request: <strong>Feature/demo-mode</strong>.</p><p>Please review the changes that enable the new demo mode for the application.</p><hr/><p>15 files changed, 450 additions, 120 deletions.</p></div>",
-                new List<string>()
+                new List<string> { "GitHub Activity" }
             ),
             new EmailDto(
                 "msg-3",
@@ -74,7 +74,7 @@ public class MockEmailService : IEmailService
                 DateTimeOffset.UtcNow.AddDays(-2),
                 "https://outlook.office.com/mail/inbox/id/msg-4",
                 "<div><h3>Weekly Security Report</h3><p>No security issues detected in the last 7 days. Your system is up to date and all patches have been applied.</p><ul><li>Scan completed: Today, 4:00 AM</li><li>Status: Healthy</li></ul></div>",
-                new List<string>()
+                new List<string> { "Security Reports" }
             ),
             new EmailDto(
                 "msg-5",
@@ -85,7 +85,7 @@ public class MockEmailService : IEmailService
                 DateTimeOffset.UtcNow.AddMinutes(-45),
                 "https://outlook.office.com/mail/inbox/id/msg-5",
                 "<div><h2 style='color: red;'>Critical Alert</h2><p><strong>Production-Web-01</strong> has exceeded 90% CPU usage for the last 15 minutes. Please investigate potential traffic spikes.</p></div>",
-                new List<string>()
+                new List<string> { "Azure Alerts" }
             ),
             new EmailDto(
                 "msg-6",

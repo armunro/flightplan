@@ -29,6 +29,36 @@ public class MockCalendarService : ICalendarService
         _mockEvents = new List<CalendarEventDto>
         {
             new CalendarEventDto(
+                "ev-today-1",
+                "Product Strategy Meeting",
+                new DateTimeOffset(today.AddHours(10), TimeSpan.Zero),
+                new DateTimeOffset(today.AddHours(11), TimeSpan.Zero),
+                "Room 302",
+                "https://example.com/teams/strategy",
+                "cal-1",
+                false
+            ),
+            new CalendarEventDto(
+                "ev-today-2",
+                "UX Review: Dashboard",
+                new DateTimeOffset(today.AddHours(13), TimeSpan.Zero),
+                new DateTimeOffset(today.AddHours(14), TimeSpan.Zero),
+                "Design Studio",
+                "https://example.com/teams/ux-review",
+                "cal-1",
+                false
+            ),
+            new CalendarEventDto(
+                "ev-today-3",
+                "Quick Sync: Demo Mode",
+                new DateTimeOffset(today.AddHours(15).AddMinutes(30), TimeSpan.Zero),
+                new DateTimeOffset(today.AddHours(16), TimeSpan.Zero),
+                "Microsoft Teams",
+                "https://example.com/teams/sync",
+                "cal-1",
+                false
+            ),
+            new CalendarEventDto(
                 "ev-1",
                 "Daily Standup",
                 new DateTimeOffset(today.AddHours(9), TimeSpan.Zero),
