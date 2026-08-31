@@ -8,7 +8,7 @@
         <UsingMicrosoftNETSdkWorkloads>false</UsingMicrosoftNETSdkWorkloads>
         <SpaRoot>frontend\</SpaRoot>
         <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-        <ApplicationIcon>C:\Users\AndrewM\OneDrive - Munro\Projects\FlightPlan\wwwroot\favicon.ico</ApplicationIcon>
+        <ApplicationIcon>frontend\public\favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
